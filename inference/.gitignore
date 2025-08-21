@@ -1,0 +1,9 @@
+test/
+# Any __pycache__ directories in any subdirectory
+**/__pycache__/
+# No tar.gz files
+*.tar.gz
+# No .bin or .pt files
+*.bin
+*.pt
+CLAM_orig/
