@@ -42,56 +42,16 @@ def collate_MIL(batch):
         for scale_idx in range(num_scales):
             coords.append(torch.cat([item[2][scale_idx] for item in batch], dim=0))
         
-        if len(first_item) >= 5: # Tumor labels
-            tumor_labels = []
-            for scale_idx in range(num_scales):
-                scale_tumor_labels = []
-                for item in batch:
-                    if item[3] is None or len(item[3]) == 0:
-                        # print("WARNING: Tumor labels are None or empty for some items in batch.")
-                        scale_tumor_labels = None
-                    else:
-                        t = item[3][scale_idx]
-                        if isinstance(t, torch.Tensor) and t.dim() == 0:
-                            t = t.unsqueeze(0)
-                        scale_tumor_labels.append(t)
-                if scale_tumor_labels is not None:
-                    try:
-                        tumor_labels.append(torch.cat(scale_tumor_labels, dim=0))
-                    except Exception as e:
-                        raise ValueError(f"Error concatenating tumor labels for scale {scale_idx}: {e} with scale_tumor_labels: {scale_tumor_labels}, corresponding coords: {[item[2][scale_idx] for item in batch]}")
-                else:
-                    tumor_labels.append(torch.tensor([]))
-
-            clinical_data = [item[4] for item in batch]
-            
-            # Assert that the number of patch representations in collated is the same as coordinates in coords and tumor_labels:
-            assert len(collated) == len(coords) == len(tumor_labels), f"Mismatch in lengths: collated={len(collated)}, coords={len(coords)}, tumor_labels={len(tumor_labels)}"
-            
-            for i in range(num_scales):
-                assert len(collated[i]) == len(coords[i]) == len(tumor_labels[i]) or len(tumor_labels[i]) == 0 or first_item[5] == "2A_001_HE", f"Mismatch in scale {i} lengths: collated[{i}]={len(collated[i])},   coords[{i}]={len(coords[i])}, tumor_labels[{i}]={len(tumor_labels[i])} in slide {first_item[5]}"
-            
-            if all(isinstance(cd, torch.Tensor) for cd in clinical_data):
-                clinical = torch.stack(clinical_data)
-            else:
-                clinical = clinical_data  # Keep as list if mixed types
-            return [collated, labels, coords, tumor_labels, clinical, first_item[5]]  # Assuming first_item[5] is the slide ID
-    
-    else:
-        # Standard collation for features and labels
-        img = torch.cat([item[0] for item in batch], dim=0)
-        label = torch.LongTensor([item[1] for item in batch])
-        if len(first_item) == 4 and isinstance(first_item[3], torch.Tensor):
+        if len(first_item) >= 5: # Id
             clinical_data = [item[3] for item in batch]
-            # Stack clinical data if all are tensors of the same shape
+            
             if all(isinstance(cd, torch.Tensor) for cd in clinical_data):
                 clinical = torch.stack(clinical_data)
             else:
                 clinical = clinical_data  # Keep as list if mixed types
-            
-            tumor_labels = [item[2] if item[2] is not None else [] for item in batch]
-            tumor_labels = torch.tensor(np.array(tumor_labels))
-            return [img, label, tumor_labels, clinical]
+            return [collated, labels, coords, clinical, first_item[4]]  # Assuming first_item[4] is the slide ID
+    else:
+        raise NotImplementedError("Unsupported batch format")
 
 
 def get_split_loader(split_dataset, training=False, weighted=False, device=None):
@@ -128,7 +88,7 @@ def get_optim(model, args):
                 mm_params = set()
             
             # Special handling for hierarchical models with per-level learning rates
-            if args.model_type == 'mm_hierarchical' and hasattr(args, 'lr_attention_levels') and args.lr_attention_levels is not None:
+            if hasattr(args, 'lr_attention_levels') and args.lr_attention_levels is not None:
                 # Parse attention level learning rates
                 attention_level_lrs = [float(lr.strip()) for lr in args.lr_attention_levels.split(',')]
                 

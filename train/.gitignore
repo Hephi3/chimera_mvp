@@ -1,1 +1,4 @@
 results/
+data/features/
+splits/
+data/pytorch_model.bin

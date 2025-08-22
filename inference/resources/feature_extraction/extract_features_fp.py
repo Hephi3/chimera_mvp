@@ -42,9 +42,6 @@ def extract_features(model_name, slide_info, mask_path, target_image_path, feat_
 		slide_info: Dictionary containing slide information (from seg_and_patch)
 		...other parameters
 	"""
-	
-	os.makedirs(feat_dir, exist_ok=True)
-	os.makedirs(os.path.join(feat_dir, 'pt_files'), exist_ok=True)
 
 	print("Loading model")
 	model, img_transforms = get_encoder(model_name=model_name, target_img_size=target_patch_size, model_weights_path=model_weights_path)  

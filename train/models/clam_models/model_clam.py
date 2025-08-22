@@ -76,12 +76,10 @@ args:
 """
 class CLAM_SB(nn.Module):
     def __init__(self, gate = True, size_arg = "small", dropout = 0., k_sample=8, n_classes=2,
-        instance_loss_fn=nn.CrossEntropyLoss(), subtyping=False, embed_dim=1024, 
-        attention_supervision_weight=0.0):
+        instance_loss_fn=nn.CrossEntropyLoss(), subtyping=False, embed_dim=1024):
         
         super().__init__()
         self.kind = 'img'
-        self.attention_supervision_weight = attention_supervision_weight
         self.size_dict = {"small": [embed_dim, 512, 256], "big": [embed_dim, 512, 384], "tiny": [embed_dim, 256, 128]}
         size = self.size_dict[size_arg]
         fc = [nn.Linear(size[0], size[1]), nn.ReLU(), nn.Dropout(dropout)]
@@ -110,50 +108,6 @@ class CLAM_SB(nn.Module):
     def create_negative_targets(length, device):
         return torch.full((length, ), 0, device=device).long()
     
-    def attention_supervision_loss(self, attention_weights, tumor_labels, slide_id=None):
-        """
-        Supervise attention to focus on tumor regions.
-        attention_weights: [N] or [1, N] - raw attention scores from attention network
-        tumor_labels: [N] - binary mask for tumor regions (1=tumor, 0=normal)
-        """
-        if attention_weights.dim() > 1:
-            attention_weights = attention_weights.squeeze()
-        
-        # Ensure tensors are on the same device
-        tumor_labels = tumor_labels.to(attention_weights.device)
-        
-        # Convert raw attention scores to probabilities
-        attention_probs = F.softmax(attention_weights, dim=0)
-        
-        # Create target distribution from tumor mask
-        tumor_target = tumor_labels.float()
-        
-        # print(1/0)
-        # Avoid division by zero
-        if tumor_target.sum() == 0:
-            # If no tumor patches, return zero loss
-            return torch.tensor(0.0, device=attention_weights.device, requires_grad=True)
-        
-        # Normalize tumor mask to create probability distribution
-        tumor_target = tumor_target / tumor_target.sum()
-        
-        # KL divergence loss: KL(attention_probs || tumor_target)
-        # If attention_probs has no shape but is a single value, it should be ensqeezed
-        if attention_probs.dim() == 0:
-            attention_probs = attention_probs.unsqueeze(0)
-        # print("SHAPES:", attention_probs.shape, tumor_target.shape, attention_probs)
-        if attention_probs.shape[0] != tumor_target.shape[0]:
-            print("!!!! WARNING: Attention probabilities shape does not match tumor target shape!!!! att, tum:", attention_probs.shape, tumor_target.shape, "slide_id:", slide_id)
-            # Optionally print a warning or debug info here
-            return torch.tensor(0.0, device=attention_weights.device, requires_grad=True)
-        assert attention_probs.shape == tumor_target.shape, f"Attention probabilities shape {attention_probs.shape} does not match tumor target shape {tumor_target.shape}"
-        kl_loss = F.kl_div(
-            attention_probs.log(), 
-            tumor_target + 1e-8,  # Add small epsilon for numerical stability
-            reduction='batchmean'
-        )
-        # print("CALCULATED KL LOSS:", kl_loss.item())
-        return kl_loss
     
     #instance-level evaluation for in-the-class attention branch
     def inst_eval(self, A, h, classifier): 
@@ -189,7 +143,7 @@ class CLAM_SB(nn.Module):
         instance_loss = self.instance_loss_fn(logits, p_targets)
         return instance_loss, p_preds, p_targets
 
-    def forward(self, h, label=None, instance_eval=False, return_features=False, attention_only=False, tumor_labels=None):
+    def forward(self, h, label=None, instance_eval=False, return_features=False, attention_only=False):
         A, h = self.attention_net(h)  # NxK        
         A = torch.transpose(A, 1, 0)  # KxN
         if attention_only:
@@ -234,10 +188,4 @@ class CLAM_SB(nn.Module):
         if return_features:
             results_dict.update({'features': M})
         
-        # Add attention supervision loss if tumor mask is provided and we're training
-        if tumor_labels is not None and len(tumor_labels) > 0 and self.training and self.attention_supervision_weight > 0:
-            att_sup_loss = self.attention_supervision_loss(A_raw.squeeze(), tumor_labels)
-            results_dict['attention_supervision_loss'] = att_sup_loss * self.attention_supervision_weight
-        else:
-            results_dict['attention_supervision_loss'] = 0
         return logits, Y_prob, Y_hat, A_raw, results_dict

@@ -5,7 +5,6 @@ import os
 from dataset.clam_dataset.dataset_generic import save_splits
 from torch import optim
 
-from models.mm_models.multimodal_simul import MultimodalFusionSimultaneousModel
 from models.mm_models.multimodal_hierarchical import MultimodalHierarchical
 from sklearn.preprocessing import label_binarize
 from sklearn.metrics import roc_auc_score, roc_curve
@@ -140,7 +139,7 @@ def train(datasets, cur, args, device):
                   'n_classes': args.n_classes, 
                   "embed_dim": args.embed_dim}
     
-    if args.model_size is not None and args.model_type != 'mil':
+    if args.model_size is not None:
         model_dict.update({"size_arg": args.model_size})
     
     if args.subtyping:
@@ -159,19 +158,9 @@ def train(datasets, cur, args, device):
     else:
         instance_loss_fn = nn.CrossEntropyLoss()
 
-    if args.model_type == 'clam_mm_simul':
-        model = MultimodalFusionSimultaneousModel(**model_dict, instance_loss_fn=instance_loss_fn,
-             clinical_dim=args.clinical_dim,
-             norm=args.norm,
-             attention_supervision_weight= args.attention_supervision_weight
-             )
-    elif args.model_type == 'mm_hierarchical':
-            model = MultimodalHierarchical(**model_dict, instance_loss_fn=instance_loss_fn, num_levels=len(args.pages), clinical_dim=args.clinical_dim,
+    model = MultimodalHierarchical(**model_dict, instance_loss_fn=instance_loss_fn, num_levels=len(args.pages), clinical_dim=args.clinical_dim,
             norm=args.norm, 
-            attention_supervision_weight= args.attention_supervision_weight,
             top_p=args.top_p)
-    else:
-        raise NotImplementedError('Model type {} not implemented'.format(args.model_type))
     
     _ = model.to(device)
     if verbose: print('Done!')
@@ -227,117 +216,33 @@ def train(datasets, cur, args, device):
 
     # _, val_error, val_auc, _= summary(model, val_loader, args.n_classes, results_dir=args.results_dir, fold_nr=cur, type='val')
     # if verbose: print('Val error: {:.4f}, ROC AUC: {:.4f}'.format(val_error, val_auc))
-    results_dict, test_error, test_auc, _ = summary(model, test_loader, args.n_classes, results_dir=args.results_dir, fold_nr=cur, type='test')
+    results_dict, test_error, test_auc, _ = summary(model, test_loader, args.n_classes, results_dir=args.results_dir, fold_nr=cur, device=device, type='test')
     if verbose: print('Test error: {:.4f}, ROC AUC: {:.4f}'.format(test_error, test_auc))
 
     # return results_dict, test_auc, val_auc, 1-test_error, 1-val_error 
     return results_dict
 
 def apply_model(loader_data, model, testing=False, plot_coords = False, device=None):
-    if len(loader_data) == 3:
-        data, label, clinical_data = loader_data
-        clinical_data = clinical_data.to(device)
-        data, label = data.to(device), label.to(device)
-        if testing:
-            with torch.no_grad():
-                results = model(data, clinical_features=clinical_data)
-        else:
-            results = model(data, label=label, clinical_features=clinical_data, instance_eval=True)
+    data, label, coords, clinical_data, slide_id = loader_data
+    clinical_data = clinical_data.to(device)
+    if isinstance(data, list):
+        data = [d.to(device) for d in data]
+    else:
+        data = data.to(device)
+    label = label.to(device)
+    coords = [c.to(device) for c in coords]
+    slide_id = slide_id.to(device) if isinstance(slide_id, torch.Tensor) else slide_id 
+    
+    for i in range(3):
+        assert len(data[i]) == len(coords[i]) or slide_id == "2A_001_HE", f"Mismatch in scale {i} lengths: collated[{i}]={len(data[i])},   coords[{i}]={len(coords[i])}, for slide {slide_id}"
 
-        return results, label
-    elif len(loader_data) == 4:
-        data, label, tumor_labels_or_coords, clinical_data = loader_data
+    if testing:
+        with torch.no_grad():
+            results = model(data, coords=coords, clinical_features=clinical_data)
+    else:
+        results = model(data, label=label, coords=coords, clinical_features=clinical_data, instance_eval=True, slide_id=slide_id, plot_coords=plot_coords)
 
-        if np.all(np.isin(tumor_labels_or_coords, [0, 1])) or tumor_labels_or_coords is None or len(tumor_labels_or_coords) == 0:
-            tumor_labels = tumor_labels_or_coords
-            tumor_labels = tumor_labels[0].to(device) # [c.to(device) for c in tumor_labels]
-        else:
-            coords = tumor_labels_or_coords
-            coords = [c.to(device) for c in coords]
-            tumor_labels = None
-            # Test if coords are not only 0 and 1
-            assert not all(np.isin(coords, [0, 1])), "Coords should not only contain 0 and 1"
-        clinical_data = clinical_data.to(device)
-        if isinstance(data, list):
-            data = [d.to(device) for d in data]
-        else:
-            data = data.to(device)
-        label = label.to(device)
-        
-        if tumor_labels is not None:
-            if testing:
-                with torch.no_grad():
-                    results = model(data, clinical_features=clinical_data)
-            else:
-                results = model(data, label=label, tumor_labels=tumor_labels, clinical_features=clinical_data, instance_eval=True)
-        else:
-            if testing:
-                with torch.no_grad():
-                    results = model(data, coords=coords, clinical_features=clinical_data)
-            else:
-                results = model(data, label=label, coords=coords, clinical_features=clinical_data, instance_eval=True)
-
-        return results, label
-
-    elif len(loader_data) == 5:
-        # print("LOADER DATA:", loader_data)
-        data, label, coords, tumor_labels, clinical_data, slide_id = loader_data
-
-        if isinstance(data, list):
-            data = [d.to(device) for d in data]
-        else:
-            data = data.to(device)
-        label = label.to(device)    
-        coords = [c.to(device) for c in coords]
-        tumor_labels = [c.to(device) for c in tumor_labels]
-        clinical_data = clinical_data.to(device)
-        
-        assert len(data) == len(coords) == len(tumor_labels), f"222Mismatch in lengths: collated={len(data)}, coords={len(coords)}, tumor_labels={len(tumor_labels)}"
-                    
-        for i in range(3):
-            assert len(data[i]) == len(coords[i]) == len(tumor_labels[i]) or len(tumor_labels[i]) == 0, f"2222Mismatch in scale {i} lengths: collated[{i}]={len(data[i])},   coords[{i}]={len(coords[i])}, tumor_labels[{i}]={len(tumor_labels[i])}"
-        
-        results = model(data, label=label, coords=coords, tumor_labels=tumor_labels, clinical_features=clinical_data, instance_eval=True, slide_id=slide_id)
-        # clinical_data = clinical_data.to(device)
-        # assert not all(np.isin(coords, [0, 1])), "Coords should not only contain 0 and 1"
-        # if isinstance(data, list):
-        #     data = [d.to(device) for d in data]
-        # else:
-        #     data = data.to(device)
-        # label = label.to(device)
-        # coords = [c.to(device) for c in coords]
-        # slide_id = slide_id.to(device) if isinstance(slide_id, torch.Tensor) else slide_id
-        
-        # if testing:
-        #     with torch.no_grad():
-        #         results = model(data, coords=coords, clinical_features=clinical_data)
-        # else:
-        #     results = model(data, label=label, coords=coords, clinical_features=clinical_data, instance_eval=True, slide_id=slide_id, plot_coords=plot_coords)
-
-        return results, label
-
-    elif len(loader_data) == 6:
-        data, label, coords, tumor_labels, clinical_data, slide_id = loader_data
-        clinical_data = clinical_data.to(device)
-        if isinstance(data, list):
-            data = [d.to(device) for d in data]
-        else:
-            data = data.to(device)
-        label = label.to(device)
-        coords = [c.to(device) for c in coords]
-        slide_id = slide_id.to(device) if isinstance(slide_id, torch.Tensor) else slide_id        
-        tumor_labels = [c.to(device) for c in tumor_labels]
-        
-        for i in range(3):
-            assert len(data[i]) == len(coords[i]) == len(tumor_labels[i]) or len(tumor_labels[i]) == 0 or slide_id == "2A_001_HE", f"Mismatch in scale {i} lengths: collated[{i}]={len(data[i])},   coords[{i}]={len(coords[i])}, tumor_labels[{i}]={len(tumor_labels[i])} for slide {slide_id}"
-
-        if testing:
-            with torch.no_grad():
-                results = model(data, coords=coords, clinical_features=clinical_data)
-        else:
-            results = model(data, label=label, coords=coords, clinical_features=clinical_data, instance_eval=True, slide_id=slide_id, plot_coords=plot_coords, tumor_labels=tumor_labels)
-
-        return results, label
+    return results, label
 
 def train_loop_clam(epoch, model, loader, optimizer, bag_weight, writer = None, loss_fn = None, verbose = True, phase = None, device=None):
     model.train()
@@ -428,12 +333,6 @@ def train_loop_clam(epoch, model, loader, optimizer, bag_weight, writer = None, 
             # Fusion + submodale Hilfsverluste
             norm = w_mm + w_clam + w_cd
             total_loss = (w_mm * loss_mm + w_clam * loss_clam + w_cd * loss_cd) / norm
-            
-        
-        attention_supervision_loss = result_dict['attention_supervision_loss']
-        if attention_supervision_loss is not None and attention_supervision_loss > 0:
-            total_loss += attention_supervision_loss
-
         
         if verbose and (batch_idx + 1) % 20 == 0:
             print('batch {}, loss_mm: {:.4f}, instance_loss: {:.4f}, weighted_loss: {:.4f}, '.format(batch_idx, loss_value, instance_loss_value, total_loss.item()) + 
@@ -586,7 +485,7 @@ def validate_clam(cur, epoch, model, loader, n_classes, early_stopping = None, w
 
     return False
 
-def summary(model, loader, n_classes, results_dir=None, fold_nr=None, type='test'):
+def summary(model, loader, n_classes, results_dir=None, fold_nr=None, device=None, type='test'):
     model.eval()
     test_loss = 0.
     test_error = 0.
@@ -607,9 +506,9 @@ def summary(model, loader, n_classes, results_dir=None, fold_nr=None, type='test
     patient_results = {}
 
     for batch_idx, loader_data in enumerate(loader):
-        
-        result_dict, label = apply_model(loader_data, model,testing=True)
-        
+
+        result_dict, label = apply_model(loader_data, model, device=device, testing=True)
+
         logits, Y_prob, Y_hat, A_raw, instance_dict = result_dict['MM']
         slide_id = slide_ids.iloc[batch_idx]
 

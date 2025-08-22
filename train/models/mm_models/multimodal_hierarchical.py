@@ -6,13 +6,13 @@ from models.clam_models.model_multi_scale import CLAM_Hierarchical
 
 class MultimodalHierarchical(nn.Module):
     
-    def __init__(self, instance_loss_fn, *args, num_levels = 4, scale_factors=None, window_size=225, top_p=0.3, clinical_dim=32, norm = False, n_classes=3,attention_supervision_weight=0.0, **kwargs):
+    def __init__(self, instance_loss_fn, *args, num_levels = 4, scale_factors=None, window_size=225, top_p=0.3, clinical_dim=32, norm = False, n_classes=3, **kwargs):
         
         super(MultimodalHierarchical, self).__init__()
         
         self.kind = 'hierarchical'
         
-        self.clam = CLAM_Hierarchical(instance_loss_fn=instance_loss_fn, num_levels=num_levels, scale_factors=scale_factors, window_size=window_size, top_p=top_p, attention_supervision_weight=attention_supervision_weight, *args, **kwargs, n_classes=n_classes)
+        self.clam = CLAM_Hierarchical(instance_loss_fn=instance_loss_fn, num_levels=num_levels, scale_factors=scale_factors, window_size=window_size, top_p=top_p, *args, **kwargs, n_classes=n_classes)
         
         
         size_arg = kwargs.get('size', 'tiny')
@@ -55,13 +55,12 @@ class MultimodalHierarchical(nn.Module):
         h_fused = self.fusion_net(h_combined)
         return h_fused
 
-    def forward(self, h_list, clinical_features, coords=None, label=None, instance_eval=False, return_features=False, attention_only=False, slide_id=None, plot_coords = False, tumor_labels=None):
+    def forward(self, h_list, clinical_features, coords=None, label=None, instance_eval=False, return_features=False, attention_only=False, slide_id=None, plot_coords = False):
         
         # Pass the features to the CLAM model
-        logits_clam, Y_prob_clam, Y_hat_clam, A_raw, results_clam = self.clam(h_list, coords=coords, label=label, instance_eval=instance_eval, return_features=True, attention_only=attention_only, slide_id=slide_id, plot_coords = plot_coords, tumor_label_list=tumor_labels)
+        logits_clam, Y_prob_clam, Y_hat_clam, A_raw, results_clam = self.clam(h_list, coords=coords, label=label, instance_eval=instance_eval, return_features=True, attention_only=attention_only, slide_id=slide_id, plot_coords = plot_coords)
         
         h_path = results_clam['features']
-        attention_supervision_losses = results_clam['attention_supervision_loss']
         
         if self.clinical_features_dim == 23:
             # If clinical features are already in the correct format
@@ -94,5 +93,5 @@ class MultimodalHierarchical(nn.Module):
         Y_prob = F.softmax(logits, dim=1)
         Y_hat = torch.argmax(Y_prob, dim=1)
             
-        return {"CLAM": [logits_clam, Y_prob_clam, Y_hat_clam, A_raw, results_clam], "CD": [logits_clinical, Y_prob_clinical, Y_hat_clinical, None, None], "MM": [logits, Y_prob, Y_hat, None, None], "attention_supervision_loss": sum(attention_supervision_losses)}
+        return {"CLAM": [logits_clam, Y_prob_clam, Y_hat_clam, A_raw, results_clam], "CD": [logits_clinical, Y_prob_clinical, Y_hat_clinical, None, None], "MM": [logits, Y_prob, Y_hat, None, None]}
 

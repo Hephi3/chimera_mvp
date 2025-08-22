@@ -17,11 +17,11 @@ def get_split_by_class(dataset:Dataset, df_slice, data_dir, num_classes, page, *
     if dataset.__class__.__name__ == 'Generic_MIL_Dataset':
         split = Generic_Split(df_slice, data_dir=data_dir, num_classes=num_classes, page=page)
     elif dataset.__class__.__name__ == 'Multimodal_Generic_MIL_Dataset':
-        split = Multimodal_Generic_Split(df_slice, data_dir=data_dir, num_classes=num_classes, page=page, return_tumor_labels = kwargs.get('return_tumor_labels', False))
+        split = Multimodal_Generic_Split(df_slice, data_dir=data_dir, num_classes=num_classes, page=page)
     elif dataset.__class__.__name__ == 'Generic_Multi_Scale_MIL_Dataset':
-        split = Generic_Multi_Scale_Split(df_slice, data_dir=data_dir, num_classes=num_classes, page=page, return_coords = kwargs.get('return_coords', False), return_tumor_labels = kwargs.get('return_tumor_labels', False), pages = kwargs.get('pages', False))
+        split = Generic_Multi_Scale_Split(df_slice, data_dir=data_dir, num_classes=num_classes, page=page, return_coords = kwargs.get('return_coords', False), pages = kwargs.get('pages', False))
     elif dataset.__class__.__name__ == 'MM_Multi_Scale_Dataset':
-        split = MM_Multi_Scale_Split(df_slice, data_dir=data_dir, num_classes=num_classes, page=page, return_coords = kwargs.get('return_coords', False), return_tumor_labels = kwargs.get('return_tumor_labels', False), pages = kwargs.get('pages', False))
+        split = MM_Multi_Scale_Split(df_slice, data_dir=data_dir, num_classes=num_classes, page=page, return_coords = kwargs.get('return_coords', False), pages = kwargs.get('pages', False))
 
     else:
         raise NotImplementedError(
@@ -291,12 +291,10 @@ class Generic_Split(Generic_MIL_Dataset):
 class Multimodal_Generic_MIL_Dataset(Generic_MIL_Dataset):
     def __init__(self,
                 data_dir, 
-                return_tumor_labels=False, 
                 **kwargs):
     
         self.clinical_data = load_clinical_data()
-        super(Multimodal_Generic_MIL_Dataset, self).__init__(data_dir=data_dir, **kwargs, return_tumor_labels=return_tumor_labels)
-        self.return_tumor_labels = return_tumor_labels
+        super(Multimodal_Generic_MIL_Dataset, self).__init__(data_dir=data_dir, **kwargs)
 
     def __getitem__(self, idx):
         # Rufe die Basis-Implementation auf
@@ -306,16 +304,6 @@ class Multimodal_Generic_MIL_Dataset(Generic_MIL_Dataset):
         slide_id = self.slide_data['slide_id'][idx]
         clinical_features = self.clinical_data.get(slide_id, None)
         clinical_features = torch.tensor(clinical_features, dtype=torch.float32) if clinical_features is not None else None
-
-        if self.return_tumor_labels:
-            tumor_labels_path = os.path.join(self.data_dir, 'tumor_labels_page{}'.format(self.page), '{}.npy'.format(slide_id[:-3]))
-            if not os.path.exists(tumor_labels_path):
-                # print("Warning: Tumor labels file not found: {}".format(tumor_labels_path))
-                tumor_labels = None
-            else:
-                tumor_labels = np.load(tumor_labels_path)
-                tumor_labels = np.array(tumor_labels.tolist(), dtype=np.float32)
-            return (*results, tumor_labels, clinical_features)
         
         return (*results, clinical_features)
             
@@ -323,14 +311,13 @@ class Multimodal_Generic_MIL_Dataset(Generic_MIL_Dataset):
         
 
 class Multimodal_Generic_Split(Multimodal_Generic_MIL_Dataset):
-    def __init__(self, slide_data, data_dir=None, num_classes=2, return_tumor_labels=False,page=0):
+    def __init__(self, slide_data, data_dir=None, num_classes=2, page=0):
         self.clinical_data = load_clinical_data()
         self.page = page
         self.use_h5 = False
         self.slide_data = slide_data
         self.data_dir = data_dir
         self.num_classes = num_classes
-        self.return_tumor_labels = return_tumor_labels
         self.slide_cls_ids = [[] for i in range(self.num_classes)]
         for i in range(self.num_classes):
             self.slide_cls_ids[i] = np.where(self.slide_data['label'] == i)[0]
@@ -343,12 +330,11 @@ class Multimodal_Generic_Split(Multimodal_Generic_MIL_Dataset):
     
     
 class Generic_Multi_Scale_MIL_Dataset(Generic_MIL_Dataset):
-    def __init__(self, data_dir, pages, return_coords, return_tumor_labels, **kwargs):
+    def __init__(self, data_dir, pages, return_coords,  **kwargs):
 
-        super(Generic_Multi_Scale_MIL_Dataset, self).__init__(**kwargs,pages = pages, return_coords=return_coords,return_tumor_labels=return_tumor_labels, data_dir=data_dir)
+        super(Generic_Multi_Scale_MIL_Dataset, self).__init__(**kwargs,pages = pages, return_coords=return_coords, data_dir=data_dir)
         self.pages = pages
         self.return_coords = return_coords
-        self.return_tumor_labels = return_tumor_labels
 
 
     def __getitem__(self, idx):
@@ -357,7 +343,6 @@ class Generic_Multi_Scale_MIL_Dataset(Generic_MIL_Dataset):
         data_dir = self.data_dir
         page_features = []
         page_coords = []
-        page_tumor_labels = []
         for page in self.pages:
             full_path = os.path.join(
                 data_dir, 'features_CLAM_page{}'.format(page), '{}.pt'.format(slide_id))
@@ -381,31 +366,14 @@ class Generic_Multi_Scale_MIL_Dataset(Generic_MIL_Dataset):
                 coords = np.array(coords.tolist(), dtype=np.float32)
                 page_coords.append(torch.tensor(coords))        
             
-            if self.return_tumor_labels:
-                tumor_labels_path = os.path.join(self.data_dir, 'tumor_labels_page{}'.format(page), '{}.npy'.format(slide_id[:-3]))
-                if not os.path.exists(tumor_labels_path):
-                    # print("Warning: Tumor labels file not found: {}".format(tumor_labels_path))
-                    tumor_labels = None
-                    continue
-                else:
-                    tumor_labels = np.load(tumor_labels_path)
-                tumor_labels = np.array(tumor_labels.tolist(), dtype=np.float32)
-                tumor_labels = torch.tensor(tumor_labels).squeeze()
-                page_tumor_labels.append(tumor_labels)
 
         if self.return_coords:
-            if self.return_tumor_labels:
-                return page_features, label, page_coords, page_tumor_labels
-            else:
-                return page_features, label, page_coords
+            return page_features, label, page_coords
         else:
-            if self.return_tumor_labels:
-                return page_features, label, page_tumor_labels
-            else:
-                return page_features, label
+            return page_features, label
 
 class Generic_Multi_Scale_Split(Generic_Multi_Scale_MIL_Dataset):
-    def __init__(self, slide_data, data_dir=None, num_classes=2, page=0, return_coords=False, return_tumor_labels = False, pages = None):
+    def __init__(self, slide_data, data_dir=None, num_classes=2, page=0, return_coords=False, pages = None):
         self.page = page
         self.use_h5 = False
         self.slide_data = slide_data
@@ -443,19 +411,18 @@ class MM_Multi_Scale_Dataset(Generic_Multi_Scale_MIL_Dataset):
         clinical_features = self.clinical_data.get(slide_id, None)
         clinical_features = torch.tensor(clinical_features, dtype=torch.float32) if clinical_features is not None else None
         # input(f"Returning features for slide {slide_id} of lenth {len(results[0])} and clinical features of length {len(clinical_features) if clinical_features is not None else 'None'}")
-        assert len(results) >= 3 and len(results) <=5, "Expected results to contain features, label and coords and optionally tumor labels, but got {}".format(len(results))
+        assert len(results) >= 3 and len(results) <=5, "Expected results to contain features, label and coords, but got {}".format(len(results))
         
         return (*results, clinical_features, slide_id)
     
 class MM_Multi_Scale_Split(MM_Multi_Scale_Dataset):
-    def __init__(self, slide_data, data_dir=None, num_classes=2, page=0, return_coords=False, pages = None, return_tumor_labels = False):
+    def __init__(self, slide_data, data_dir=None, num_classes=2, page=0, return_coords=False, pages = None):
         self.clinical_data = load_clinical_data()
         self.page = page
         self.use_h5 = False
         self.slide_data = slide_data
         self.data_dir = data_dir
         self.num_classes = num_classes
-        self.return_tumor_labels = return_tumor_labels
         self.slide_cls_ids = [[] for i in range(self.num_classes)]
         for i in range(self.num_classes):
             self.slide_cls_ids[i] = np.where(self.slide_data['label'] == i)[0]

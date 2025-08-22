@@ -110,13 +110,12 @@ def my_method():
         
         
         ### MODEL ###
-        model_names = ["advanced_hierarchical_17", "advanced_hierarchical_21", "grid_search_hierarchical_26"]
-        model_classes = ["hierarchical", "hierarchical", "simultaneous"]
+        model_names = ["Model1", "Model2", "Model3"]
         model_classes = ["hierarchical", "hierarchical", "hierarchical"]
         model_configs = [
-            {'dropout': 0.4, 'n_classes': 3, 'embed_dim': 1536, 'size_arg': 'tiny', 'subtyping': True, 'k_sample': 8, 'instance_loss_fn': None, 'num_levels': 3, 'clinical_dim': 256, 'norm': True, 'use_auxiliary_loss': False}, #17
-            {'dropout': 0.4, 'n_classes': 3, 'embed_dim': 1536, 'size_arg': 'tiny', 'subtyping': True, 'k_sample': 8, 'instance_loss_fn': None, 'num_levels': 3, 'clinical_dim': 256, 'norm': True, 'use_auxiliary_loss': False}, #21
-            {'dropout': 0.5, 'n_classes': 3, 'embed_dim': 1536, 'size_arg': 'tiny', 'subtyping': True, 'k_sample': 8, 'instance_loss_fn': None, 'num_levels': 3, 'clinical_dim': 256, 'norm': True, 'use_auxiliary_loss': False}, #
+            {'dropout': 0.4, 'n_classes': 3, 'embed_dim': 1536, 'size_arg': 'tiny', 'subtyping': True, 'k_sample': 8, 'instance_loss_fn': None, 'num_levels': 3, 'clinical_dim': 256, 'norm': True, 'use_auxiliary_loss': False},
+            {'dropout': 0.4, 'n_classes': 3, 'embed_dim': 1536, 'size_arg': 'tiny', 'subtyping': True, 'k_sample': 8, 'instance_loss_fn': None, 'num_levels': 3, 'clinical_dim': 256, 'norm': True, 'use_auxiliary_loss': False},
+            {'dropout': 0.5, 'n_classes': 3, 'embed_dim': 1536, 'size_arg': 'tiny', 'subtyping': True, 'k_sample': 8, 'instance_loss_fn': None, 'num_levels': 3, 'clinical_dim': 256, 'norm': True, 'use_auxiliary_loss': False},
 
         ]
 

@@ -1,62 +1,22 @@
-# CHIMERA Baseline Template
-
-This repository provides a **minimal working template** for participating in the [CHIMERA Challenge](https://chimera.grand-challenge.org/).  
-It serves as a **starting point** for your own submission and implements the required boilerplate to run across all tasks in the challenge.
+# Hierarchical Multimodal Model for HR-NMIBC Prognosis - Inference Guide
+This guide describes how to set up and run inference for the Hierarchical Multimodal Model for HR-NMIBC Prognosis.
 
 ---
 
-## 📁 Structure
-
-Each task follows this structure:
-
-- `inference.py`: Main entry point for processing inputs and generating outputs.
-- `model/`: Placeholder for model-related resources.
-  - `README.md`: Instructions for uploading or including models.
-  - `a_tarball_subdirectory/`: Example subdirectory for tarball-based resources.
-- `resources/`: Placeholder for any additional resources.
-- `requirements.in` and `requirements.txt`: Define the Python dependencies for the project.
-- `Dockerfile`: Specifies the container environment for running the algorithm.
-- `do_build.sh`: Script to build the Docker container.
-- `do_test_run.sh`: Script to test the container locally.
-- `do_save.sh`: Script to save the container image and optional tarball for upload.
-
+## 1. Prepare Model Weights
+- Copy the model weights for all folds into the folder:
+```bash
+model/<Model Name>/
+```
+- If you use a custom model name, update both the folder name and the corresponding name in `inference.py`.
+- Download the UNI2-h model weights [from MahmoodLab/UNI2-h](https://huggingface.co/MahmoodLab/UNI2-h) and place them in the model directory as:
+```bash
+model/pytorch_model.bin
+```
 ---
 
-## 🚀 Getting Started
-
-**System requirements:**  
-- Linux-based OS (e.g., Ubuntu 22.04)  
-- Python 3.10+  
-- Docker installed
-
-Depending on your preferred development setup, you can follow one of our tutorials:
-
-## ⚙️ Running the Baseline Models Locally
-To try out the baseline models on your local system, follow these steps:
-
-Open a terminal or command prompt
-Navigate to the directory where you want to clone the repository:
-```
-cd /path/to/your/desired/location
-```
-Clone the repository:
-```
-git clone https://github.com/nadieh/CHIMERA_minimal_baseline.git
-```
-Change to the task directory you want to run (e.g., Task1, Task2 or Task3):
-```
-cd /path/to/each/task
-```
-Follow the instructions provided [here](https://github.com/nadieh/CHIMERA_minimal_baseline/blob/main/CHIMERA-bladder-brs/model/README.md) to set up the necessary files. Then, to test the container locally, run:
-```
-./do_test_run.sh
-```
-This script launches Docker to execute the inference.py script.
-
-## 🛠️ Customization
-Modify inference.py to implement your own feature extraction or prediction logic.
-Add your model weights to the model/ directory or upload them as a tarball to Grand Challenge.
-Update requirements.in to include additional Python dependencies and regenerate requirements.txt using pip-compile.
-## 📄 License
-This project is licensed under the Apache License 2.0. See the LICENSE file for details.
+## 2. Run Inference
+- Use the provided bash scripts to execute inference.
+- Ensure all required paths and parameters are set correctly in the scripts and `inference.py`.
+- For further details, refer to the documentation or contact the project maintainers.
 

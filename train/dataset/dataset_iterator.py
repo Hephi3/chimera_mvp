@@ -1,7 +1,6 @@
 import os
-from torchvision.transforms import v2
 
-ROOT_DIR = ROOT_DIR = "/local/scratch/chimera/task2new/data"
+ROOT_DIR = "/local/scratch/chimera/task2new/data" # Set this path to your dataset root directory
 
 def id_to_filename(id, he = False):
     filename = f"2{'A' if int(id)<200 else 'B'}_{id}"
@@ -9,7 +8,7 @@ def id_to_filename(id, he = False):
         filename += "_HE"
     return filename
 
-def root_iter(root_dir=ROOT_DIR, page=None, clinical_only = False, tumor_masks = False):
+def root_iter(root_dir=ROOT_DIR, page=None, clinical_only = False):
     """Returns an iterator over patient IDs and their associated files."""
     
     def patient_iterator():
@@ -47,15 +46,6 @@ def root_iter(root_dir=ROOT_DIR, page=None, clinical_only = False, tumor_masks =
             if not clinical_only:
                 result["hist"] = hist_path
                 result["hist_mask"] = hist_mask_path
-            
-            if tumor_masks:
-                # from rootdir everything but the last part of the path
-                tumor_mask_path = os.path.join("/local/scratch/chimera/task2new/", "RNA_masks",f"{patient_dir[1:]}.tif")
-                if os.path.exists(tumor_mask_path):
-                    result["tumor_mask"] = tumor_mask_path
-                else:
-                    print(f"Warning: Tumor mask {tumor_mask_path} does not exist!")
-                    result["tumor_mask"] = None
 
             yield id, result
     
