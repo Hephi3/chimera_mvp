@@ -60,7 +60,7 @@ class CLAM_Hierarchical(CLAM_Multi_Scale):
         Select target-level features based on attention from source-level features.
         """
         # Call the attention_net properly to get attention scores
-
+        self.attention_nets[level_idx] = self.attention_nets[level_idx].to(h_source.device)
         A, h_source_transformed = self.attention_nets[level_idx](h_source)
         A = torch.transpose(A, 1, 0)  # KxN
         A_raw = A.clone()

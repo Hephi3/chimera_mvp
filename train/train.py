@@ -4,29 +4,13 @@ import argparse
 import os
 
 # internal imports
-from utils.file_utils import save_pkl
-from utils.core_utils_simul import train
-from dataset.clam_dataset.dataset_generic import MM_Multi_Scale_Dataset
+
+from federated_train import main
 
 # pytorch imports
 import torch
 import numpy as np
-from tqdm import tqdm
 
-def main(args, dataset):
-    # create results directory if necessary
-    if not os.path.isdir(args.results_dir):
-        os.mkdir(args.results_dir)
-    folds = np.arange(0, args.k)
-    for i in tqdm(folds, desc='Folds'):
-        seed_torch(args.seed)
-        train_dataset, val_dataset, test_dataset = dataset.return_splits(csv_path = '{}/splits_{}.csv'.format(args.split_dir, i))
-        
-        datasets = (train_dataset, val_dataset, test_dataset)
-        results = train(datasets, i, args, device=device)
-        # write results to pkl
-        filename = os.path.join(args.results_dir, 'split_{}_results.pkl'.format(i))
-        save_pkl(filename, results)
 
 
 # Generic training settings
@@ -44,7 +28,7 @@ parser.add_argument('--reg', type=float, default=1e-5,
                     help='weight decay (default: 1e-5)')
 parser.add_argument('--seed', type=int, default=1, 
                     help='random seed for reproducible experiment (default: 1)')
-parser.add_argument('--k', type=int, default=10, help='number of folds (default: 10)')
+parser.add_argument('--k', type=int, default=3, help='number of clients (default: 3)')
 parser.add_argument('--results_dir', default='./results', help='results directory (default: ./results)')
 parser.add_argument('--split_dir', type=str, required=True, 
                     help='manually specify the set of splits to use')
@@ -158,22 +142,7 @@ def init_experiment(args):
     if verbose: print('\nLoad Dataset')
 
     args.n_classes=3
-    dataset = MM_Multi_Scale_Dataset(
-        csv_path = '/gris/gris-f/homelv/phempel/masterthesis/MMFL/data/chimera_new.csv',
-        return_coords = args.return_coords,
-        data_dir= args.data_root_dir,
-        pages = args.pages if args.pages is not None else [0, 1, 2, 3, 4],
-        shuffle = False, 
-        seed = args.seed, 
-        print_info = verbose,
-        label_dict = {
-            "BRS1": 0,
-            "BRS2": 1,
-            "BRS3": 2,
-        },
-        patient_strat= False,
-        ignore=[]
-    )
+    
     assert args.subtyping 
         
     if not os.path.isdir(args.results_dir):
@@ -207,7 +176,7 @@ if __name__ == "__main__":
             args.results_dir = results_dir
             dataset = init_experiment(args=args)
             
-            results = main(args, dataset)
+            results = main(args, dataset, device)
 
     print("finished!")
     print("end script")

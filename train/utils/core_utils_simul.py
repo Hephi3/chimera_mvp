@@ -52,23 +52,24 @@ class EarlyStopping:
             self.counter = 0
 
     def save_checkpoint(self, val_loss, model, ckpt_name):
-        '''Saves model when validation loss decrease.'''
-        if self.verbose:
-            print(f'Validation loss decreased ({self.val_loss_min:.6f} --> {val_loss:.6f}).  Saving model ...')
-        torch.save(model.state_dict(), ckpt_name)
-        self.val_loss_min = val_loss
+        pass
+        # '''Saves model when validation loss decrease.'''
+        # if self.verbose:
+        #     print(f'Validation loss decreased ({self.val_loss_min:.6f} --> {val_loss:.6f}).  Saving model ...')
+        # torch.save(model.state_dict(), ckpt_name)
+        # self.val_loss_min = val_loss
 
 # device=torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 def log_metrics(writer, epoch, loss, all_labels, all_preds, all_probs, kind:str, submodel:str):
     if loss == 0:
         return
-    labels = np.unique(all_labels)
-    pos_class_idx = 2 if len(labels) == 3 else 1
+    pos_class_idx = 2
     
     acc = accuracy_score(all_labels, all_preds)
     # Convert to one-vs-rest for AUC calculation (0 and 1 vs 2)
     binary_labels = np.array(all_labels) == pos_class_idx
+    
     if type(all_probs[0]) == np.ndarray and type(all_probs[0][0]) == np.ndarray and len(all_probs[0][0]) == pos_class_idx + 1:
         roc_auc = roc_auc_score(binary_labels, [p[0][pos_class_idx] for p in all_probs] if type(all_probs[0]) == np.ndarray else all_probs)
     elif type(all_probs[0]) == np.ndarray and len(all_probs[0]) == pos_class_idx + 1:
@@ -83,7 +84,7 @@ def log_metrics(writer, epoch, loss, all_labels, all_preds, all_probs, kind:str,
     f1 = f1_score(binary_labels, np.array(all_preds) == pos_class_idx)
     binary_acc = accuracy_score(binary_labels, np.array(all_preds) == pos_class_idx)
     
-    # Log metrics to TensorBoard'
+    # Log metrics to TensorBoard
     if writer is not None:
         if loss is not None: writer.add_scalar(f'Loss/{kind}/{submodel}', loss, epoch)
         writer.add_scalar(f'Accuracy/{kind}/{submodel}', acc, epoch)
@@ -93,18 +94,25 @@ def log_metrics(writer, epoch, loss, all_labels, all_preds, all_probs, kind:str,
     
     return acc, roc_auc, f1
 
-def train(datasets, cur, args, device):
+def get_writer_dir(client_nr, round_nr, results_dir):
+    writer_dir = os.path.join(results_dir, "log")
+    if not os.path.isdir(writer_dir):
+        os.mkdir(writer_dir)
+    if type(client_nr) == int:
+        writer_dir = os.path.join(writer_dir, f"client_{client_nr}_round_{round_nr}")
+    else:
+        writer_dir = os.path.join(writer_dir, f"server_round_{round_nr}")
+    if not os.path.isdir(writer_dir):
+        os.mkdir(writer_dir)
+    return writer_dir
+    
+
+def train(model, train_split, val_split, args, cur, device, round_num=None):
     """   
-        train for a single fold
+        train for a single client
     """
     verbose = not args.no_verbose
-    if verbose: print('\nTraining Fold {}!'.format(cur))
-    writer_dir = os.path.join(args.results_dir, "log")
-    if not os.path.isdir(writer_dir):
-        os.mkdir(writer_dir)
-    writer_dir = os.path.join(writer_dir, f"fold_{cur}")
-    if not os.path.isdir(writer_dir):
-        os.mkdir(writer_dir)
+    writer_dir = get_writer_dir(cur, round_num, args.results_dir)
 
     if args.log_data:
         from tensorboardX import SummaryWriter
@@ -112,17 +120,10 @@ def train(datasets, cur, args, device):
 
     else:
         writer = None
-
-    
-    if verbose: print('\nInit train/val/test splits...', end=' ')
-    train_split, val_split, test_split = datasets
-    save_splits(datasets, ['train', 'val', 'test'], os.path.join(args.results_dir, 'splits_{}.csv'.format(cur)))
-    if verbose: print('Done!')
     if verbose: print("Training on {} samples".format(len(train_split)))
-    if verbose: print("Validating on {} samples".format(len(val_split)))
-    if verbose: print("Testing on {} samples".format(len(test_split)))
 
-    if verbose: print('\nInit loss function...', end=' ')
+    if verbose: print('\nInit optimizer ...', end=' ')
+    optimizer = get_optim(model, args)
     if args.bag_loss == 'svm':
         from topk.svm import SmoothTop1SVM
         loss_fn = SmoothTop1SVM(n_classes = args.n_classes)
@@ -132,62 +133,25 @@ def train(datasets, cur, args, device):
         loss_fn = nn.CrossEntropyLoss()
     else:
         raise NotImplementedError('Loss function {} not implemented'.format(args.bag_loss))
-    if verbose: print('Done!')
     
-    if verbose: print('\nInit Model...', end=' ')
-    model_dict = {"dropout": args.drop_out, 
-                  'n_classes': args.n_classes, 
-                  "embed_dim": args.embed_dim}
-    
-    if args.model_size is not None:
-        model_dict.update({"size_arg": args.model_size})
-    
-    if args.subtyping:
-        model_dict.update({'subtyping': True})
-    
-    if args.B > 0:
-        model_dict.update({'k_sample': args.B})
-    
-    # if args.norm:
-    #     model_dict.update({'norm': True})
-    if args.inst_loss == 'svm':
-        from topk.svm import SmoothTop1SVM
-        instance_loss_fn = SmoothTop1SVM(n_classes = 2)
-        if device.type == 'cuda':
-            instance_loss_fn = instance_loss_fn.cuda()
-    else:
-        instance_loss_fn = nn.CrossEntropyLoss()
-
-    model = MultimodalHierarchical(**model_dict, instance_loss_fn=instance_loss_fn, num_levels=len(args.pages), clinical_dim=args.clinical_dim,
-            norm=args.norm, 
-            top_p=args.top_p)
-    
-    _ = model.to(device)
-    if verbose: print('Done!')
-    if verbose: print_network(model)
-
-    if verbose: print('\nInit optimizer ...', end=' ')
-    optimizer = get_optim(model, args)
     scheduler = None
     if args.use_scheduler:
         scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', factor=0.5, patience=3)
     if verbose: print('Done!')
     
     if verbose: print('\nInit Loaders...', end=' ')
-    train_loader = get_split_loader(train_split, training=True, weighted = args.weighted_sample, device=device)
-    val_loader = get_split_loader(val_split, device=device)
-    test_loader = get_split_loader(test_split, device=device)
+    train_loader = get_split_loader(train_split, training=True, weighted = args.weighted_sample, device=device, args=args)
+    val_loader = get_split_loader(val_split, device=device, args=args)
     if verbose: print('Done!')
 
     if verbose: print('\nSetup EarlyStopping...', end=' ')
     if args.early_stopping:
         early_stopping = EarlyStopping(patience = 5, stop_epoch=40, verbose = verbose)
-
     else:
         early_stopping = None
     if verbose: print('Done!')
 
-    for epoch in tqdm(range(args.max_epochs), desc='Training Epochs'):#, disable=not verbose):
+    for epoch in tqdm(range(args.max_epochs), desc='Training Epochs', disable=not verbose):
         if epoch < 15:
             phase = 'clam_only'
         elif epoch < 30:
@@ -202,25 +166,18 @@ def train(datasets, cur, args, device):
         if hasattr(model, 'fusion_net'):
             model.fusion_net.requires_grad_(phase == 'fusion')
             model.classifier.requires_grad_(phase == 'fusion')
-        train_loop_clam(epoch, model, train_loader, optimizer,args.bag_weight, writer, loss_fn, verbose=verbose, phase=phase, device=device)
-        stop = validate_clam(cur, epoch, model, val_loader, args.n_classes, 
-            early_stopping, writer, loss_fn, args.results_dir, verbose=verbose, scheduler=scheduler, phase=phase, device=device)
+        train_loss = train_loop_clam(epoch, model, train_loader, optimizer,args.bag_weight, writer, loss_fn, verbose=verbose, phase=phase, device=device)
+        stop = validate_clam(cur=cur, epoch=epoch, model=model, loader=val_loader, n_classes=args.n_classes, 
+            early_stopping=early_stopping, writer=writer, results_dir=args.results_dir, verbose=verbose, scheduler=scheduler, phase=phase, device=device, loss_fn=loss_fn)
 
         if stop: 
             break
-
-    if args.early_stopping:
-        model.load_state_dict(torch.load(os.path.join(args.results_dir, "s_{}_checkpoint.pt".format(cur))))
-    else:
-        torch.save(model.state_dict(), os.path.join(args.results_dir, "s_{}_checkpoint.pt".format(cur)))
-
-    # _, val_error, val_auc, _= summary(model, val_loader, args.n_classes, results_dir=args.results_dir, fold_nr=cur, type='val')
-    # if verbose: print('Val error: {:.4f}, ROC AUC: {:.4f}'.format(val_error, val_auc))
-    results_dict, test_error, test_auc, _ = summary(model, test_loader, args.n_classes, results_dir=args.results_dir, fold_nr=cur, device=device, type='test')
-    if verbose: print('Test error: {:.4f}, ROC AUC: {:.4f}'.format(test_error, test_auc))
-
-    # return results_dict, test_auc, val_auc, 1-test_error, 1-val_error 
-    return results_dict
+    
+    # Ensure TensorBoard writer flushes all data before returning
+    if writer is not None:
+        writer.flush()
+        
+    return train_loss
 
 def apply_model(loader_data, model, testing=False, plot_coords = False, device=None):
     data, label, coords, clinical_data, slide_id = loader_data
@@ -245,6 +202,13 @@ def apply_model(loader_data, model, testing=False, plot_coords = False, device=N
     return results, label
 
 def train_loop_clam(epoch, model, loader, optimizer, bag_weight, writer = None, loss_fn = None, verbose = True, phase = None, device=None):
+    # # print information about loader data to compare with other experiment:
+    # data, label, coords, clinical_data, slide_id = next(iter(loader))
+    # print(f"Data batch shapes: {[d.shape for d in data]}, Labels: {label}, Coords: {[c.shape for c in coords]}, Clinical data: {clinical_data.shape}, Slide IDs: {slide_id}")
+    
+    # print(1/0)
+    
+    
     model.train()
     
     train_loss_mm = 0.
@@ -352,7 +316,7 @@ def train_loop_clam(epoch, model, loader, optimizer, bag_weight, writer = None, 
     train_loss_clam /= len(loader)
     train_loss_cd /= len(loader)
     
-    log_metrics(writer, epoch, train_loss_mm, all_labels, all_preds, all_probs, 'train', 'MM')
+    acc, roc_auc, f1 = log_metrics(writer, epoch, train_loss_mm, all_labels, all_preds, all_probs, 'train', 'MM')
     log_metrics(writer, epoch, train_loss_clam, all_labels, all_preds_clam, all_probs_clam, 'train', 'CLAM')
     log_metrics(writer, epoch, train_loss_cd, all_labels, all_preds_cd, all_probs_cd, 'train', 'CD')
     
@@ -361,9 +325,24 @@ def train_loop_clam(epoch, model, loader, optimizer, bag_weight, writer = None, 
         if verbose: print('\n')
 
     if verbose: print('Epoch: {}, train_loss_mm: {:.4f}, train_clustering_loss:  {:.4f}, train_error: {:.4f}'.format(epoch, train_loss_mm, train_inst_loss,  train_error))
-        
+    return train_loss_mm, f1
 
-def validate_clam(cur, epoch, model, loader, n_classes, early_stopping = None, writer = None, loss_fn = None, results_dir = None, verbose = True, scheduler=None, phase = None, device=None):
+def validate(model, val_split, args, cur, device, round_num=None):
+    if args.bag_loss == 'svm':
+        from topk.svm import SmoothTop1SVM
+        loss_fn = SmoothTop1SVM(n_classes = args.n_classes)
+        if device.type == 'cuda':
+            loss_fn = loss_fn.cuda()
+    elif args.bag_loss == 'ce':
+        loss_fn = nn.CrossEntropyLoss()
+    else:
+        raise NotImplementedError('Loss function {} not implemented'.format(args.bag_loss))
+    
+    val_loader = get_split_loader(val_split, device=device, args=args)
+    loss, accuracy = validate_clam(cur, None, model, val_loader, args.n_classes, device=device, loss_fn=loss_fn, round_nr=round_num)
+    return loss, accuracy
+
+def validate_clam(cur, epoch, model, loader, n_classes, early_stopping = None, writer = None, loss_fn = None, results_dir = None, verbose = True, scheduler=None, phase = None, device=None, round_nr=None):
     model.eval()
     val_loss_mm = 0.
     val_error = 0.
@@ -452,9 +431,12 @@ def validate_clam(cur, epoch, model, loader, n_classes, early_stopping = None, w
     if scheduler and phase == 'fusion':
         scheduler.step(val_loss_mm)
     
-    log_metrics(writer, epoch, val_loss_mm, all_labels, all_preds, all_probs, 'val', 'MM')
+    acc, roc_auc, f1 = log_metrics(writer, epoch, val_loss_mm, all_labels, all_preds, all_probs, 'val', 'MM')
     log_metrics(writer, epoch, val_loss_clam, all_labels, all_preds_clam, all_probs_clam, 'val', 'CLAM')
     log_metrics(writer, epoch, val_loss_cd, all_labels, all_preds_cd, all_probs_cd, 'val', 'CD')
+    
+    if epoch is None:
+        return val_loss_mm, f1
 
     if n_classes == 2:
         auc = roc_auc_score(labels, prob[:, 1])
@@ -465,6 +447,7 @@ def validate_clam(cur, epoch, model, loader, n_classes, early_stopping = None, w
         for class_idx in range(n_classes):
             if class_idx in labels:
                 fpr, tpr, _ = roc_curve(binary_labels[:, class_idx], prob[:, class_idx])
+                
                 aucs.append(calc_auc(fpr, tpr))
             else:
                 aucs.append(float('nan'))
@@ -485,7 +468,23 @@ def validate_clam(cur, epoch, model, loader, n_classes, early_stopping = None, w
 
     return False
 
-def summary(model, loader, n_classes, results_dir=None, fold_nr=None, device=None, type='test'):
+
+def test(model, test_split, args, device, results_dir=None, client_nr=None, n_classes=3, round_nr=None):
+    if args.bag_loss == 'svm':
+        from topk.svm import SmoothTop1SVM
+        loss_fn = SmoothTop1SVM(n_classes = args.n_classes)
+        if device.type == 'cuda':
+            loss_fn = loss_fn.cuda()
+    elif args.bag_loss == 'ce':
+        loss_fn = nn.CrossEntropyLoss()
+    else:
+        raise NotImplementedError('Loss function {} not implemented'.format(args.bag_loss))
+    
+    test_loader = get_split_loader(test_split, device=device, args=args)
+    loss, f1 = test_clam(model, test_loader, device=device, args=args, results_dir=results_dir, client_nr=client_nr, n_classes=n_classes, loss_fn=loss_fn, round_nr=round_nr)
+    return loss, f1
+
+def test_clam(model, loader, device, args, results_dir=None, client_nr=None, n_classes=3, loss_fn=None, round_nr=None):
     model.eval()
     test_loss = 0.
     test_error = 0.
@@ -500,62 +499,56 @@ def summary(model, loader, n_classes, results_dir=None, fold_nr=None, device=Non
     all_probs_cd = np.zeros((len(loader), n_classes))
     all_preds_cd = np.zeros(len(loader))
     
-    
+    with torch.inference_mode():
+        for batch_idx, loader_data in enumerate(loader):
 
-    slide_ids = loader.dataset.slide_data['slide_id']
-    patient_results = {}
+            result_dict, label = apply_model(loader_data, model, device=device, testing=True)
+            logits, Y_prob, Y_hat, _, _ = result_dict['MM']
+            
+            if isinstance(loss_fn, nn.NLLLoss):
+                Y_log_prob = torch.log(Y_prob + 1e-8)
+                loss = loss_fn(Y_log_prob, label)
+            else:
+                loss = loss_fn(logits, label)
+            test_loss += loss.item()
 
-    for batch_idx, loader_data in enumerate(loader):
-
-        result_dict, label = apply_model(loader_data, model, device=device, testing=True)
-
-        logits, Y_prob, Y_hat, A_raw, instance_dict = result_dict['MM']
-        slide_id = slide_ids.iloc[batch_idx]
-
-        probs = Y_prob.cpu().detach().numpy()
-        all_probs[batch_idx] = probs
-        all_labels[batch_idx] = label.item()
-        all_preds[batch_idx] = Y_hat.item()
-        
-        all_probs_clam[batch_idx] = result_dict['CLAM'][1].cpu().detach().numpy()
-        all_preds_clam[batch_idx] = result_dict['CLAM'][2].item()
-        
-        if result_dict['CD'][1] is not None:
-            all_probs_cd[batch_idx] = result_dict['CD'][1].cpu().detach().numpy()
-            all_preds_cd[batch_idx] = result_dict['CD'][2].item()
-        
-        patient_results.update({slide_id: {'slide_id': np.array(slide_id), 'prob': probs, 'label': label.item()}})
-        error = calculate_error(Y_hat, label)
-        test_error += error
+            probs = Y_prob.cpu().detach().numpy()
+            all_probs[batch_idx] = probs
+            all_labels[batch_idx] = label.item()
+            all_preds[batch_idx] = Y_hat.item()
+            
+            all_probs_clam[batch_idx] = result_dict['CLAM'][1].cpu().detach().numpy()
+            all_preds_clam[batch_idx] = result_dict['CLAM'][2].item()
+            
+            if result_dict['CD'][1] is not None:
+                all_probs_cd[batch_idx] = result_dict['CD'][1].cpu().detach().numpy()
+                all_preds_cd[batch_idx] = result_dict['CD'][2].item()
+            
+            error = calculate_error(Y_hat, label)
+            test_error += error
 
     test_error /= len(loader)
+    test_loss /= len(loader)
     
-    writer_dir = os.path.join(results_dir,"log", f"fold_{fold_nr}")
-    if not os.path.isdir(writer_dir):
-        os.mkdir(writer_dir)
-
+    writer_dir = get_writer_dir(client_nr, round_nr, results_dir)
 
     from tensorboardX import SummaryWriter
     writer = SummaryWriter(writer_dir, flush_secs=15)
-    if type == 'test':
-        log_metrics(writer, None, None, all_labels, all_preds, all_probs, 'test', 'MM')
-        log_metrics(writer, None, None, all_labels, all_preds_clam, all_probs_clam, 'test', 'CLAM')
-        log_metrics(writer, None, None, all_labels, all_preds_cd, all_probs_cd, 'test', 'CD')
 
-    if n_classes == 2:
-        auc = roc_auc_score(all_labels, all_probs[:, 1])
-        aucs = []
-    else:
-        aucs = []
-        binary_labels = label_binarize(all_labels, classes=[i for i in range(n_classes)])
-        for class_idx in range(n_classes):
-            if class_idx in all_labels:
-                fpr, tpr, _ = roc_curve(binary_labels[:, class_idx], all_probs[:, class_idx])
-                aucs.append(calc_auc(fpr, tpr))
-            else:
-                aucs.append(float('nan'))
+    acc, roc_auc, f1 = log_metrics(writer, None, None, all_labels, all_preds, all_probs, 'test', 'MM')
+    log_metrics(writer, None, None, all_labels, all_preds_clam, all_probs_clam, 'test', 'CLAM')
+    log_metrics(writer, None, None, all_labels, all_preds_cd, all_probs_cd, 'test', 'CD')
+
+    aucs = []
+    binary_labels = label_binarize(all_labels, classes=[i for i in range(n_classes)])
+    for class_idx in range(n_classes):
+        if class_idx in all_labels:
+            fpr, tpr, _ = roc_curve(binary_labels[:, class_idx], all_probs[:, class_idx])
+            aucs.append(calc_auc(fpr, tpr))
+        else:
+            aucs.append(float('nan'))
 
         auc = np.nanmean(np.array(aucs))
 
 
-    return patient_results, test_error, auc, None
+    return test_loss, f1
