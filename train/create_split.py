@@ -161,14 +161,14 @@ def create_csv_split(clients: List[Tuple[List[int], List[int], List[int]]], name
         df.to_csv(f"{outputs_dir}/splits_{f}.csv")
  
 if __name__ == "__main__":
-    num_clients = 1
+    num_clients = 3
     test_p = 0.1
     val_p = 0.2
     balance = True
-    seed = 1
+    seed = 5
     output_dir = "splits/"
 
     splits_generator = create_k_clients_splits(num_clients=num_clients, test_p=test_p, val_p=val_p, balance=balance, seed=seed, verbose=True, as_filename=True)
     
     splits = list(splits_generator)
-    create_csv_split(splits, name=f"chimera_{num_clients}_{test_p}", outputs_dir=output_dir)
+    create_csv_split(splits, name=f"chimera_{num_clients}_{test_p}_{seed}", outputs_dir=output_dir)

@@ -5,9 +5,11 @@ def get_hyperparameters():
     parser.add_argument('--gpus', type=int, nargs='+', required=True, help='gpu id(s) to use, e.g. --gpus 0 1 for multiple GPUs')
     parser.add_argument('--num_clients', type=int, default=3, help='number of clients (default: 3)')
     parser.add_argument('--num_rounds', type=int, default=3, help='number of federated learning rounds (default: 3)')
+    parser.add_argument('--use_split_k', type=int, default=0, help='If less clients than splits are used, which split to use (default: +0)')
     parser.add_argument('--data_root_dir', type=str, 
                         default="/local/scratch/phempel/chimera/features_1536",
                         help='data directory')
+    parser.add_argument('--multi_seed', type=int, nargs='+', help='list of seeds for experiments with multiple runs per client number')
     parser.add_argument('--embed_dim', type=int, default=1536)
     parser.add_argument('--n_classes', type=int, default=3)
     parser.add_argument('--max_epochs', type=int, default=150,

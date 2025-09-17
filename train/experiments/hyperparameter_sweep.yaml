@@ -1,0 +1,20 @@
+# Hyperparameter Optimization Sweep
+# Tests different learning rates and bag weights
+
+experiment_name: "hyperopt"
+
+script_config:
+  script: "federated_train.py"
+
+base_parameters:
+  gpus: [1]
+  num_clients: 3
+  num_rounds: 5
+  split_dir: "chimera_3_0.1"
+  seed: 1
+  no_verbose: true
+  max_epochs: 100
+
+sweep_parameters:
+  lr: [1e-5, 5e-5, 1e-4, 5e-4, 1e-3]
+  bag_weight: [0.6, 0.7, 0.8, 0.9]

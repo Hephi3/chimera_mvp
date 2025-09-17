@@ -1,0 +1,18 @@
+# Epochs Sweep Experiment
+# Tests performance with different numbers of epochs
+
+experiment_name: "epochs_sweep"
+
+script_config:
+  script: "federated_train.py"
+
+base_parameters:
+  gpus: [1]
+  num_rounds: 5
+  split_dir: "chimera_3_0.1"
+  seed: 1
+  no_verbose: true
+  num_clients: 3
+
+sweep_parameters:
+  max_epochs: [100, 70, 50]

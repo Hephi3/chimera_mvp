@@ -24,6 +24,8 @@ class FlowerClient(NumPyClient):
         round_num = config.get("server_round", None)
         assert round_num is not None, "Server round number must be provided"
         set_parameters(self.net, parameters)
+        if round_num == 1:
+            test(self.net, self.test_split, self.args, self.device, results_dir=self.args.results_dir, client_nr=self.partition_id, round_nr=0) # Initial evaluation before training
         train_loss, f1 = train(
             self.net,
             self.train_split,
@@ -33,7 +35,7 @@ class FlowerClient(NumPyClient):
             self.device,
             round_num=round_num
         )
-        test(self.net, self.val_split, self.args, self.device, results_dir=self.args.results_dir, client_nr=self.partition_id, round_nr=round_num)
+        test(self.net, self.test_split, self.args, self.device, results_dir=self.args.results_dir, client_nr=self.partition_id, round_nr=round_num)
         
         return (
             get_parameters(self.net),

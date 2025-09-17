@@ -70,10 +70,10 @@ federated_metrics = {
     
     
     'Binary_Accuracy/test': 'Test Binary Accuracy',
-    'ROC_AUC/test': 'Test ROC AUC',
+    # 'ROC_AUC/test': 'Test ROC AUC',
     'F1/test': 'Test F1 Score',
     # 'Accuracy/test': 'Test Accuracy',
-    # 'Legend': None,
+    'Legend': None,
 }
 
 # federated_metrics = {
@@ -179,7 +179,7 @@ def create_federated_plot(num_metrics=None):
     return fig, axs
 
 
-def plot_federated_metric(ax, metric, title, client_data, server_data, client_colors, linestyle='-'):
+def plot_federated_metric(ax, metric, title, client_data, server_data, client_colors, linestyle='-', show_legend=True):
     """Plot a single metric for federated learning"""
     
     # Get all rounds that exist
@@ -187,6 +187,10 @@ def plot_federated_metric(ax, metric, title, client_data, server_data, client_co
     for client_id in client_data.keys():
         all_rounds.update(client_data[client_id].keys())
     all_rounds = sorted(all_rounds)
+    
+    # For train/val metrics, exclude round 0 (initial evaluation before training)
+    if 'test' not in metric:
+        all_rounds = [r for r in all_rounds if r > 0]
     
     max_steps_per_round = 0
     # Find maximum steps per round across all clients
@@ -259,10 +263,11 @@ def plot_federated_metric(ax, metric, title, client_data, server_data, client_co
             ax.set_visible(True)  # Make sure the axis is visible
             ax.grid(True, alpha=0.3)
             
-            # Add legend for test metrics
-            handles, labels = ax.get_legend_handles_labels()
-            if handles:
-                ax.legend()
+            # Add legend for test metrics only if show_legend is True
+            if show_legend:
+                handles, labels = ax.get_legend_handles_labels()
+                if handles:
+                    ax.legend()
             
             return  # Exit early for test metrics to avoid the general x-axis handling below
         else:
@@ -314,12 +319,41 @@ def plot_federated_metric(ax, metric, title, client_data, server_data, client_co
     ax.set_xlabel('Federated Learning Rounds')
     ax.set_ylabel(title)
     
-    # Improve legend handling - only add legend if there are labeled artists
-    handles, labels = ax.get_legend_handles_labels()
-    if handles:
-        ax.legend()
+    # Improve legend handling - only add legend if there are labeled artists and show_legend is True
+    if show_legend:
+        handles, labels = ax.get_legend_handles_labels()
+        if handles:
+            ax.legend()
     ax.grid(True, alpha=0.3)
 
+
+def create_client_legend_handles(client_data, client_colors):
+    legend_handles = []
+    for client_id in sorted(client_data.keys()):
+        color = client_colors[client_id % len(client_colors)]
+        line = plt.Line2D([0], [0], color=color, linewidth=2, label=f'Client {client_id} Training', )
+        legend_handles.append(line)
+    
+    # Add global model legend
+    server_line = plt.Line2D([0], [0], color='red', marker='s', markersize=8, 
+                            linestyle=':', linewidth=2, label='Global Model Performance')
+    legend_handles.append(server_line)
+    return legend_handles
+    
+
+def create_legend_subplot(axs, ax_dims, ax_width, legend_handles):
+    for i, (base_metric, title) in enumerate(federated_metrics.items()):
+        if base_metric == 'Legend':
+            # Get the subplot for legend
+            if len(ax_dims) > 1:
+                legend_ax = axs[i // ax_width, i % ax_width]
+            else:
+                legend_ax = axs[i] if hasattr(axs, '__len__') else axs
+            
+            legend_ax.axis('off')
+            legend_ax.legend(handles=legend_handles, loc='center', fontsize=12)
+            legend_ax.set_title('Legend')
+            break
 
 def plot_federated_experiment(experiment_name: str, submodel: str = 'MM', smooth_window: int = None):
     """
@@ -332,12 +366,12 @@ def plot_federated_experiment(experiment_name: str, submodel: str = 'MM', smooth
     """
     # Get federated data
     client_data, server_data = tensorboard_to_datadict_federated(experiment_name)
-    print("Client Data:", list(client_data.keys()))
-    print("Client Data:", list(client_data[0].keys()))
-    print("Client Data:", list(client_data[0][3].keys()))
-    print("Example: 'F1/test/MM'", client_data[0][1].get('F1/test/MM', 'Not Found'), client_data[0][2].get('F1/test/MM', 'Not Found'), client_data[0][3].get('F1/test/MM', 'Not Found'))
-    print("Server Data:", list(server_data[0].keys()))
-    
+    # print("Client Data:", list(client_data.keys()))
+    # print("Client Data:", list(client_data[0].keys()))
+    # print("Client Data:", list(client_data[0][3].keys()))
+    # print("Example: 'F1/test/MM'", client_data[1][1].get('F1/test/MM', 'Not Found'), client_data[1][2].get('F1/test/MM', 'Not Found'), client_data[1][3].get('F1/test/MM', 'Not Found'))
+    # print("Server Data:", list(server_data.keys()))
+
     # Apply smoothing if requested
     if smooth_window and smooth_window > 1:
         client_data = smooth_client_data(client_data, smooth_window)
@@ -354,8 +388,15 @@ def plot_federated_experiment(experiment_name: str, submodel: str = 'MM', smooth
     ax_dims = axs.shape
     ax_width = ax_dims[1] if len(ax_dims) > 1 else 1
     
+    # Check if we should suppress individual legends (when 'Legend' entry exists)
+    has_legend_entry = 'Legend' in federated_metrics
+    
     for i, (base_metric, title) in enumerate(federated_metrics.items()):
         if base_metric is None or title is None:
+            continue
+        
+        # Skip Legend entry - it will be handled separately
+        if base_metric == 'Legend':
             continue
             
         # Get the subplot
@@ -370,49 +411,16 @@ def plot_federated_experiment(experiment_name: str, submodel: str = 'MM', smooth
             for sub in ['MM', 'CLAM', 'CD']:
                 metric = f"{base_metric}/{sub}"
                 plot_federated_metric(ax, metric, title + f" ({sub})", client_data, server_data, 
-                                    client_colors, submodels.get(sub, '-'))
+                                    client_colors, submodels.get(sub, '-'), show_legend=not has_legend_entry)
         else:
             metric = f"{base_metric}/{submodel}"
-            plot_federated_metric(ax, metric, title, client_data, server_data, client_colors)
-    
-    # Count actual metrics (excluding None and Legend entries)
-    actual_metrics = [m for m in federated_metrics.keys() if m is not None and m != 'Legend']
-    total_actual_plots = len(actual_metrics)
+            plot_federated_metric(ax, metric, title, client_data, server_data, client_colors, 
+                                show_legend=not has_legend_entry)
     
     # Find the Legend subplot and create legend there
-    legend_created = False
-    for i, (base_metric, title) in enumerate(federated_metrics.items()):
-        if base_metric == 'Legend':
-            # Get the subplot for legend
-            if len(ax_dims) > 1:
-                legend_ax = axs[i // ax_width, i % ax_width]
-            else:
-                legend_ax = axs[i] if hasattr(axs, '__len__') else axs
-            
-            legend_ax.axis('off')
-            
-            # Create legend handles
-            legend_handles = []
-            for client_id in sorted(client_data.keys()):
-                color = client_colors[client_id % len(client_colors)]
-                line = plt.Line2D([0], [0], color=color, linewidth=2, label=f'Client {client_id} Training')
-                legend_handles.append(line)
-            
-            # Add global model legend
-            server_line = plt.Line2D([0], [0], color='red', marker='s', markersize=8, 
-                                   linestyle=':', linewidth=2, label='Global Model Performance')
-            legend_handles.append(server_line)
-            
-            # Add round boundary legend
-            boundary_line = plt.Line2D([0], [0], color='gray', linestyle='--', alpha=0.5, 
-                                     label='Round Boundaries')
-            legend_handles.append(boundary_line)
-            
-            legend_ax.legend(handles=legend_handles, loc='center', fontsize=12)
-            legend_ax.set_title('Legend')
-            legend_created = True
-            break
-    
+    legend_handles = create_client_legend_handles(client_data, client_colors)
+    create_legend_subplot(axs, ax_dims, ax_width, legend_handles)
+
     # Hide any remaining empty subplots
     if hasattr(axs, 'flat'):
         for j in range(len(federated_metrics), len(axs.flat)):
@@ -427,6 +435,42 @@ def plot_federated_experiment(experiment_name: str, submodel: str = 'MM', smooth
     print(f"Plot saved to {plot_path}")
     plt.show()
 
+
+def create_compare_legend_handles(all_data, exp_colors, client_line_styles, metric_filter, show_individual_clients):
+    legend_handles = []
+            
+    # Add experiment lines
+    for exp_idx, exp_name in enumerate(all_data.keys()):
+        color = exp_colors[exp_idx % len(exp_colors)]
+        
+        if 'test' in metric_filter or metric_filter == 'all':
+            # Test metrics line
+            test_line = plt.Line2D([0], [0], color=color, marker='o', linewidth=2, 
+                                    markersize=6, label=f'{exp_name}')
+            legend_handles.append(test_line)
+        else:
+            # Train/val metrics
+            if show_individual_clients:
+                # Show client examples
+                for client_idx in range(min(3, len(client_line_styles))):  # Show max 3 client examples
+                    client_line_style = client_line_styles[client_idx % len(client_line_styles)]
+                    client_line = plt.Line2D([0], [0], color=color, linestyle=client_line_style, 
+                                            linewidth=1.5, 
+                                            label=f'{exp_name} C{client_idx}' if client_idx == 0 else '')
+                    if client_idx == 0:  # Only add label for first client to avoid clutter
+                        legend_handles.append(client_line)
+            else:
+                # Averaged client line
+                avg_line = plt.Line2D([0], [0], color=color, marker='o', linewidth=2, 
+                                    markersize=6, label=f'{exp_name} (avg)')
+                legend_handles.append(avg_line)
+            
+            # Server evaluation line
+            server_line = plt.Line2D([0], [0], color=color, marker='s', linewidth=2, 
+                                    markersize=4, linestyle='--',
+                                    label=f'{exp_name} (server)')
+            legend_handles.append(server_line)
+    return legend_handles
 
 def plot_federated_comparison(experiment_names: list, submodel: str = 'MM', metric_filter: str = 'test', 
                              show_individual_clients: bool = False, show_full_training: bool = False, 
@@ -443,12 +487,18 @@ def plot_federated_comparison(experiment_names: list, submodel: str = 'MM', metr
         smooth_window: If > 0, apply moving average smoothing with this window size
     """
     
+    # Alpha (transparency) settings for plot lines - adjust these to change line transparency
+    CLIENT_LINE_ALPHA = 0.6      # Alpha for individual client lines
+    SERVER_LINE_ALPHA = 0.6      # Alpha for server evaluation lines
+    AVERAGED_LINE_ALPHA = 0.6    # Alpha for averaged client curves
+    TEST_LINE_ALPHA = 0.6        # Alpha for test metric lines
+    
     # Filter metrics based on metric_filter
     if metric_filter == 'all':
         metrics_to_plot = {k: v for k, v in federated_metrics.items() if k is not None and v is not None}
     else:
         metrics_to_plot = {k: v for k, v in federated_metrics.items() 
-                          if k is not None and v is not None and metric_filter in k}
+                          if k is not None and v is not None and (metric_filter in k or k == 'Legend')}
     
     # Create plot
     fig, axs = create_federated_plot(len(metrics_to_plot))
@@ -491,8 +541,33 @@ def plot_federated_comparison(experiment_names: list, submodel: str = 'MM', metr
     ax_dims = axs.shape if hasattr(axs, 'shape') else (1, 1)
     ax_width = ax_dims[1] if len(ax_dims) > 1 else 1
     
+    # Calculate global set of all rounds across ALL experiments for consistent x-axis
+    global_all_rounds = set()
+    global_max_steps_per_round = 0  # Global max steps for consistent spacing
+    for exp_name, (client_data, server_data) in all_data.items():
+        for client_id in client_data.keys():
+            global_all_rounds.update(client_data[client_id].keys())
+            # Calculate max steps per round across all experiments
+            for round_num in client_data[client_id].keys():
+                for metric_key in client_data[client_id][round_num].keys():
+                    if client_data[client_id][round_num][metric_key]:
+                        steps_in_round = len([v for v in client_data[client_id][round_num][metric_key] if v is not None])
+                        global_max_steps_per_round = max(global_max_steps_per_round, steps_in_round)
+        global_all_rounds.update(server_data.keys())
+    global_all_rounds = sorted(global_all_rounds)
+    
+    # For train/val metrics, exclude round 0 (initial evaluation before training)
+    global_train_val_rounds = [r for r in global_all_rounds if r > 0]
+    
+    # Check if we have a 'Legend' entry in the original federated_metrics
+    has_legend_entry = 'Legend' in federated_metrics
+    
     for i, (base_metric, title) in enumerate(metrics_to_plot.items()):
-        # Get the subplot
+        # Handle Legend entry specially
+        if base_metric == 'Legend':
+            continue  # Will handle legend after plotting all metrics
+            
+        # Get the subplot for regular metrics
         if len(ax_dims) > 1:
             ax = axs[i // ax_width, i % ax_width]
         else:
@@ -515,15 +590,14 @@ def plot_federated_comparison(experiment_names: list, submodel: str = 'MM', metr
                 
                 if server_values:
                     ax.plot(server_rounds, server_values, color=color, marker='o', 
-                           linewidth=2, markersize=6, label=exp_name, alpha=0.8)
+                           linewidth=2, markersize=6, label=exp_name, alpha=TEST_LINE_ALPHA)
                     ax.set_xlabel('Federated Round')
             
             else:
                 # For train/val metrics, plot client training curves
-                all_rounds = set()
-                for client_id in client_data.keys():
-                    all_rounds.update(client_data[client_id].keys())
-                all_rounds = sorted(all_rounds)
+                # Use global rounds for consistent x-axis positioning across experiments
+                # Exclude round 0 for train/val metrics (round 0 is initial evaluation before training)
+                all_rounds = global_train_val_rounds
                 
                 if not all_rounds:
                     continue
@@ -538,12 +612,8 @@ def plot_federated_comparison(experiment_names: list, submodel: str = 'MM', metr
                             all_values = []
                             all_steps = []
                             
-                            # Find maximum steps per round for consistent spacing
-                            max_steps_per_round = 0
-                            for round_num in all_rounds:
-                                if round_num in client_data[client_id] and metric in client_data[client_id][round_num]:
-                                    steps_in_round = len([v for v in client_data[client_id][round_num][metric] if v is not None])
-                                    max_steps_per_round = max(max_steps_per_round, steps_in_round)
+                            # Use global max steps per round for consistent spacing across experiments
+                            max_steps_per_round = global_max_steps_per_round
                             
                             for round_idx, round_num in enumerate(all_rounds):
                                 if round_num in client_data[client_id] and metric in client_data[client_id][round_num]:
@@ -559,7 +629,7 @@ def plot_federated_comparison(experiment_names: list, submodel: str = 'MM', metr
                             
                             if all_values:
                                 ax.plot(all_steps, all_values, color=color, 
-                                       linestyle=client_line_style, linewidth=1.5, alpha=0.7, 
+                                       linestyle=client_line_style, linewidth=1.5, alpha=CLIENT_LINE_ALPHA, 
                                        label=f'{exp_name} C{client_id}')
                             
                             # Add round boundaries for clarity (only if multiple rounds)
@@ -596,20 +666,15 @@ def plot_federated_comparison(experiment_names: list, submodel: str = 'MM', metr
                             if round_values:
                                 ax.plot(round_x_positions, round_values, color=color, 
                                        linestyle=client_line_style, linewidth=2, markersize=4, 
-                                       alpha=0.7, label=f'{exp_name} C{client_id}')
+                                       alpha=CLIENT_LINE_ALPHA, label=f'{exp_name} C{client_id}')
                                 ax.set_xlabel('Federated Round')
                 
                 else:
                     # Plot aggregated average across clients
                     if show_full_training:
                         # Average the full training curves across clients
-                        max_steps_per_round = 0
-                        # Find maximum steps per round across all clients
-                        for client_id in client_data.keys():
-                            for round_num in all_rounds:
-                                if round_num in client_data[client_id] and metric in client_data[client_id][round_num]:
-                                    steps_in_round = len([v for v in client_data[client_id][round_num][metric] if v is not None])
-                                    max_steps_per_round = max(max_steps_per_round, steps_in_round)
+                        # Use global max steps per round for consistent spacing across experiments
+                        max_steps_per_round = global_max_steps_per_round
                         
                         # Create averaged curves
                         all_avg_values = []
@@ -643,7 +708,7 @@ def plot_federated_comparison(experiment_names: list, submodel: str = 'MM', metr
                         
                         if all_avg_values:
                             ax.plot(all_steps, all_avg_values, color=color, linewidth=2, 
-                                   alpha=0.8, label=f'{exp_name} (avg)')
+                                   alpha=AVERAGED_LINE_ALPHA, label=f'{exp_name} (avg)')
                         
                         # Add round boundaries (only if there are multiple rounds)
                         if len(all_rounds) > 1:
@@ -686,7 +751,7 @@ def plot_federated_comparison(experiment_names: list, submodel: str = 'MM', metr
                         
                         if round_aggregated_values:
                             ax.plot(round_x_positions, round_aggregated_values, color=color, marker='o', 
-                                   linewidth=2, markersize=6, label=f'{exp_name} (avg)', alpha=0.8)
+                                   linewidth=2, markersize=6, label=f'{exp_name} (avg)', alpha=AVERAGED_LINE_ALPHA)
                             ax.set_xlabel('Federated Round')
                 
                 # Also plot server evaluation if available for train/val metrics
@@ -699,15 +764,15 @@ def plot_federated_comparison(experiment_names: list, submodel: str = 'MM', metr
                 
                 if server_values:
                     ax.plot(server_rounds, server_values, color=color, marker='s', 
-                           linewidth=2, markersize=4, linestyle='--', alpha=0.6, 
+                           linewidth=2, markersize=4, linestyle='--', alpha=SERVER_LINE_ALPHA, 
                            label=f'{exp_name} (server)')
         
         ax.set_title(title)
         ax.set_ylabel(title)
         ax.grid(True, alpha=0.3)
         
-        # Add legend if there are multiple experiments
-        if len(all_data) > 1:
+        # Add legend only if there's no centralized legend AND there are multiple experiments
+        if not has_legend_entry and len(all_data) > 1:
             handles, labels = ax.get_legend_handles_labels()
             if handles:
                 # Adjust legend font size based on number of items and mode
@@ -720,7 +785,10 @@ def plot_federated_comparison(experiment_names: list, submodel: str = 'MM', metr
                 
                 ncols = 3 if show_individual_clients and len(handles) > 10 else 2 if show_individual_clients else 1
                 ax.legend(fontsize=legend_fontsize, ncol=ncols)
-    
+
+    legend_handles = create_compare_legend_handles(all_data, exp_colors, client_line_styles, metric_filter, show_individual_clients)
+    create_legend_subplot(axs, ax_dims, ax_width, legend_handles)
+
     # Hide empty subplots
     total_plots = len(metrics_to_plot)
     if hasattr(axs, 'flat'):
@@ -785,4 +853,4 @@ if __name__ == "__main__":
 #cd /gris/gris-f/homelv/phempel/masterthesis/MM_flower/train/plot && conda activate osr && 
 #python plot_run_federated.py --name 1_client_redo_s1 --submodel MM
 
-#cd /gris/gris-f/homelv/phempel/masterthesis/MM_flower/train/plot && python plot_run_federated.py --compare --names 3_client_seed1 3_client_seedx 3_client_seedy --submodel MM --metric_filter all --show_individual_clients --show_full_training --smooth_window 10
+#cd /gris/gris-f/homelv/phempel/masterthesis/MM_flower/train/plot && python plot_run_federated.py --compare --names 3_clients_s1 3_clients_1_s1 3_clients_2_s1 3_clients_3_s1 --submodel MM --metric_filter all --show_individual_clients --show_full_training --smooth_window 10

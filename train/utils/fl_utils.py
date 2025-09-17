@@ -38,7 +38,7 @@ def load_data(partition_id, args):
         ignore=[]
     )
 
-    train_dataset, val_dataset, test_dataset = dataset.return_splits(csv_path = '{}/splits_{}.csv'.format(args.split_dir, partition_id))
+    train_dataset, val_dataset, test_dataset = dataset.return_splits(csv_path = '{}/splits_{}.csv'.format(args.split_dir, partition_id + args.use_split_k))
     return train_dataset, val_dataset, test_dataset
 
 def set_parameters(net, parameters: List[np.ndarray]):

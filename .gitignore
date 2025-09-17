@@ -1,0 +1,4 @@
+# All __pycache__ folders
+__pycache__/
+# All .pyc files
+*.pyc

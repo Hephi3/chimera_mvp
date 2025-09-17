@@ -1,0 +1,20 @@
+# Complex Multi-Dimensional Sweep
+# Tests combinations of clients, rounds, and learning rates
+
+experiment_name: "complex_sweep"
+
+script_config:
+  script: "federated_train.py"
+
+base_parameters:
+  gpus: [1]
+  split_dir: "chimera_3_0.1"
+  seed: 1
+  no_verbose: true
+  max_epochs: 80  # Reduced for faster sweep
+
+sweep_parameters:
+  num_clients: [2, 3, 5]
+  num_rounds: [3, 5, 10]
+  lr: [1e-4, 5e-4]
+  bag_weight: [0.7, 0.8]

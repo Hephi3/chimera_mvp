@@ -1,0 +1,23 @@
+# Split Dataset Comparison
+# Compares performance across different data splits
+
+experiment_name: "split_comparison"
+
+script_config:
+  script: "federated_train.py"
+
+base_parameters:
+  gpus: [2]
+  num_clients: 3
+  num_rounds: 5
+  seed: 1
+  no_verbose: true
+  max_epochs: 100
+
+sweep_parameters:
+  split_dir: 
+    - "chimera_3_0.1"
+    - "chimera_3_0.1_2"
+    - "chimera_3_0.1_3"
+    - "chimera_3_0.1_4"
+    - "chimera_3_0.1_5"

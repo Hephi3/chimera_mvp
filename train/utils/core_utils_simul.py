@@ -62,8 +62,7 @@ class EarlyStopping:
 # device=torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 def log_metrics(writer, epoch, loss, all_labels, all_preds, all_probs, kind:str, submodel:str):
-    if loss == 0:
-        return
+    # Don't skip logging when loss is 0 or None - we still want to log other metrics
     pos_class_idx = 2
     
     acc = accuracy_score(all_labels, all_preds)
@@ -176,6 +175,7 @@ def train(model, train_split, val_split, args, cur, device, round_num=None):
     # Ensure TensorBoard writer flushes all data before returning
     if writer is not None:
         writer.flush()
+        writer.close()  # Properly close the writer to ensure data persistence
         
     return train_loss
 
@@ -496,8 +496,9 @@ def test_clam(model, loader, device, args, results_dir=None, client_nr=None, n_c
     all_probs_clam = np.zeros((len(loader), n_classes))
     all_preds_clam = np.zeros(len(loader))
     
-    all_probs_cd = np.zeros((len(loader), n_classes))
-    all_preds_cd = np.zeros(len(loader))
+    all_probs_cd = []
+    all_preds_cd = []
+    has_cd_results = False
     
     with torch.inference_mode():
         for batch_idx, loader_data in enumerate(loader):
@@ -521,8 +522,13 @@ def test_clam(model, loader, device, args, results_dir=None, client_nr=None, n_c
             all_preds_clam[batch_idx] = result_dict['CLAM'][2].item()
             
             if result_dict['CD'][1] is not None:
-                all_probs_cd[batch_idx] = result_dict['CD'][1].cpu().detach().numpy()
-                all_preds_cd[batch_idx] = result_dict['CD'][2].item()
+                all_probs_cd.append(result_dict['CD'][1].cpu().detach().numpy())
+                all_preds_cd.append(result_dict['CD'][2].item())
+                has_cd_results = True
+            else:
+                # Fill with default values when CD results are None
+                all_probs_cd.append(np.zeros(n_classes))
+                all_preds_cd.append(0)
             
             error = calculate_error(Y_hat, label)
             test_error += error
@@ -535,9 +541,26 @@ def test_clam(model, loader, device, args, results_dir=None, client_nr=None, n_c
     from tensorboardX import SummaryWriter
     writer = SummaryWriter(writer_dir, flush_secs=15)
 
+    print(f"Test metrics logging for client {client_nr}, round {round_nr}:")
+    print(f"  Total test samples: {len(loader)}")
+    print(f"  Test loss: {test_loss:.6f}")
+    print(f"  Has CD results: {has_cd_results}")
+
     acc, roc_auc, f1 = log_metrics(writer, None, None, all_labels, all_preds, all_probs, 'test', 'MM')
+    writer.flush()  # Ensure MM metrics are written
+    print(f"  MM metrics - Acc: {acc:.4f}, ROC-AUC: {roc_auc:.4f}, F1: {f1:.4f}")
+    
     log_metrics(writer, None, None, all_labels, all_preds_clam, all_probs_clam, 'test', 'CLAM')
-    log_metrics(writer, None, None, all_labels, all_preds_cd, all_probs_cd, 'test', 'CD')
+    writer.flush()  # Ensure CLAM metrics are written
+    print(f"  CLAM metrics logged")
+    
+    # Only log CD metrics if we have valid CD results
+    if has_cd_results:
+        log_metrics(writer, None, None, all_labels, all_preds_cd, all_probs_cd, 'test', 'CD')
+        writer.flush()  # Ensure CD metrics are written
+        print(f"  CD metrics logged")
+    else:
+        print(f"  CD metrics skipped (no valid results)")
 
     aucs = []
     binary_labels = label_binarize(all_labels, classes=[i for i in range(n_classes)])
@@ -550,5 +573,9 @@ def test_clam(model, loader, device, args, results_dir=None, client_nr=None, n_c
 
         auc = np.nanmean(np.array(aucs))
 
+    # Ensure TensorBoard writer flushes all data before returning
+    if writer is not None:
+        writer.flush()
+        writer.close()  # Properly close the writer to ensure data persistence
 
     return test_loss, f1

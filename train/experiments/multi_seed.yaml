@@ -1,0 +1,18 @@
+# Multi-Seed Statistical Validation
+# Runs experiments with multiple seeds for statistical significance
+
+experiment_name: "statistical_validation"
+
+script_config:
+  script: "federated_train.py"
+
+base_parameters:
+  gpus: [1]
+  num_clients: 3
+  num_rounds: 5
+  split_dir: "chimera_3_0.1"
+  no_verbose: true
+  max_epochs: 100
+
+sweep_parameters:
+  seed: [1, 2, 3, 4, 5, 42, 123, 456, 789, 999]

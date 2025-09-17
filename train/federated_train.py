@@ -49,7 +49,7 @@ def init_experiment(device, args):
     if not os.path.isdir(args.results_dir):
         os.mkdir(args.results_dir)
 
-    args.results_dir = os.path.join(args.results_dir, str(args.exp_code))
+    args.results_dir = os.path.join(args.results_dir, str(args.exp_code) + '_s{}'.format(args.seed))
     if not os.path.isdir(args.results_dir):
         os.mkdir(args.results_dir)
 
@@ -58,42 +58,8 @@ def init_experiment(device, args):
 
     assert os.path.isdir(args.split_dir), "Split directory does not exist: {}".format(args.split_dir)
 
-if __name__ == "__main__":
-    
-    # args = get_hyperparameters()
-    
-    # gpus = args.gpus
-    # # Set CUDA environment if not already set
-    # if "CUDA_VISIBLE_DEVICES" not in os.environ:
-    #     os.environ["CUDA_VISIBLE_DEVICES"] = ','.join(map(str, gpus))
 
-    # DEVICE = torch.device(f"cuda:{gpus[0]}" if torch.cuda.is_available() else "cpu")
-    # print(f"Training on {DEVICE}")
-    # print("CUDA_VISIBLE_DEVICES:", os.environ.get("CUDA_VISIBLE_DEVICES"))
-
-    # NUM_CLIENTS = 3
-    # BATCH_SIZE = 32
-
-    # # Create Ray temp directory in scratch space
-    # ray_temp_dir = "/local/scratch/phempel/ray_tmp"
-    # os.makedirs(ray_temp_dir, exist_ok=True)
-    
-    # # Set RAY_TMPDIR environment variable to force Ray to use our temp directory
-    # os.environ["RAY_TMPDIR"] = ray_temp_dir
-    
-    # # Configure Ray backend to allocate GPU resources to clients
-    # backend_config = {
-    #     "client_resources": {"num_cpus": len(gpus), "num_gpus": math.floor(len(gpus)/NUM_CLIENTS)},
-    #     "runtime_env": {
-    #         "env_vars": {
-    #             "CUDA_VISIBLE_DEVICES": os.environ.get("CUDA_VISIBLE_DEVICES", str(gpus[0]))
-    #         }
-    #     }
-    # }
-    
-    
-    args = get_hyperparameters()
-    
+def run_experiment(args):
     # Set environment variables early for maximum consistency with MVP
     os.environ['CUBLAS_WORKSPACE_CONFIG'] = ':16:8'
     os.environ['PYTHONHASHSEED'] = str(args.seed)
@@ -139,3 +105,25 @@ if __name__ == "__main__":
         num_supernodes=NUM_CLIENTS,
         backend_config=backend_config,
     )
+
+
+if __name__ == "__main__":
+    
+    orig_args = get_hyperparameters()
+    
+    if orig_args.multi_seed is not None:
+        for seed in orig_args.multi_seed:
+            args = orig_args  # Use a separate variable to avoid modifying the original args
+            args.seed = seed
+            print(f"Running experiment with seed {seed}")
+            run_experiment(args)
+    else:
+        import time
+        start_time = time.time()
+        run_experiment(orig_args)
+        end_time = time.time()
+        print(f"Experiment completed in {end_time - start_time:.2f} seconds")
+    
+    
+    
+# python federated_train.py --gpus 1 --num_clients 3 --exp_code 3_clients --no_verbose --split_dir chimera_3_0.1 --num_rounds 3 --seed 1

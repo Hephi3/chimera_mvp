@@ -1,0 +1,18 @@
+# Rounds Sweep Experiment
+# Tests performance with different numbers of federated learning rounds
+
+experiment_name: "rounds_sweep"
+
+script_config:
+  script: "federated_train.py"
+
+base_parameters:
+  gpus: [1]
+  num_clients: 3
+  split_dir: "chimera_3_0.1"
+  seed: 1
+  no_verbose: true
+  max_epochs: 100
+
+sweep_parameters:
+  num_rounds: [1,2,4,5,8,10]
