@@ -1,0 +1,12 @@
+train/results*
+train/visualization*
+*__pycache__
+train/command_logs*
+train/examples*
+train/experiment_logs*
+# All pycache files pyc:
+# Ignore all Python cache files and folders
+__pycache__/
+**/__pycache__/
+*.pyc
+
