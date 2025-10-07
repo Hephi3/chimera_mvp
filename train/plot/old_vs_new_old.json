@@ -1,0 +1,31 @@
+{
+    "Old Splits":[
+        "3_clients_always_phases_10_rounds_7_epochs_s1",
+        "3_clients_always_phases_10_rounds_sp2_7_epochs_s1",
+        "3_clients_always_phases_10_rounds_sp3_7_epochs_s1",
+        "3_clients_always_phases_10_rounds_sp4_7_epochs_s1",
+        "3_clients_always_phases_10_rounds_sp5_7_epochs_s1"
+    ],
+    "New Splits": [
+        "3_clients_1st_round_phases_10_rounds_s1",
+        "3_clients_1st_round_phases_10_rounds_sp2_7_epochs_s1",
+        "3_clients_1st_round_phases_10_rounds_sp3_7_epochs_s1",
+        "3_clients_1st_round_phases_10_rounds_sp4_7_epochs_s1",
+        "3_clients_1st_round_phases_10_rounds_sp5_7_epochs_s1"
+    ],
+    "Max5": [
+        "3_clients_no_phases_max5_s1",
+        "3_clients_no_phases_max5_sp2_s1",
+        "3_clients_no_phases_max5_sp3_s1",
+        "3_clients_no_phases_max5_sp4_s1",
+        "3_clients_no_phases_max5_sp5_s1"
+    ],
+    "Max20": [
+        "3_clients_no_phases_max20_s1",
+        "3_clients_no_phases_max20_sp2_s1",
+        "3_clients_no_phases_max20_sp3_s1",
+        "3_clients_no_phases_max20_sp4_s1",
+        "3_clients_no_phases_max20_sp5_s1"
+    ]
+    
+}

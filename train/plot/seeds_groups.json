@@ -1,0 +1,37 @@
+{
+    "phases":[
+        "3_clients_10_rounds_s1",
+        "3_clients_10_rounds_s2",
+        "3_clients_10_rounds_s3",
+        "3_clients_10_rounds_s4",
+        "3_clients_10_rounds_s5"
+    ],
+    "NoMax": [
+        "3_clients_no_phases_s1",
+        "3_clients_no_phases_s2",
+        "3_clients_no_phases_s3",
+        "3_clients_no_phases_s4",
+        "3_clients_no_phases_s5"
+    ],
+    "Max2": [
+        "3_clients_no_phases_max2_s1",
+        "3_clients_no_phases_max2_s2",
+        "3_clients_no_phases_max2_s3",
+        "3_clients_no_phases_max2_s4",
+        "3_clients_no_phases_max2_s5"
+    ],
+    "Max5": [
+        "3_clients_no_phases_max5_s1",
+        "3_clients_no_phases_max5_s2",
+        "3_clients_no_phases_max5_s3",
+        "3_clients_no_phases_max5_s4",
+        "3_clients_no_phases_max5_s5"
+    ],
+    "Max20": [
+        "3_clients_no_phases_max20_s1",
+        "3_clients_no_phases_max20_s2",
+        "3_clients_no_phases_max20_s3",
+        "3_clients_no_phases_max20_s4",
+        "3_clients_no_phases_max20_s5"
+    ]
+}

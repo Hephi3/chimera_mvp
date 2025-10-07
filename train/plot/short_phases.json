@@ -1,0 +1,29 @@
+{
+    "15_phases":[
+        "3_clients_10_rounds_s1"
+    ],
+    "start_epoch_2":[
+        "3_clients_short_phases_2_3_0_s1",
+        "3_clients_short_phases_2_3_1_s1",
+        "3_clients_short_phases_2_5_2_s1",
+        "3_clients_short_phases_2_7_3_s1",
+        "3_clients_short_phases_2_9_4_s1",
+        "3_clients_short_phases_2_11_5_s1"
+    ],
+    "start_epoch_3": [
+        "3_clients_short_phases_3_1_0_s1",
+        "3_clients_short_phases_3_3_1_s1",
+        "3_clients_short_phases_3_5_2_s1",
+        "3_clients_short_phases_3_7_3_s1",
+        "3_clients_short_phases_3_9_4_s1",
+        "3_clients_short_phases_3_11_5_s1"
+    ],
+    "start_epoch_4": [
+        "3_clients_short_phases_4_3_0_s1",
+        "3_clients_short_phases_4_3_1_s1",
+        "3_clients_short_phases_4_5_2_s1",
+        "3_clients_short_phases_4_7_3_s1",
+        "3_clients_short_phases_4_9_4_s1",
+        "3_clients_short_phases_4_11_5_s1"
+    ]
+}

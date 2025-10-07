@@ -382,8 +382,12 @@ def plot_federated_experiment(experiment_name: str, submodel: str = 'MM', smooth
     fig.suptitle(f"Federated Learning: {experiment_name}\nClient Training vs Global Model Performance ({submodel}){smooth_text}", fontsize=16)
     fig.subplots_adjust(hspace=0.4, wspace=0.4)
     
-    # Colors for different clients
-    client_colors = ['blue', 'red', 'green', 'orange', 'purple', 'brown', 'pink', 'gray']
+    # Colors for different clients - extended palette
+    client_colors = [
+        'blue', 'red', 'green', 'orange', 'purple', 'brown', 'pink', 'gray',
+        'olive', 'cyan', 'magenta', 'lime', 'indigo', 'teal', 'maroon', 'navy',
+        'darkgreen', 'darkred', 'darkorange', 'darkviolet', 'darkblue', 'darkgoldenrod'
+    ]
     
     ax_dims = axs.shape
     ax_width = ax_dims[1] if len(ax_dims) > 1 else 1
@@ -518,8 +522,15 @@ def plot_federated_comparison(experiment_names: list, submodel: str = 'MM', metr
     fig.suptitle(f"Federated Learning Comparison ({submodel} - {metric_filter} metrics, {title_suffix})", fontsize=16)
     fig.subplots_adjust(hspace=0.4, wspace=0.4)
     
-    # Colors for different experiments
-    exp_colors = ['blue', 'red', 'green', 'orange', 'purple', 'brown', 'pink', 'gray']
+    # Colors for different experiments - extended palette for many experiments
+    exp_colors = [
+        'blue', 'red', 'green', 'orange', 'purple', 'brown', 'pink', 'gray',
+        'olive', 'cyan', 'magenta', 'lime', 'indigo', 'teal', 'maroon', 'navy',
+        'darkgreen', 'darkred', 'darkorange', 'darkviolet', 'darkblue', 'darkgoldenrod',
+        'crimson', 'forestgreen', 'royalblue', 'chocolate', 'steelblue', 'darkslategray',
+        'mediumvioletred', 'seagreen', 'slateblue', 'firebrick', 'darkcyan', 'darkmagenta',
+        'saddlebrown', 'midnightblue', 'darkslateblue', 'darkturquoise', 'indianred', 'cadetblue'
+    ]
     # Line styles for different clients within an experiment
     client_line_styles = ['-', '--', '-.', ':', (0, (3, 1, 1, 1)), (0, (5, 5)), (0, (3, 5, 1, 5))]
     
@@ -854,3 +865,5 @@ if __name__ == "__main__":
 #python plot_run_federated.py --name 1_client_redo_s1 --submodel MM
 
 #cd /gris/gris-f/homelv/phempel/masterthesis/MM_flower/train/plot && python plot_run_federated.py --compare --names 3_clients_s1 3_clients_1_s1 3_clients_2_s1 3_clients_3_s1 --submodel MM --metric_filter all --show_individual_clients --show_full_training --smooth_window 10
+
+# python plot_run_federated.py --compare --names 3_clients_no_overfit_sp1_4115_s1 3_clients_no_overfit_sp2_4115_s1 3_clients_no_overfit_sp3_4115_s1 3_clients_no_overfit_sp4_4115_s1 3_clients_no_overfit_sp5_4115_s1  --submodel MM --metric_filter all --show_individual_clients --show_full_training --smooth_window 10

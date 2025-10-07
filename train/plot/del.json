@@ -1,0 +1,38 @@
+{
+    "phases":[
+        "split_comparison_num_clients_3_num_rounds_5_seed_1_split_dir_chimera_3_0.1_s1",
+        "split_comparison_num_clients_3_num_rounds_5_seed_1_split_dir_chimera_3_0.1_2_s1",
+        "split_comparison_num_clients_3_num_rounds_5_seed_1_split_dir_chimera_3_0.1_3_s1",
+        "split_comparison_num_clients_3_num_rounds_5_seed_1_split_dir_chimera_3_0.1_4_s1",
+        "split_comparison_num_clients_3_num_rounds_5_seed_1_split_dir_chimera_3_0.1_5_s1"
+    ],
+    
+    "Patience 4, 5 epochs phases, Seed 1": [
+        "3_clients_no_overfit_sp1_4115_s1",
+        "3_clients_no_overfit_sp2_4115_s1",
+        "3_clients_no_overfit_sp3_4115_s1",
+        "3_clients_no_overfit_sp4_4115_s1",
+        "3_clients_no_overfit_sp5_4115_s1"
+    ],
+    "Patience 4, 5 epochs phases, Seed 2": [
+        "3_clients_no_overfit_sp1_4115_s2",
+        "3_clients_no_overfit_sp2_4115_s2",
+        "3_clients_no_overfit_sp3_4115_s2",
+        "3_clients_no_overfit_sp4_4115_s2",
+        "3_clients_no_overfit_sp5_4115_s2"
+    ],
+    "No phases, 2 epochs, Seed 1": [
+        "3_clients_no_overfit_sp1_np2e_s1",
+        "3_clients_no_overfit_sp2_np2e_s1",
+        "3_clients_no_overfit_sp3_np2e_s1",
+        "3_clients_no_overfit_sp4_np2e_s1",
+        "3_clients_no_overfit_sp5_np2e_s1"
+    ],
+    "No phases, 2 epochs, Seed 2": [
+        "3_clients_no_overfit_sp1_np2e_s2",
+        "3_clients_no_overfit_sp2_np2e_s2",
+        "3_clients_no_overfit_sp3_np2e_s2",
+        "3_clients_no_overfit_sp4_np2e_s2",
+        "3_clients_no_overfit_sp5_np2e_s2"
+    ]
+}

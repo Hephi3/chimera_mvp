@@ -106,7 +106,7 @@ def get_writer_dir(client_nr, round_nr, results_dir):
     return writer_dir
     
 
-def train(model, train_split, val_split, args, cur, device, round_num=None):
+def train(model, train_split, val_split, args, cur, device, round_num=None, use_phases = True):
     """   
         train for a single client
     """
@@ -145,26 +145,28 @@ def train(model, train_split, val_split, args, cur, device, round_num=None):
 
     if verbose: print('\nSetup EarlyStopping...', end=' ')
     if args.early_stopping:
-        early_stopping = EarlyStopping(patience = 5, stop_epoch=40, verbose = verbose)
+        early_stopping = EarlyStopping(patience = args.es_patience, stop_epoch=args.es_stop_epoch, verbose = verbose)
     else:
         early_stopping = None
     if verbose: print('Done!')
 
     for epoch in tqdm(range(args.max_epochs), desc='Training Epochs', disable=not verbose):
-        if epoch < 15:
-            phase = 'clam_only'
-        elif epoch < 30:
-            if args.clinical_dim != 23:
-                phase = 'cd_only'
+        phase = None
+        if use_phases:
+            if epoch < args.phase_length:
+                phase = 'clam_only'
+            elif epoch < 2 * args.phase_length:
+                if args.clinical_dim != 23:
+                    phase = 'cd_only'
+                else:
+                    phase = 'fusion'
             else:
                 phase = 'fusion'
-        else:
-            phase = 'fusion'
-        model.clam.requires_grad_(phase in ['clam_only', 'fusion'])
-        model.clinical_model.requires_grad_(phase in ['cd_only', 'fusion'])
-        if hasattr(model, 'fusion_net'):
-            model.fusion_net.requires_grad_(phase == 'fusion')
-            model.classifier.requires_grad_(phase == 'fusion')
+            model.clam.requires_grad_(phase in ['clam_only', 'fusion'])
+            model.clinical_model.requires_grad_(phase in ['cd_only', 'fusion'])
+            if hasattr(model, 'fusion_net'):
+                model.fusion_net.requires_grad_(phase == 'fusion')
+                model.classifier.requires_grad_(phase == 'fusion')
         train_loss = train_loop_clam(epoch, model, train_loader, optimizer,args.bag_weight, writer, loss_fn, verbose=verbose, phase=phase, device=device)
         stop = validate_clam(cur=cur, epoch=epoch, model=model, loader=val_loader, n_classes=args.n_classes, 
             early_stopping=early_stopping, writer=writer, results_dir=args.results_dir, verbose=verbose, scheduler=scheduler, phase=phase, device=device, loss_fn=loss_fn)
@@ -428,7 +430,7 @@ def validate_clam(cur, epoch, model, loader, n_classes, early_stopping = None, w
     val_loss_clam /= len(loader)
     val_loss_cd /= len(loader)
     
-    if scheduler and phase == 'fusion':
+    if scheduler and not phase in ['clam_only', 'cd_only']:
         scheduler.step(val_loss_mm)
     
     acc, roc_auc, f1 = log_metrics(writer, epoch, val_loss_mm, all_labels, all_preds, all_probs, 'val', 'MM')

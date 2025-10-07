@@ -2,3 +2,7 @@
 __pycache__/
 # All .pyc files
 *.pyc
+train/command_logs/
+train/examples/
+train/experiment_logs/
+train/visualization_*

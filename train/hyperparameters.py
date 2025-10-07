@@ -6,6 +6,11 @@ def get_hyperparameters():
     parser.add_argument('--num_clients', type=int, default=3, help='number of clients (default: 3)')
     parser.add_argument('--num_rounds', type=int, default=3, help='number of federated learning rounds (default: 3)')
     parser.add_argument('--use_split_k', type=int, default=0, help='If less clients than splits are used, which split to use (default: +0)')
+    parser.add_argument('--no_phases', action='store_true', default=False, help='disable phase training also for the first round')
+    parser.add_argument('--phases_always', action='store_true', default=False, help='enable phase training for all rounds')
+    parser.add_argument('--phase_length', type=int, default=7, help='number of epochs per phase (default: 7)')
+    parser.add_argument('--es_patience', type=int, default=4, help='early stopping patience (default: 4)')
+    parser.add_argument('--es_stop_epoch', type=int, default=2, help='minimum number of epochs before early stopping can occur (default: 2)')
     parser.add_argument('--data_root_dir', type=str, 
                         default="/local/scratch/phempel/chimera/features_1536",
                         help='data directory')
@@ -28,7 +33,7 @@ def get_hyperparameters():
                         default='chimera_3_0.1', 
                         help='manually specify the set of splits to use')
     parser.add_argument('--log_data', action='store_true', default=True, help='log data using tensorboard')
-    parser.add_argument('--early_stopping', action='store_true', default=True, help='enable early stopping')
+    parser.add_argument('--early_stopping', action='store_true', default=False, help='enable early stopping')
     parser.add_argument('--opt', type=str, choices = ['adam', 'sgd'], default='adam')
     parser.add_argument('--drop_out', type=float, default=0.5, help='dropout')
     parser.add_argument('--bag_loss', type=str, choices=['svm', 'ce'], default='ce',

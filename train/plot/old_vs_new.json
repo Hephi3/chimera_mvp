@@ -1,0 +1,15 @@
+{
+    "Old":[
+        "3_clients_always_phases_10_rounds_s1",
+        "3_clients_always_phases_10_rounds_s2",
+        "3_clients_always_phases_10_rounds_s3",
+        "3_clients_always_phases_10_rounds_s4"
+    ],
+    
+    "New": [
+        "3_clients_1st_round_phases_10_rounds_s1",
+        "3_clients_1st_round_phases_10_rounds_s2",
+        "3_clients_1st_round_phases_10_rounds_s3",
+        "3_clients_1st_round_phases_10_rounds_s4"
+    ]    
+}

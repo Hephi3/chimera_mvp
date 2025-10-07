@@ -33,7 +33,8 @@ class FlowerClient(NumPyClient):
             self.args,
             self.partition_id,
             self.device,
-            round_num=round_num
+            round_num=round_num,
+            use_phases= self.args.phases_always or (not self.args.no_phases and round_num < 2),
         )
         test(self.net, self.test_split, self.args, self.device, results_dir=self.args.results_dir, client_nr=self.partition_id, round_nr=round_num)
         
