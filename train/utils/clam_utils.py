@@ -63,13 +63,18 @@ def get_split_loader(split_dataset, training=False, weighted=False, device=None)
               'batch_size': 1} if device.type == "cuda" else {}
     if training:
         if weighted:
-            weights = make_weights_for_balanced_classes_split(
-                split_dataset)
+            weights = make_weights_for_balanced_classes_split(split_dataset)
+            # Use explicit generator for reproducible sampling - seed 1 to match federated version
+            generator = torch.Generator()
+            generator.manual_seed(1)
             loader = DataLoader(split_dataset, sampler=WeightedRandomSampler(
-                weights, len(weights)), collate_fn=collate_MIL, **kwargs)
+                weights, len(weights), generator=generator), collate_fn=collate_MIL, **kwargs)
         else:
+            # Use explicit generator for reproducible sampling - seed 1 to match federated version
+            generator = torch.Generator()
+            generator.manual_seed(1)
             loader = DataLoader(split_dataset, sampler=RandomSampler(
-                split_dataset), collate_fn=collate_MIL, **kwargs)
+                split_dataset, generator=generator), collate_fn=collate_MIL, **kwargs)
     else:
         loader = DataLoader(split_dataset, sampler=SequentialSampler(
             split_dataset), collate_fn=collate_MIL, **kwargs)

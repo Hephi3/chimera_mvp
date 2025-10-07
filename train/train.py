@@ -19,7 +19,7 @@ def main(args, dataset):
         os.mkdir(args.results_dir)
     folds = np.arange(0, args.k)
     for i in tqdm(folds, desc='Folds'):
-        seed_torch(args.seed)
+        seed_torch(device, args.seed)
         train_dataset, val_dataset, test_dataset = dataset.return_splits(csv_path = '{}/splits_{}.csv'.format(args.split_dir, i))
         
         datasets = (train_dataset, val_dataset, test_dataset)
@@ -109,7 +109,7 @@ args = parser.parse_args()
 device=torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print("Using device: ", device)
 
-def seed_torch(seed=7):
+def seed_torch(device, seed):
     import random
     random.seed(seed)
     os.environ['PYTHONHASHSEED'] = str(seed)
@@ -120,11 +120,30 @@ def seed_torch(seed=7):
         torch.cuda.manual_seed_all(seed) # if you are using multi-GPU.
     torch.backends.cudnn.benchmark = False
     torch.backends.cudnn.deterministic = True
+    torch.use_deterministic_algorithms(True, warn_only=True)
+
+def seed_everything(seed):
+    """Comprehensive seeding for all randomness sources"""
+    import random
+    random.seed(seed)
+    os.environ['PYTHONHASHSEED'] = str(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed(seed)
+        torch.cuda.manual_seed_all(seed)
+    torch.backends.cudnn.benchmark = False
+    torch.backends.cudnn.deterministic = True
+    torch.use_deterministic_algorithms(True, warn_only=True)
+    
+    # Set environment variables for deterministic behavior
+    os.environ['CUBLAS_WORKSPACE_CONFIG'] = ':16:8'
+    os.environ['PYTHONHASHSEED'] = str(seed)
 
 def init_experiment(args):
 
     verbose = not args.no_verbose
-    seed_torch(args.seed)
+    seed_torch(device, args.seed)
 
     assert (args.lr_clinical is not None and args.lr_clam is not None and args.lr_mm is not None) or args.lr is not None, "Please specify learning rates for all models or a single learning rate for all models."
 
@@ -193,6 +212,7 @@ def init_experiment(args):
             
 
 if __name__ == "__main__":
+    seed_everything(args.seed)
     if not args.multi_split:
         dataset = init_experiment(args=args)
         results = main(args, dataset)

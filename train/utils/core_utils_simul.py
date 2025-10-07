@@ -1,3 +1,4 @@
+from random import random
 import numpy as np
 import torch
 from utils.clam_utils import get_split_loader, get_optim, print_network, calculate_error
@@ -97,6 +98,21 @@ def train(datasets, cur, args, device):
     """   
         train for a single fold
     """
+    
+    seed = args.seed
+    import random
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    os.environ['PYTHONHASHSEED'] = str(seed)
+    
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed(seed)
+        torch.cuda.manual_seed_all(seed)
+    torch.backends.cudnn.benchmark = False
+    torch.backends.cudnn.deterministic = True
+    torch.use_deterministic_algorithms(True, warn_only=True)
+    
     verbose = not args.no_verbose
     if verbose: print('\nTraining Fold {}!'.format(cur))
     writer_dir = os.path.join(args.results_dir, "log")
@@ -245,6 +261,12 @@ def apply_model(loader_data, model, testing=False, plot_coords = False, device=N
     return results, label
 
 def train_loop_clam(epoch, model, loader, optimizer, bag_weight, writer = None, loss_fn = None, verbose = True, phase = None, device=None):
+    # print information about loader data to compare with other experiment:
+    # data, label, coords, clinical_data, slide_id = next(iter(loader))
+    # print(f"Data batch shapes: {[d.shape for d in data]}, Labels: {label}, Coords: {[c.shape for c in coords]}, Clinical data: {clinical_data.shape}, Slide IDs: {slide_id}")
+    
+    # print(1/0)
+    
     model.train()
     
     train_loss_mm = 0.
