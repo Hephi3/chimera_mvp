@@ -6,13 +6,12 @@ from collections import defaultdict
 import argparse
 import numpy as np
 
-ROOT_RUNS = "/gris/gris-f/homelv/phempel/masterthesis/MM_flower/train/runs"
-ROOT_RESULTS = "/gris/gris-f/homelv/phempel/masterthesis/MM_flower/train/results"
-ROOT_DELETE = "/gris/gris-f/homelv/phempel/masterthesis/MM_flower/train/results_delete"
+ROOT_RUNS = "/gris/gris-f/homelv/phempel/masterthesis/MM_MVP/train/runs"
+ROOT_RESULTS = "/gris/gris-f/homelv/phempel/masterthesis/MM_MVP/train/results"
+ROOT_DELETE = "/gris/gris-f/homelv/phempel/masterthesis/MM_MVP/train/results_delete"
 
-# Original metrics for backward compatibility
 metrics = {
-    
+     
     # 'Accuracy/train': 'Training Accuracy',
     'Binary_Accuracy/train': 'Training Binary Accuracy',
     # 'ROC_AUC/train': 'Training ROC AUC',
@@ -35,27 +34,6 @@ metrics = {
     'F1/test': 'Test F1 Score',
     # 'Legend': None,
     # None: None,
-}
-
-# Federated learning metrics - base metrics without submodel specification
-federated_metrics = {
-    'Loss/train': 'Training Loss',
-    'Binary_Accuracy/train': 'Training Binary Accuracy',
-    'F1/train': 'Training F1 Score',
-    'ROC_AUC/train': 'Training ROC AUC',
-    'Accuracy/train': 'Training Accuracy',
-    
-    'Loss/val': 'Validation Loss',
-    'Binary_Accuracy/val': 'Validation Binary Accuracy',
-    'F1/val': 'Validation F1 Score',
-    'ROC_AUC/val': 'Validation ROC AUC',
-    'Accuracy/val': 'Validation Accuracy',
-    
-    'Binary_Accuracy/test': 'Test Binary Accuracy',
-    'ROC_AUC/test': 'Test ROC AUC',
-    'F1/test': 'Test F1 Score',
-    'Accuracy/test': 'Test Accuracy',
-    'Legend': None,
 }
 
 debug_metrics = {
@@ -99,7 +77,7 @@ def plot_run(data: dict, smoothed_data: dict, experiment_name: str, config_data:
     epochs = len(data[0].keys())
     df = datadict_to_df(data)
     smoothed_df = datadict_to_df(smoothed_data)    
-    epochs_per_client = len(data[0][list(data[0].keys())[0]]) if data else 0
+    epochs_per_fold = len(data[0][list(data[0].keys())[0]]) if data else 0
     # Get number of experiments out of legend_handles
     
     ax_dims = axs.shape
@@ -107,7 +85,7 @@ def plot_run(data: dict, smoothed_data: dict, experiment_name: str, config_data:
     
     def plot_single_line(value, label, color, marker, title, ax, linestyle='-', alpha=0.6):
         # Plot average validation metrics
-        ax.axhline(y=value, label=label, alpha=alpha, color=color, linestyle=linestyle)
+        ax.axhline(y=value, label=None, alpha=alpha, color=color, linestyle=linestyle)
         
         # Generate random x-positions for markers (between x-axis limits)
         # random_x_positions = np.random.random(1)
@@ -116,7 +94,7 @@ def plot_run(data: dict, smoothed_data: dict, experiment_name: str, config_data:
             # Find handle index of the label, if it exists
             pos = next((i for i, h in enumerate(legend_handles) if h.get_label() == label), None)
             if pos is not None:
-                random_x_positions = pos/num_experiments * epochs_per_client * len(data)
+                random_x_positions = pos/num_experiments * epochs_per_fold * len(data)
             else:
                 random_x_positions = np.random.random(1)
             
@@ -152,11 +130,11 @@ def plot_run(data: dict, smoothed_data: dict, experiment_name: str, config_data:
         ax.set_title(title)
         ax.set_xlabel('Epoch')
         ax.set_ylabel(title)
-        for clientnr in range(len(data)):
-            ax.axvline(x=clientnr * epochs_per_client, color='b', linestyle='--', alpha=0.5)
+        for foldnr in range(len(data)):
+            ax.axvline(x=foldnr * epochs_per_fold, color='b', linestyle='--', alpha=0.5)
             if show_phases:
-                ax.axvline(x=clientnr * epochs_per_client + 15, color='orange', linestyle='--', alpha=0.3)
-                ax.axvline(x=clientnr * epochs_per_client + 30, color='orange', linestyle='--', alpha=0.3)
+                ax.axvline(x=foldnr * epochs_per_fold + 15, color='orange', linestyle='--', alpha=0.3)
+                ax.axvline(x=foldnr * epochs_per_fold + 30, color='orange', linestyle='--', alpha=0.3)
 
     def plot_multisplit(df, smoothed_df, metric, title, label, ax):
         num_splits = 2
@@ -207,13 +185,13 @@ def plot_run(data: dict, smoothed_data: dict, experiment_name: str, config_data:
         
         elif metric in df.columns:
             
-            # Vertical lines for each client of length epochs
+            # Vertical lines for each fold of length epochs
             # if next((i for i, h in enumerate(legend_handles) if h.get_label() == label), None) == 0:
-            for clientnr in range(len(data)):
-                ax.axvline(x=clientnr * epochs_per_client, color='b', linestyle='--', alpha=0.5)
+            for foldnr in range(len(data)):
+                ax.axvline(x=foldnr * epochs_per_fold, color='b', linestyle='--', alpha=0.5)
                     
             
-            # If metric is a test metric also plot the average of all clients as a horizontal line
+            # If metric is a test metric also plot the average of all folds as a horizontal line
             if 'test' in metric:
                 ax.plot(df.index, df[metric], color=color, alpha=0.3)
                 plot_single_line(df[metric].mean(), label, color, marker, title, ax)
@@ -294,24 +272,24 @@ def merge_splits(datas: dict):
     merged_metrics = {}
     
     for experiment_name, data in datas.items():
-        for clientnr, client_data in data.items():
-            for metric in client_data.keys():
+        for foldnr, fold_data in data.items():
+            for metric in fold_data.keys():
                 if not metric.endswith('/1'):
                     continue
-                # Merge all clients for this metric into a single list
+                # Merge all folds for this metric into a single list
                 merged_metric = metric[:-2]+ '/split_avg'
                 
                 
                 values = []
                 
-                for metric_compare in client_data.keys():
+                for metric_compare in fold_data.keys():
                     if metric[:-2] == metric_compare[:-2]:
-                        values.extend(client_data[metric_compare])
+                        values.extend(fold_data[metric_compare])
             
                 # Replace the original metric with the merged one
                 merged_metrics[merged_metric] = values
             for merged_metric, values in merged_metrics.items():
-                client_data[merged_metric] = [np.mean(values)]
+                fold_data[merged_metric] = [np.mean(values)]
     return datas
                 
 
@@ -321,7 +299,7 @@ def smooth_data(data, window_size=5):
     Apply a moving average smoothing to the data dictionary.
     
     Args:
-        data: Dictionary with format {client: {metric: [value1, value2, ...]}}
+        data: Dictionary with format {fold: {metric: [value1, value2, ...]}}
         window_size: Size of the moving average window
         
     Returns:
@@ -332,26 +310,26 @@ def smooth_data(data, window_size=5):
     
     smoothed_data = {}
     
-    for client, client_data in data.items():
-        smoothed_data[client] = {}
-        for metric, values in client_data.items():
+    for fold, fold_data in data.items():
+        smoothed_data[fold] = {}
+        for metric, values in fold_data.items():
             # Convert to pandas Series for smoothing
             series = pd.Series(values)
             # Apply moving average
             smoothed_series = series.rolling(window=window_size, min_periods=1).mean()
-            smoothed_data[client][metric] = smoothed_series.tolist()
+            smoothed_data[fold][metric] = smoothed_series.tolist()
     return smoothed_data
 
 def datadict_to_df(data: dict):
-    # Dict has format {client: {metric: [value1, value2, ...]}}
+    # Dict has format {fold: {metric: [value1, value2, ...]}}
     df_data = {}
     
-    debug_list = {client_nr: list(client_data.keys()) for client_nr, client_data in data.items()}        
+    debug_list = {fold_nr: list(fold_data.keys()) for fold_nr, fold_data in data.items()}        
     # input(f"Debug: {debug_list}")
     
-    for clientnr, client_data in data.items():
+    for foldnr, fold_data in data.items():
         
-        for metric, values in client_data.items():
+        for metric, values in fold_data.items():
             if metric not in df_data:
                 df_data[metric] = []
             df_data[metric].extend(values)
@@ -375,406 +353,48 @@ def tensorboard_to_datadict(experiment_name: str, exp_dir:str = ROOT_RUNS, exper
         if not os.path.exists(log_dir):
             log_dir = log_dir_delete
         
-    # Dict to store data: {client: {metric: [values_for_all_epochs]}}
+    # Dict to store data: {fold: {metric: [values_for_all_epochs]}}
     data = defaultdict(lambda: defaultdict(list))
     test = {}
     
-    # Track the maximum step seen for each client and metric
+    # Track the maximum step seen for each fold and metric
     max_steps = defaultdict(lambda: defaultdict(int))
     
     
     
     for root, dirs, files in os.walk(log_dir):
-        for clientnr, client in enumerate(sorted(dirs)):
-            if not client.startswith("client_") and not client == "test":
-                print(f"Skipping {client} as it is not a client")
+        for foldnr, fold in enumerate(sorted(dirs)):
+            if not fold.startswith("fold_") and not fold == "test":
+                print(f"Skipping {fold} as it is not a fold")
                 continue
-            client_path = os.path.join(root, client)
-            for file in os.listdir(client_path):
+            fold_path = os.path.join(root, fold)
+            for file in os.listdir(fold_path):
                 if file.startswith("events.out.tfevents"):
-                    event_file = os.path.join(client_path, file)
+                    event_file = os.path.join(fold_path, file)
                     for event in tf.compat.v1.train.summary_iterator(event_file):
-                        if client == "test":
+                        if fold == "test":
                             for value in event.summary.value:
                                 test[value.tag] = value.simple_value
                             continue
                         
                         for value in event.summary.value:
                             # Track the maximum step for this metric
-                            max_steps[clientnr][value.tag] = max(max_steps[clientnr][value.tag], event.step + 1)
+                            max_steps[foldnr][value.tag] = max(max_steps[foldnr][value.tag], event.step + 1)
                             
                             # Ensure the list is long enough
-                            while len(data[clientnr][value.tag]) <= event.step:
-                                data[clientnr][value.tag].append(None)
+                            while len(data[foldnr][value.tag]) <= event.step:
+                                data[foldnr][value.tag].append(None)
                             
                             # Add the value at the correct position
-                            data[clientnr][value.tag][event.step] = value.simple_value
+                            data[foldnr][value.tag][event.step] = value.simple_value
     
-    # Ensure all metric lists have consistent length within each client
-    for clientnr in data:
-        max_length = max(max_steps[clientnr].values(), default=0)
-        for metric in data[clientnr]:
-            assert len(data[clientnr][metric]) <= max_length, f"Data length mismatch for client {clientnr}, metric {metric}"
+    # Ensure all metric lists have consistent length within each fold
+    for foldnr in data:
+        max_length = max(max_steps[foldnr].values(), default=0)
+        for metric in data[foldnr]:
+            assert len(data[foldnr][metric]) <= max_length, f"Data length mismatch for fold {foldnr}, metric {metric}"
     
     return data, test
-
-
-def tensorboard_to_datadict_federated(experiment_name: str, exp_dir: str = ROOT_RESULTS):
-    """Extract data from TensorBoard logs for federated learning plotting"""
-    
-    experiment_dir = os.path.join(exp_dir, experiment_name)
-    log_dir = os.path.join(experiment_dir, "log")
-    
-    assert os.path.exists(log_dir), f"Log directory {log_dir} does not exist."
-    
-    # Separate data structures for clients and server
-    client_data = defaultdict(lambda: defaultdict(lambda: defaultdict(list)))  # {client_id: {round: {metric: [values]}}}
-    server_data = defaultdict(lambda: defaultdict(dict))  # {round: {metric: value}}
-    
-    # Parse directory structure
-    for item in os.listdir(log_dir):
-        if item.startswith("client_") and "round" in item:
-            # Parse client training logs: client_{id}_round_{round}
-            parts = item.split("_")
-            client_id = int(parts[1])
-            round_num = int(parts[3])
-            
-            client_path = os.path.join(log_dir, item)
-            for file in os.listdir(client_path):
-                if file.startswith("events.out.tfevents"):
-                    event_file = os.path.join(client_path, file)
-                    for event in tf.compat.v1.train.summary_iterator(event_file):
-                        for value in event.summary.value:
-                            # Store all epochs for this client/round/metric
-                            metric = value.tag
-                            while len(client_data[client_id][round_num][metric]) <= event.step:
-                                client_data[client_id][round_num][metric].append(None)
-                            client_data[client_id][round_num][metric][event.step] = value.simple_value
-                            
-        elif item.startswith("client_server"):
-            # Parse server evaluation logs: client_server_{round}
-            round_num = int(item.split("_")[2])
-            
-            server_path = os.path.join(log_dir, item)
-            for file in os.listdir(server_path):
-                if file.startswith("events.out.tfevents"):
-                    event_file = os.path.join(server_path, file)
-                    for event in tf.compat.v1.train.summary_iterator(event_file):
-                        for value in event.summary.value:
-                            # Server evaluation metrics (single values per round)
-                            server_data[round_num][value.tag] = value.simple_value
-    
-    return dict(client_data), dict(server_data)
-
-
-def create_federated_plot(num_metrics=None):
-    """Create figure for federated learning plots"""
-    if num_metrics is None:
-        num_metrics = len(federated_metrics)
-    
-    # Calculate layout
-    rows_config = {
-        1: [1],
-        2: [2, 3, 4, 5, 6],
-        3: [7, 8, 9, 10, 11, 12],
-        4: [13, 14, 15, 16]
-    }
-    
-    num_rows = next(i for i, n in rows_config.items() if num_metrics in n)
-    num_cols = (num_metrics + num_rows - 1) // num_rows
-    
-    fig, axs = plt.subplots(num_rows, num_cols, figsize=(20, 15))
-    
-    # Handle single subplot case
-    if num_rows == 1 and num_cols == 1:
-        axs = np.array([axs])
-    elif num_rows == 1 or num_cols == 1:
-        axs = axs.reshape(num_rows, num_cols)
-    
-    return fig, axs
-
-
-def plot_federated_experiment(experiment_name: str, submodel: str = 'MM'):
-    """
-    Plot federated learning experiment results
-    
-    Args:
-        experiment_name: Name of the federated experiment
-        submodel: Which submodel to focus on ('MM', 'CLAM', 'CD', or 'ALL')
-    """
-    # Get federated data
-    client_data, server_data = tensorboard_to_datadict_federated(experiment_name)
-    
-    # Create plot
-    fig, axs = create_federated_plot()
-    fig.suptitle(f"Federated Learning: {experiment_name}\nClient Training vs Global Model Performance ({submodel})", fontsize=16)
-    fig.subplots_adjust(hspace=0.4, wspace=0.4)
-    
-    # Colors for different clients
-    client_colors = ['blue', 'red', 'green', 'orange', 'purple', 'brown', 'pink', 'gray']
-    
-    ax_dims = axs.shape
-    ax_width = ax_dims[1] if len(ax_dims) > 1 else 1
-    
-    for i, (base_metric, title) in enumerate(federated_metrics.items()):
-        if base_metric is None or title is None:
-            continue
-            
-        # Get the subplot
-        if len(ax_dims) > 1:
-            ax = axs[i // ax_width, i % ax_width]
-        else:
-            ax = axs[i] if hasattr(axs, '__len__') else axs
-        
-        # Construct full metric name with submodel
-        if submodel == 'ALL':
-            # Plot all submodels with different line styles
-            for sub in ['MM', 'CLAM', 'CD']:
-                metric = f"{base_metric}/{sub}"
-                plot_federated_metric(ax, metric, title + f" ({sub})", client_data, server_data, 
-                                    client_colors, submodels.get(sub, '-'))
-        else:
-            metric = f"{base_metric}/{submodel}"
-            plot_federated_metric(ax, metric, title, client_data, server_data, client_colors)
-    
-    # Hide empty subplots
-    total_plots = len([m for m in federated_metrics.keys() if m is not None])
-    if hasattr(axs, 'flat'):
-        for j in range(total_plots, len(axs.flat)):
-            axs.flat[j].axis('off')
-    
-    # Add legend for the last subplot
-    if hasattr(axs, 'flat') and len(axs.flat) > total_plots:
-        legend_ax = axs.flat[-1]
-        legend_ax.axis('off')
-        
-        # Create legend handles
-        legend_handles = []
-        for client_id in sorted(client_data.keys()):
-            color = client_colors[client_id % len(client_colors)]
-            line = plt.Line2D([0], [0], color=color, linewidth=2, label=f'Client {client_id} Training')
-            legend_handles.append(line)
-        
-        # Add global model legend
-        server_line = plt.Line2D([0], [0], color='red', marker='s', markersize=8, 
-                               linestyle=':', linewidth=2, label='Global Model Performance')
-        legend_handles.append(server_line)
-        
-        # Add round boundary legend
-        boundary_line = plt.Line2D([0], [0], color='gray', linestyle='--', alpha=0.5, 
-                                 label='Round Boundaries')
-        legend_handles.append(boundary_line)
-        
-        legend_ax.legend(handles=legend_handles, loc='center', fontsize=12)
-        legend_ax.set_title('Legend')
-    
-    plt.tight_layout()
-    
-    # Save the figure
-    plot_dir = os.path.join(ROOT_RESULTS, experiment_name)
-    plot_path = os.path.join(plot_dir, f"federated_plot_{submodel.lower()}.png")
-    plt.savefig(plot_path, dpi=300, bbox_inches='tight')
-    print(f"Plot saved to {plot_path}")
-    plt.show()
-
-
-def plot_federated_metric(ax, metric, title, client_data, server_data, client_colors, linestyle='-'):
-    """Plot a single metric for federated learning"""
-    
-    # Get all rounds that exist
-    all_rounds = set()
-    for client_id in client_data.keys():
-        all_rounds.update(client_data[client_id].keys())
-    all_rounds = sorted(all_rounds)
-    
-    max_steps_per_round = 0
-    # Find maximum steps per round across all clients
-    for client_id in client_data.keys():
-        for round_num in all_rounds:
-            if round_num in client_data[client_id] and metric in client_data[client_id][round_num]:
-                steps_in_round = len([v for v in client_data[client_id][round_num][metric] if v is not None])
-                max_steps_per_round = max(max_steps_per_round, steps_in_round)
-    
-    # Plot each client
-    for client_id in sorted(client_data.keys()):
-        color = client_colors[client_id % len(client_colors)]
-        client_rounds = client_data[client_id]
-        
-        all_values = []
-        all_steps = []
-        
-        for round_idx, round_num in enumerate(all_rounds):
-            if round_num in client_rounds and metric in client_rounds[round_num]:
-                round_values = [v for v in client_rounds[round_num][metric] if v is not None]
-                
-                # Create x-positions: each round starts at round_idx * max_steps_per_round
-                round_start = round_idx * max_steps_per_round
-                round_steps = list(range(round_start, round_start + len(round_values)))
-                
-                all_values.extend(round_values)
-                all_steps.extend(round_steps)
-        
-        if all_values:
-            ax.plot(all_steps, all_values, color=color, alpha=0.7, linestyle=linestyle,
-                   label=f'Client {client_id}')
-    
-    # Add vertical lines for round boundaries
-    round_boundaries = []
-    for round_idx in range(1, len(all_rounds)):
-        boundary = round_idx * max_steps_per_round
-        round_boundaries.append(boundary)
-        ax.axvline(x=boundary, color='gray', linestyle='--', alpha=0.5)
-    
-    # Plot server evaluation points
-    server_values = []
-    server_rounds = []
-    for round_num in sorted(server_data.keys()):
-        if metric in server_data[round_num]:
-            server_values.append(server_data[round_num][metric])
-            server_rounds.append(round_num)
-    
-    if server_values:
-        # For test metrics, plot server evaluations at their actual round numbers
-        if 'test' in metric:
-            ax2 = ax.twinx()  # Create a second y-axis that shares the same x-axis
-            ax2.scatter(server_rounds, server_values, color='red', marker='s', 
-                      s=100, alpha=0.9, label='Global Model (Server)', zorder=5, edgecolor='black')
-            ax2.plot(server_rounds, server_values, color='red', alpha=0.6, 
-                   linestyle=':', linewidth=2, zorder=4)
-            ax2.set_ylabel(title + ' (Global Model)', color='red')
-            ax2.tick_params(axis='y', labelcolor='red')
-            
-            # Set x-axis to show round numbers
-            ax2.set_xlim(-0.5, max(server_rounds) + 0.5)
-            ax2.set_xticks(server_rounds)
-            ax2.set_xticklabels([f'Round {r}' for r in server_rounds])
-        else:
-            # For train/val metrics, position server evaluations at round boundaries
-            server_x_positions = []
-            for round_num in server_rounds:
-                if round_num == 0:
-                    server_x_positions.append(0)  # Initial evaluation at x=0
-                else:
-                    # After round completion: at the end of the round
-                    round_idx = round_num - 1  # Convert to 0-based index for completed rounds
-                    if round_idx < len(all_rounds):
-                        server_x_positions.append((round_idx + 1) * max_steps_per_round)
-            
-            # Ensure we have matching lengths
-            min_len = min(len(server_x_positions), len(server_values))
-            server_x_positions = server_x_positions[:min_len]
-            server_values = server_values[:min_len]
-            
-            if len(server_x_positions) > 0:
-                ax.scatter(server_x_positions, server_values, color='red', marker='s', 
-                          s=100, alpha=0.9, label='Global Model (Server)', zorder=5, edgecolor='black')
-                ax.plot(server_x_positions, server_values, color='red', alpha=0.6, 
-                       linestyle=':', linewidth=2, zorder=4)
-    
-    # Add round labels on x-axis
-    if all_rounds and max_steps_per_round > 0:
-        round_centers = [(i + 0.5) * max_steps_per_round for i in range(len(all_rounds))]
-        ax.set_xticks(round_centers)
-        ax.set_xticklabels([f'Round {r}' for r in all_rounds])
-    
-    ax.set_title(title)
-    ax.set_xlabel('Federated Learning Rounds')
-    ax.set_ylabel(title)
-    
-    # Improve legend handling - only add legend if there are labeled artists
-    handles, labels = ax.get_legend_handles_labels()
-    if handles:
-        ax.legend()
-    ax.grid(True, alpha=0.3)
-
-
-def plot_federated_comparison(experiment_names: list, submodel: str = 'MM', metric_filter: str = 'test'):
-    """
-    Compare multiple federated learning experiments
-    
-    Args:
-        experiment_names: List of federated experiment names to compare
-        submodel: Which submodel to focus on ('MM', 'CLAM', 'CD')
-        metric_filter: Which type of metrics to plot ('train', 'val', 'test', or 'all')
-    """
-    
-    # Filter metrics based on metric_filter
-    if metric_filter == 'all':
-        metrics_to_plot = {k: v for k, v in federated_metrics.items() if k is not None and v is not None}
-    else:
-        metrics_to_plot = {k: v for k, v in federated_metrics.items() 
-                          if k is not None and v is not None and metric_filter in k}
-    
-    # Create plot
-    fig, axs = create_federated_plot(len(metrics_to_plot))
-    fig.suptitle(f"Federated Learning Comparison ({submodel} - {metric_filter} metrics)", fontsize=16)
-    fig.subplots_adjust(hspace=0.4, wspace=0.4)
-    
-    # Colors for different experiments
-    exp_colors = ['blue', 'red', 'green', 'orange', 'purple', 'brown', 'pink', 'gray']
-    
-    # Get data for all experiments
-    all_data = {}
-    for exp_name in experiment_names:
-        try:
-            client_data, server_data = tensorboard_to_datadict_federated(exp_name)
-            all_data[exp_name] = (client_data, server_data)
-        except Exception as e:
-            print(f"Warning: Could not load data for {exp_name}: {e}")
-            continue
-    
-    ax_dims = axs.shape if hasattr(axs, 'shape') else (1, 1)
-    ax_width = ax_dims[1] if len(ax_dims) > 1 else 1
-    
-    for i, (base_metric, title) in enumerate(metrics_to_plot.items()):
-        # Get the subplot
-        if len(ax_dims) > 1:
-            ax = axs[i // ax_width, i % ax_width]
-        else:
-            ax = axs[i] if hasattr(axs, '__len__') else axs
-        
-        metric = f"{base_metric}/{submodel}"
-        
-        # Plot each experiment
-        for exp_idx, (exp_name, (client_data, server_data)) in enumerate(all_data.items()):
-            color = exp_colors[exp_idx % len(exp_colors)]
-            
-            # Plot server evaluation points only for comparison clarity
-            server_values = []
-            server_rounds = []
-            for round_num in sorted(server_data.keys()):
-                if metric in server_data[round_num]:
-                    server_values.append(server_data[round_num][metric])
-                    server_rounds.append(round_num)
-            
-            if server_values:
-                ax.plot(server_rounds, server_values, color=color, marker='o', 
-                       linewidth=2, markersize=6, label=exp_name, alpha=0.8)
-        
-        ax.set_title(title)
-        ax.set_xlabel('Federated Round')
-        ax.set_ylabel(title)
-        ax.grid(True, alpha=0.3)
-        
-        # Add legend if there are multiple experiments
-        if len(all_data) > 1:
-            handles, labels = ax.get_legend_handles_labels()
-            if handles:
-                ax.legend()
-    
-    # Hide empty subplots
-    total_plots = len(metrics_to_plot)
-    if hasattr(axs, 'flat'):
-        for j in range(total_plots, len(axs.flat)):
-            axs.flat[j].axis('off')
-    
-    plt.tight_layout()
-    
-    # Save the figure
-    plot_path = os.path.join(ROOT_RESULTS, f"federated_comparison_{submodel.lower()}_{metric_filter}.png")
-    plt.savefig(plot_path, dpi=300, bbox_inches='tight')
-    print(f"Comparison plot saved to {plot_path}")
-    plt.show()
 
 
 def get_config_data(experiment_name: str):
@@ -847,7 +467,7 @@ def plot_experiment(experiment_name: str):
     plt.show()
     
 
-def plot_experiments(experiment_names: list, smooth_window_size=10, max_k = 10):
+def plot_experiments(experiment_names: list, smooth_window_size=1, max_k = 10):
     datas = {}
     # config_datas = {}
     tests = {}
@@ -872,39 +492,39 @@ def plot_experiments(experiment_names: list, smooth_window_size=10, max_k = 10):
         tests[experiment_name] = test
     
     datas = merge_splits(datas)
-    # # datas dictionary format is {experiment_name: {client: {metric: [value1, value2, ...]}}}
-    # # Configure data to have same number of epochs per client
-    # nr_clients = len(datas[list(datas.keys())[0]])
-    # # Assert that all experiments have the same number of clients
+    # # datas dictionary format is {experiment_name: {fold: {metric: [value1, value2, ...]}}}
+    # # Configure data to have same number of epochs per fold
+    # nr_folds = len(datas[list(datas.keys())[0]])
+    # # Assert that all experiments have the same number of folds
     # for experiment_name, data in datas.items():
-    #     assert len(data) == nr_clients, f"Experiment {experiment_name} has {len(data)} clients, expected {nr_clients} clients."
+    #     assert len(data) == nr_folds, f"Experiment {experiment_name} has {len(data)} folds, expected {nr_folds} folds."
     
-    max_nr_clients = max(len(data) for data in datas.values())
-    max_nr_clients = min(max_nr_clients, max_k)  # Limit to max_k clients
-    # Delete clients that are greater than max_k
+    max_nr_folds = max(len(data) for data in datas.values())
+    max_nr_folds = min(max_nr_folds, max_k)  # Limit to max_k folds
+    # Delete folds that are greater than max_k
     for experiment_name, data in datas.items():
-        for clientnr in list(data.keys()):
-            if clientnr >= max_k:
-                del data[clientnr]
+        for foldnr in list(data.keys()):
+            if foldnr >= max_k:
+                del data[foldnr]
     
-    # Make sure all clients have the same number of epochs, also adjust that all clients have the same length
+    # Make sure all folds have the same number of epochs, also adjust that all folds have the same length
     max_length = 0
     for experiment_name, data in datas.items():
-        for clientnr, client_data in data.items():
-            if clientnr >= max_k:
+        for foldnr, fold_data in data.items():
+            if foldnr >= max_k:
                 continue
-            # Find the maximum length of epochs in this client
-            local_max_length = max(max_length, max(len(values) for values in client_data.values()))
+            # Find the maximum length of epochs in this fold
+            local_max_length = max(max_length, max(len(values) for values in fold_data.values()))
             max_length = max(max_length, local_max_length)
             
-    for clientnr in range(max_nr_clients):
+    for foldnr in range(max_nr_folds):
         for experiment_name, data in datas.items():
-            # Ensure each client has the same number of epochs by padding with last value
-            if clientnr not in data:
-                continue  # Skip if client does not exist in this experiment
-            for metric in data[clientnr]:
-                while len(data[clientnr][metric]) < max_length:
-                    data[clientnr][metric].append(data[clientnr][metric][-1] if data[clientnr][metric] else None)
+            # Ensure each fold has the same number of epochs by padding with last value
+            if foldnr not in data:
+                continue  # Skip if fold does not exist in this experiment
+            for metric in data[foldnr]:
+                while len(data[foldnr][metric]) < max_length:
+                    data[foldnr][metric].append(data[foldnr][metric][-1] if data[foldnr][metric] else None)
     
     avg_datas = None
     # If any metric starts with 'Avg_', calculate the average of the last epochs
@@ -955,10 +575,10 @@ def plot_experiments(experiment_names: list, smooth_window_size=10, max_k = 10):
 
 def calc_avg_val_metrics(data: dict):
     """
-    Calculate average validation metrics of last epochs from all clients.
+    Calculate average validation metrics of last epochs from all folds.
     
     Args:
-        data: Dictionary with format {client: {metric: [value1, value2, ...]}}
+        data: Dictionary with format {fold: {metric: [value1, value2, ...]}}
         
     Returns:
         Dictionary with average validation metrics.
@@ -972,14 +592,14 @@ def calc_avg_val_metrics(data: dict):
     
     for experiments_name, exp_data in data.items():
         avg_metrics[experiments_name] = {}
-        for clientnr, client_data in exp_data.items():
+        for foldnr, fold_data in exp_data.items():
             for metric in avg_metrics_keys:
                 if metric not in avg_metrics[experiments_name]:
                     avg_metrics[experiments_name][metric] = []
-                # Get the last value of the metric for this client
+                # Get the last value of the metric for this fold
                 not_avg_metric = metric.replace('Avg_', '')
-                if not_avg_metric in client_data:
-                    last_value = client_data[not_avg_metric][-1] if client_data[not_avg_metric] else None
+                if not_avg_metric in fold_data:
+                    last_value = fold_data[not_avg_metric][-1] if fold_data[not_avg_metric] else None
                     avg_metrics[experiments_name][metric].append(last_value)
         # Calculate the average of the last values for each metric
         for metric in avg_metrics[experiments_name]:
@@ -994,58 +614,79 @@ def calc_avg_val_metrics(data: dict):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Plotting script for TensorBoard logs')
     parser.add_argument('--name', type=str, help='Name of the experiment to plot')
-    parser.add_argument('--names', nargs='+', help='Names of experiments to compare (for federated comparison mode)')
-    parser.add_argument('--max_k', type=int, default=10, help='Maximum number of clients to plot')
+    parser.add_argument('--max_k', type=int, default=10, help='Maximum number of folds to plot')
     parser.add_argument('--mm_only', action='store_true', help='Plot only MM experiments')
     parser.add_argument('--clam_only', action='store_true', help='Plot only CLAM experiments')
-    parser.add_argument('--federated', action='store_true', help='Use federated learning plotting mode')
-    parser.add_argument('--compare', action='store_true', help='Compare multiple federated experiments')
-    parser.add_argument('--submodel', type=str, default='MM', choices=['MM', 'CLAM', 'CD', 'ALL'], 
-                       help='Which submodel to plot for federated learning')
-    parser.add_argument('--metric_filter', type=str, default='test', choices=['train', 'val', 'test', 'all'],
-                       help='Which metrics to show in comparison mode')
     args = parser.parse_args()
 
-    experiment_name = args.name if args.name else 'test2_2_client_s1'
+    experiment_name = args.name if args.name else '2025-05-22_11-31-27'
     max_k = args.max_k if args.max_k else 10
     
     if args.mm_only: submodels = {'MM': '-'}
     elif args.clam_only: submodels = {'CLAM': '-'}
     
-    # Use federated comparison if requested
-    if args.compare and args.names:
-        plot_federated_comparison(args.names, args.submodel, args.metric_filter)
-    # Use federated plotting if requested
-    elif args.federated or args.name == 'test2_2_client_s1':  # Auto-detect federated for test experiments
-        plot_federated_experiment(experiment_name, args.submodel)
-    else:
-        # Original plotting functions for backward compatibility
+    # plot_experiment(experiment_name)
+    # plot_experiments(['CDSoloNewCLAMSplit100', 'CDSoloNewCLAMSplit200', 'CDSoloNewCLAMSplit250', 'CDSoloNew03test'], smooth_window_size=20)
+    # plot_experiments(['CDSoloSmallOld', 'CDLogReg', 'CDXGBoost', 'CDRanFor', 'CDSoloNew10', 'CDSolo10_0_1', 'CDSolotest'])
+    # plot_experiments(['CDLogReg', 'CDXGBoost', 'CDRanFor','CDSolo10_0_1', 'CDSolotest', 'CDSolotestNoEarly', 'CDSolotestNoEarly0403', 'CDSolotest0403'])
+    # plot_experiments(['CDSolo10_0_1','CDSolotest', 'CDSolotest0403', 'CDSoloLogRegNew'])
+    # plot_experiments(['CDSolotest0403','CDSolotestNoEarly0403', 'CDSolo10_0_1', 'CDSolo0404_1'])
+    # plot_experiments(['CDSoloNew', 'CDSoloSmallOld', 'CDSoloSmallNew', 'CDSoloNew2', 'CDSoloNew3'])
+    
+    
+    # plot_experiments(['WholeImgResNet', 'SimplerCNN', 'SimpleMIL3', 'SimpleMIL4', 'CLAM_Img_only', 'chimera_CLAM_new3_s1'])
+    # plot_experiments(['chimera_MM_s1', 'chimera_MM_Pretrained_s1', 'grid_search_Winner', 'chimera_New_MM_s1', 'chimera_New_Img_Only_s1'])#,'CDSoloNew'])
+    # plot_experiments(['chimera_MM_Renewed_s1', 'chimera_MM_Pretrained_Renewed_s1', 'chimera_CLAM_Img_Renewed_s1', 'chimera_MM_Freezed_Renewed_s1', 'CDSoloNew'])
+    # plot_experiments(['chimera_New_MM_s1', 'chimera_New_Img_Only2Full_s1', 'chimera_New_Img_Only_s1', 'CLAM_Img_only', 'chimera_New_Img_Tiny_No_Gated_s1'])#,'CDSoloNew'])
+    # plot_experiments(['CDSoloNew', 'CDRanFor', 'CDXGBoost','CDLogReg'])
+    
+    # plot_experiments(['chimera_New_Img_Tiny_Gated_MM_1F_pretrained3_s1'])
+    
+    # plot_experiments([
+    #     # 'chimera_New_Img_Tiny_Gated_s1',
+    #                 #   'chimera_New_Img_Tiny_Gated_MM_1f_pretrained_freezed_lr_s1',
+    #                 #   'chimera_New_Img_Tiny_Gated_MM_1f_pretrained_freezed_s1',
+    #                 #   'chimera_New_Img_Tiny_Gated_MM_1F_pretrained_s1',
+    #                 #   'chimera_New_Img_Tiny_Gated_MM_1F_pretrained3_s1',
+    #                 #   'chimera_New_Img_Tiny_Gated_Drop_Out_s1'
+    #                 # 'CDSoloNew',
+    #                 # 'chimera_New_Img_Tiny_Gated_MM_1F_pretrained3f1ce_s1',
+    #                 'chimera_New_Img_Tiny_Gated_MM_1f_pretrained_freezed_lr10_s1',# !!!!!!!,
+    #                 'chimera_New_Img_Tiny_Gated_MM_Att_s1',
+    #                 'chimera_New_Img_Tiny_Gated_MM_Bal_Att_s1'
+                      
+    #                   ])
+    
+    # plot_experiments([
+    #     'chimera_New_Img_Tiny_Gated_MM_1f_pretrained_freezed_s1',
+    #     'chimera_New_Img_Tiny_Gated_MM_1F_pretrained_s1',
+    #     'chimera_New_Img_Tiny_Gated_MM_1f_pretrained_freezed_lr_s1',
         
-        # plot_experiment(experiment_name)
-        # plot_experiments(['CDSoloNewCLAMSplit100', 'CDSoloNewCLAMSplit200', 'CDSoloNewCLAMSplit250', 'CDSoloNew03test'], smooth_window_size=20)
-        # plot_experiments(['CDSoloSmallOld', 'CDLogReg', 'CDXGBoost', 'CDRanFor', 'CDSoloNew10', 'CDSolo10_0_1', 'CDSolotest'])
-        # plot_experiments(['CDLogReg', 'CDXGBoost', 'CDRanFor','CDSolo10_0_1', 'CDSolotest', 'CDSolotestNoEarly', 'CDSolotestNoEarly0403', 'CDSolotest0403'])
-        # plot_experiments(['CDSolo10_0_1','CDSolotest', 'CDSolotest0403', 'CDSoloLogRegNew'])
-        # plot_experiments(['CDSolotest0403','CDSolotestNoEarly0403', 'CDSolo10_0_1', 'CDSolo0404_1'])
-        # plot_experiments(['CDSoloNew', 'CDSoloSmallOld', 'CDSoloSmallNew', 'CDSoloNew2', 'CDSoloNew3'])
         
-        
-        # plot_experiments(['WholeImgResNet', 'SimplerCNN', 'SimpleMIL3', 'SimpleMIL4', 'CLAM_Img_only', 'chimera_CLAM_new3_s1'])
-        # plot_experiments(['chimera_MM_s1', 'chimera_MM_Pretrained_s1', 'grid_search_Winner', 'chimera_New_MM_s1', 'chimera_New_Img_Only_s1'])#,'CDSoloNew'])
-        # plot_experiments(['chimera_MM_Renewed_s1', 'chimera_MM_Pretrained_Renewed_s1', 'chimera_CLAM_Img_Renewed_s1', 'chimera_MM_Freezed_Renewed_s1', 'CDSoloNew'])
-        # plot_experiments(['chimera_New_MM_s1', 'chimera_New_Img_Only2Full_s1', 'chimera_New_Img_Only_s1', 'CLAM_Img_only', 'chimera_New_Img_Tiny_No_Gated_s1'])#,'CDSoloNew'])
-        # plot_experiments(['CDSoloNew', 'CDRanFor', 'CDXGBoost','CDLogReg'])
-        
-        # plot_experiments(['chimera_New_Img_Tiny_Gated_MM_1F_pretrained3_s1'])
-        
-        # Example federated experiment - test with default name
-        print("Testing federated plotting with default experiment...")
-        plot_federated_experiment(experiment_name, 'MM')
-        
-        # for i in range(1,6):
-        #     plot_experiments([
-        #         f'MMWM544364_uni_v2_page_1_split_{i}_s1',
-        #         f'grid_search_MM_1_004_split_{i}_s1',
-        #         f'grid_search_MM_30-10-34_0_005_split_{i}_s1',
-        #         f'grid_search_MM_01-17-32_0_002_split_{i}_s1',
-        #     ])
+    #     # 'chimera_New_Img_Tiny_Gated_MM_s1',
+    #     'chimera_New_Img_Tiny_Gated_MM_1fold_s1',
+    #     # 'chimera_New_Img_Tiny_Gated_1_Folds2_s1',
+    #     # 'chimera_New_Img_Tiny_Gated_5_Folds2_s1'
+    #     # 'chimera_New_Img_Tiny_Gated_Long_s1'
+    #     'chimera_New_Img_Tiny_Gated_s1'
+    #     # 'chimera_New_Img_Tiny_Gated_F1CE_s1',
+    #     # 'chimera_New_Img_Tiny_No_Gated_s1',
+    #     # 'chimera_New_Img_Tiny_Gated_Remake2_s1'
+    #     ])
+    # plot_experiments(['chimera_New_Img_Tiny_Gated_5_Folds_s1'])
+    # plot_experiments([
+    #     # 'chimera_New_Img_Tiny_No_Gated_s1','chimera_New_Img_Tiny_No_Gated_high_lr_s1',
+    #     'chimera_New_Img_Tiny_Gated_s1',
+    #     'chimera_New_Img_Tiny_Gated_2C_s1',
+    #     'chimera_New_Img_Tiny_Gated_MM_1f_pretrained_freezed_lr10_s1',
+    #     'chimera_New_Img_Tiny_Gated_MM_2c_s1',
+    #     'chimera_New_Img_Tiny_Gated_MM_cd23_s1'
+    #     # 'chimera_New_Img_Tiny_Gated_Drop_Out_s1', 
+    #     # 'chimera_New_Img_Tiny_Gated_Remake_s1', 
+    #     # 'chimera_New_Img_Tiny_Gated_Remake2_s1',
+    #     # 'chimera_New_Img_Tiny_Gated_Remake3_s1'
+    #     ])#, 'chimera_New_Img_Tiny_Gated1_2_s1'])
+    
+    plot_experiments([
+        '1_client_repair_data_order_k1_5ep_no_es_s1'
+    ])

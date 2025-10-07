@@ -105,15 +105,15 @@ def get_split_loader(split_dataset, training=False, weighted=False, device=None,
     if training:
         if weighted:
             weights = make_weights_for_balanced_classes_split(split_dataset)
-            # Use a generator with seed based on args.seed for reproducible weighted sampling
+            # Use explicit generator for reproducible sampling - seed 1 to match federated version
             generator = torch.Generator()
-            generator.manual_seed(seed)
+            generator.manual_seed(1)
             loader = DataLoader(split_dataset, sampler=WeightedRandomSampler(
                 weights, len(weights), generator=generator), collate_fn=collate_MIL, **kwargs)
         else:
-            # Use a generator with seed based on args.seed for reproducible random sampling
+            # Use explicit generator for reproducible sampling - seed 1 to match federated version
             generator = torch.Generator()
-            generator.manual_seed(seed)
+            generator.manual_seed(1)
             loader = DataLoader(split_dataset, sampler=RandomSampler(
                 split_dataset, generator=generator), collate_fn=collate_MIL, **kwargs)
     else:
