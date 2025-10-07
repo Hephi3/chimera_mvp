@@ -54,13 +54,54 @@ def collate_MIL(batch):
         raise NotImplementedError("Unsupported batch format")
 
 
-def get_split_loader(split_dataset, training=False, weighted=False, device=None):
+def get_split_loader(split_dataset, training=False, weighted=False, device=None, args=None):
     """
             return either the validation loader or training loader 
     """
 
-    kwargs = {'num_workers': 8, 'pin_memory': False,
-              'batch_size': 1} if device.type == "cuda" else {}
+    # For single client federated learning, use identical behavior as MVP
+    if args and args.num_clients == 1:
+        # Use MVP-identical behavior with explicit generator for reproducible sampling
+        kwargs = {'num_workers': 8, 'pin_memory': False,
+                  'batch_size': 1} if device.type == "cuda" else {}
+        if training:
+            if weighted:
+                weights = make_weights_for_balanced_classes_split(split_dataset)
+                # Use explicit generator to ensure identical sampling order as MVP
+                generator = torch.Generator()
+                generator.manual_seed(args.seed)
+                loader = DataLoader(split_dataset, sampler=WeightedRandomSampler(
+                    weights, len(weights), generator=generator), collate_fn=collate_MIL, **kwargs)
+            else:
+                # Use explicit generator to ensure identical sampling order as MVP
+                generator = torch.Generator()
+                generator.manual_seed(args.seed)
+                loader = DataLoader(split_dataset, sampler=RandomSampler(
+                    split_dataset, generator=generator), collate_fn=collate_MIL, **kwargs)
+        else:
+            loader = DataLoader(split_dataset, sampler=SequentialSampler(
+                split_dataset), collate_fn=collate_MIL, **kwargs)
+        return loader
+    
+    # For multi-client federated learning, use enhanced deterministic behavior
+    def worker_init_fn(worker_id):
+        import torch
+        import numpy as np
+        import random
+        # Each worker gets a different but deterministic seed
+        worker_seed = torch.initial_seed() % 2**32
+        np.random.seed(worker_seed)
+        random.seed(worker_seed)
+
+    kwargs = {
+        'num_workers': 8,
+        'pin_memory': False,
+        'worker_init_fn': worker_init_fn,
+        'batch_size': 1} if device.type == "cuda" else {}
+    
+    # Use args.seed if provided, otherwise fall back to default
+    seed = args.seed if args is not None else 42
+    
     if training:
         if weighted:
             weights = make_weights_for_balanced_classes_split(split_dataset)

@@ -1,0 +1,89 @@
+[project]
+
+name = "federated"
+version = "1.0.0"
+description = "WSI Federated Learning"
+license = "Apache-2.0"
+dependencies = [
+    "flwr[simulation]>=1.20.0",
+    "torch==2.7.1",
+    "torchvision==0.22.1"
+]
+
+[tool.flwr.app]
+publisher = "Hephi"
+
+# Point to your ServerApp and ClientApp objects
+[tool.flwr.app.components]
+serverapp = "federated.server_app:app"
+clientapp = "federated.client_app:app"
+
+# Custom config values accessible via `context.run_config`
+[tool.flwr.app.config]
+num-server-rounds = 3
+fraction-fit = 0.5
+local-epochs = 1
+
+#flower
+
+#options
+no_verbose= false
+exp_code= "exp001"
+results_dir= "./results"
+
+
+#dataset
+data_root_dir= "/local/scratch/phempel/chimera/features_1536"
+split_dir= "chimera_3_0.1"
+return_coords= true
+seed= 1
+
+#model
+drop_out= 0.5
+n_classes= 3
+embed_dim= 1536
+model_size= "tiny"
+subtyping= true
+B= 8
+inst_loss= "svm"
+bag_loss= "ce"
+bag_weight= 0.8
+pages= [1, 2, 3]
+clinical_dim= 256
+norm= true
+top_p= 0.3
+
+
+# #training
+# max_epochs= 150
+# lr= 1e-4
+# label_frac= 1.0
+# reg= 1e-5
+# k= 3
+# opt= "adam"
+# batch_size= 32
+# # learning_rates
+# lr_clinical= 2e-5
+# lr_clam= 2.5e-5
+# lr_mm= 9e-5
+# lr_attention= null
+# lr_attention_levels= "4e-5,3e-5,2e-5"
+# lr_fusion_net= null
+# lr_classifier= null
+# lr_level_weights= null
+
+# # regularization
+# reg_clinical= 1e-6
+# reg_clam= 0.001
+# reg_mm= 1e-4
+
+# # options
+# log_data= true
+# early_stopping= true
+# weighted_sample= true
+# use_scheduler= true
+# multi_split= false
+
+# # pages
+# page= 1
+

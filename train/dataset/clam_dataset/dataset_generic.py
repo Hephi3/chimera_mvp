@@ -128,8 +128,8 @@ class Generic_WSI_Classification_Dataset(Dataset):
         self.patient_data_prep(patient_voting)
         self.cls_ids_prep()
 
-        if print_info:
-            self.summarize()
+        # if print_info:
+        #     self.summarize()
         self.args = kwargs
 
     def cls_ids_prep(self):
