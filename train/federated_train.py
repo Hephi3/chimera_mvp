@@ -10,6 +10,8 @@ from flwr.simulation import run_simulation
 from server_app import server_config
 from client_app import client_config
 from hyperparameters import get_hyperparameters
+from tqdm import tqdm
+
 disable_progress_bar()
 
 def seed_torch(device, seed):
@@ -46,17 +48,14 @@ def seed_everything(seed):
 def init_experiment(device, args):
     seed = args.seed
     seed_torch(device, seed)
-    if not os.path.isdir(args.results_dir):
-        os.mkdir(args.results_dir)
+    os.makedirs(args.orig_results_dir, exist_ok=True)
+    args.origin_max_epochs = args.max_epochs # For no phases but first
 
-    args.results_dir = os.path.join(args.results_dir, str(args.exp_code) + '_s{}'.format(args.seed))
-    if not os.path.isdir(args.results_dir):
-        os.mkdir(args.results_dir)
-
-
-    args.split_dir = os.path.join('splits', args.split_dir)
-
-    assert os.path.isdir(args.split_dir), "Split directory does not exist: {}".format(args.split_dir)
+    if args.folds > 1:
+        args.results_dir = os.path.join(args.orig_results_dir, str(args.exp_code) + '_s{}'.format(args.seed), 'Fold{}'.format(args.fold))
+    else:
+        args.results_dir = os.path.join(args.orig_results_dir, str(args.exp_code) + '_s{}'.format(args.seed))
+    os.makedirs(args.results_dir, exist_ok=True)
 
 
 def run_experiment(args):
@@ -97,14 +96,31 @@ def run_experiment(args):
             }
         }
     }
-    init_experiment(device=DEVICE, args=args)
+    
+    args.split_dir = os.path.join('splits', args.split_dir)
+    assert os.path.isdir(args.split_dir), "Split directory does not exist: {}".format(args.split_dir)
 
-    run_simulation(
-        server_app=ServerApp(server_fn=server_config(args=args)),
-        client_app=ClientApp(client_fn=client_config(args=args)),
-        num_supernodes=NUM_CLIENTS,
-        backend_config=backend_config,
-    )
+    args.orig_results_dir = args.results_dir  # Store original results directory
+    augmentations = None
+    if args.augmentations:
+        augmentations = {}
+        for mapping in args.augmentations:
+            client_id, aug_name = mapping.split('=', 1)
+            augmentations[int(client_id)] = aug_name
+    args.augmentations = augmentations
+    print("AUGMENTATIONS:", args.augmentations)
+
+    for i in tqdm(range(args.folds), desc='Folds'):
+        args.fold = i
+    
+        init_experiment(device=DEVICE, args=args)
+
+        run_simulation(
+            server_app=ServerApp(server_fn=server_config(args=args)),
+            client_app=ClientApp(client_fn=client_config(args=args)),
+            num_supernodes=NUM_CLIENTS,
+            backend_config=backend_config,
+        )
 
 
 if __name__ == "__main__":

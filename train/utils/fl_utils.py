@@ -9,11 +9,26 @@ from dataset.clam_dataset.dataset_generic import MM_Multi_Scale_Dataset
 from models.mm_models.multimodal_hierarchical import MultimodalHierarchical
 
 
+def load_global_test_data(args):
+    all_test_splits = None
+    for client in range(args.num_clients):
+        _, _, test_split = load_data(client, args)
+        if client == 0:
+            all_test_splits = test_split
+        else:
+            all_test_splits += test_split
+    return all_test_splits
+
 def load_data(partition_id, args):
     # Ensure deterministic dataset loading
     import random
     import numpy as np
     import torch
+    
+    # e.g. augmentations = {
+    #     1: "Aug1_1_1",
+    #     2: "Aug1_1_42"
+    # }
     
     # Re-seed before dataset operations to ensure consistency
     seed = args.seed + partition_id  # Add partition_id to avoid identical seeds across clients
@@ -24,7 +39,8 @@ def load_data(partition_id, args):
     dataset = MM_Multi_Scale_Dataset(
         csv_path = '/gris/gris-f/homelv/phempel/masterthesis/MMFL/data/chimera_new.csv',
         return_coords = args.return_coords,
-        data_dir= args.data_root_dir,
+        data_dir = args.data_root_dir if not args.augmentations or partition_id not in args.augmentations else f"/local/scratch/phempel/chimera/{args.augmentations[partition_id]}",
+        # default="/local/scratch/phempel/chimera/features_1536",
         pages = args.pages if args.pages is not None else [0, 1, 2, 3, 4],
         shuffle = False,
         seed = args.seed,  # Use original seed for dataset consistency
@@ -38,7 +54,10 @@ def load_data(partition_id, args):
         ignore=[]
     )
 
-    train_dataset, val_dataset, test_dataset = dataset.return_splits(csv_path = '{}/splits_{}.csv'.format(args.split_dir, partition_id + args.use_split_k))
+    if args.folds > 1:
+        train_dataset, val_dataset, test_dataset = dataset.return_splits(csv_path = '{}/splits_{}_{}.csv'.format(args.split_dir, partition_id + args.use_split_k, args.fold))
+    else:
+        train_dataset, val_dataset, test_dataset = dataset.return_splits(csv_path = '{}/splits_{}.csv'.format(args.split_dir, partition_id + args.use_split_k))
     return train_dataset, val_dataset, test_dataset
 
 def set_parameters(net, parameters: List[np.ndarray]):

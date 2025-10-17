@@ -96,28 +96,27 @@ def log_metrics(writer, epoch, loss, all_labels, all_preds, all_probs, kind:str,
 
 def get_writer_dir(client_nr, round_nr, results_dir):
     writer_dir = os.path.join(results_dir, "log")
-def train(datasets, cur, args, device):
+# def train(datasets, cur, args, device):
     """   
         train for a single fold
     """
+    # seed = args.seed
+    # import random
+    # random.seed(seed)
+    # np.random.seed(seed)
+    # torch.manual_seed(seed)
+    # os.environ['PYTHONHASHSEED'] = str(seed)
     
-    seed = args.seed
-    import random
-    random.seed(seed)
-    np.random.seed(seed)
-    torch.manual_seed(seed)
-    os.environ['PYTHONHASHSEED'] = str(seed)
+    # if torch.cuda.is_available():
+    #     torch.cuda.manual_seed(seed)
+    #     torch.cuda.manual_seed_all(seed)
+    # torch.backends.cudnn.benchmark = False
+    # torch.backends.cudnn.deterministic = True
+    # torch.use_deterministic_algorithms(True, warn_only=True)
     
-    if torch.cuda.is_available():
-        torch.cuda.manual_seed(seed)
-        torch.cuda.manual_seed_all(seed)
-    torch.backends.cudnn.benchmark = False
-    torch.backends.cudnn.deterministic = True
-    torch.use_deterministic_algorithms(True, warn_only=True)
-    
-    verbose = not args.no_verbose
-    if verbose: print('\nTraining Fold {}!'.format(cur))
-    writer_dir = os.path.join(args.results_dir, "log")
+    # verbose = not args.no_verbose
+    # if verbose: print('\nTraining Fold {}!'.format(cur))
+    # writer_dir = os.path.join(args.results_dir, "log")
     if not os.path.isdir(writer_dir):
         os.mkdir(writer_dir)
     if type(client_nr) == int:
@@ -565,24 +564,16 @@ def test_clam(model, loader, device, args, results_dir=None, client_nr=None, n_c
     from tensorboardX import SummaryWriter
     writer = SummaryWriter(writer_dir, flush_secs=15)
 
-    print(f"Test metrics logging for client {client_nr}, round {round_nr}:")
-    print(f"  Total test samples: {len(loader)}")
-    print(f"  Test loss: {test_loss:.6f}")
-    print(f"  Has CD results: {has_cd_results}")
-
     acc, roc_auc, f1 = log_metrics(writer, None, None, all_labels, all_preds, all_probs, 'test', 'MM')
     writer.flush()  # Ensure MM metrics are written
-    print(f"  MM metrics - Acc: {acc:.4f}, ROC-AUC: {roc_auc:.4f}, F1: {f1:.4f}")
     
     log_metrics(writer, None, None, all_labels, all_preds_clam, all_probs_clam, 'test', 'CLAM')
     writer.flush()  # Ensure CLAM metrics are written
-    print(f"  CLAM metrics logged")
     
     # Only log CD metrics if we have valid CD results
     if has_cd_results:
         log_metrics(writer, None, None, all_labels, all_preds_cd, all_probs_cd, 'test', 'CD')
         writer.flush()  # Ensure CD metrics are written
-        print(f"  CD metrics logged")
     else:
         print(f"  CD metrics skipped (no valid results)")
 

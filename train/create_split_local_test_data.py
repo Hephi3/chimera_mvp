@@ -110,7 +110,7 @@ if __name__ == "__main__":
     num_clients = 3
     test_p = 0.1
     balance = True
-    seed = 5
+    seed = 4
     folds = 5
     output_dir = "splits/"
 

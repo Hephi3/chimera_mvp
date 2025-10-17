@@ -867,3 +867,5 @@ if __name__ == "__main__":
 #cd /gris/gris-f/homelv/phempel/masterthesis/MM_flower/train/plot && python plot_run_federated.py --compare --names 3_clients_s1 3_clients_1_s1 3_clients_2_s1 3_clients_3_s1 --submodel MM --metric_filter all --show_individual_clients --show_full_training --smooth_window 10
 
 # python plot_run_federated.py --compare --names 3_clients_no_overfit_sp1_4115_s1 3_clients_no_overfit_sp2_4115_s1 3_clients_no_overfit_sp3_4115_s1 3_clients_no_overfit_sp4_4115_s1 3_clients_no_overfit_sp5_4115_s1  --submodel MM --metric_filter all --show_individual_clients --show_full_training --smooth_window 10
+
+# python plot_run_federated.py --compare --names nda_no_phases_s1/Fold0 nda_no_phases_s1/Fold1 nda_no_phases_s1/Fold2  --submodel MM --metric_filter all --show_individual_clients --show_full_training --smooth_window 10

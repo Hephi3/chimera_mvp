@@ -5,6 +5,7 @@ from flwr.common import Context
 import torch
 from utils.fl_utils import get_parameters, load_data, set_parameters, get_model
 from utils.core_utils_simul import test, train, validate
+# from utils.core_utils_random import test, train
 
 # Define Flower Client and client_fn
 class FlowerClient(NumPyClient):
@@ -25,7 +26,23 @@ class FlowerClient(NumPyClient):
         assert round_num is not None, "Server round number must be provided"
         set_parameters(self.net, parameters)
         if round_num == 1:
-            test(self.net, self.test_split, self.args, self.device, results_dir=self.args.results_dir, client_nr=self.partition_id, round_nr=0) # Initial evaluation before training
+            test(self.net, self.test_split, self.args, self.device, results_dir=self.args.results_dir, client_nr=self.partition_id, round_nr=0)  # Initial evaluation before training
+            # if self.args.no_phases_but_first:
+            #     self.args.max_epochs = 150
+                
+        # elif self.args.no_phases_but_first:
+        #     self.args.early_stopping = False
+        #     self.args.max_epochs = self.args.origin_max_epochs
+        # if self.args.max_epochs_steps:
+        #     steps = self.args.max_epochs_steps.split(",")
+        #     phase_epochs = {int(round): int(epochs) for round, epochs in (step.split(":") for step in steps[:-1])}
+            
+        #     if round_num + 1 > max(phase_epochs.keys()):
+        #         self.args.max_epochs = int(steps[-1])
+        #     else:
+        #         upper_bound = min([r for r in phase_epochs.keys() if r >= round_num + 1])
+        #         self.args.max_epochs = phase_epochs[upper_bound]
+
         train_loss, f1 = train(
             self.net,
             self.train_split,
@@ -82,7 +99,7 @@ def client_config(args):
         model = get_model(args, device=device)
         partition_id = context.node_config["partition-id"]
         # num_partitions = context.node_config["num-partitions"]
-        train_split, val_split, test_split = load_data(partition_id, args) #TODO? Testloader????
+        train_split, val_split, test_split = load_data(partition_id, args)
         
         # Statistics over data:
         # print("TRAINING ON", len(train_split), "Labels:", train_split.slide_data['label'].value_counts().to_dict())
