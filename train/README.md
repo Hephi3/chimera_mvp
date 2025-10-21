@@ -50,6 +50,14 @@ python train.py --data_root_dir <features_dir> --split_dir <splits_dir> --exp_co
   - `--split_dir`: Directory containing split CSV files
   - `--exp_code`: Name for your experiment (any string)
 
+Parameters of the 3 models used as ensemble in the CHIMERA challenge submission:
+- Model 1 Code: Default parameters, just set data_root_dir, split_dir, and exp_code
+    - `CUDA_VISIBLE_DEVICES=0 python train.py --data_root_dir "/local/scratch/phempel/chimera/features_1536" --split_dir chimera_1_10_0.1 --no_verbose --exp_code Model1`
+- Model 2 Code: 
+    - `CUDA_VISIBLE_DEVICES=0 python train.py --data_root_dir "/local/scratch/phempel/chimera/features_1536" --split_dir chimera_1_10_0.1 --no_verbose --exp_code Model2 --drop_out 0.4 --inst_loss ce --lr_clam 2.2e-5 --lr_clinical 2.2e-5 --lr_mm 8.5e-5 --lr_attention_levels 4e-5,3e-5,2e-5 --top_p 0.35`
+- Model 3 Code:
+    - `CUDA_VISIBLE_DEVICES=0 python train.py --data_root_dir "/local/scratch/phempel/chimera/features_1536" --split_dir chimera_1_10_0.1 --no_verbose --exp_code Model3 --drop_out 0.4 --lr_attention_levels 5e-5,3e-5,2e-5 --top_p 0.2`
+
 ---
 
 For more details, see the documentation or contact the project maintainers.
