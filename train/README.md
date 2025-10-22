@@ -60,4 +60,9 @@ Parameters of the 3 models used as ensemble in the CHIMERA challenge submission:
 
 ---
 
+### Docker Image
+As the docker image created from the inference model is too large to upload to GitHub, a link is provided:
+- https://next.hessenbox.de/index.php/s/cWgpZGgYeJYsa7c
+- https://next.hessenbox.de/index.php/s/ioxWxDxQGTyXC77
+
 For more details, see the documentation or contact the project maintainers.
