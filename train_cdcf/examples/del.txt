@@ -1,0 +1,14 @@
+python federated_train.py --gpus 3 --num_clients 3 --exp_code del25_1 --no_verbose --split_dir chimera_3_5_2_0.1_1 --num_rounds 4 --folds 2 --seed 1 --augmentation 'features_1536_fixed' --no_phases --max_epochs 3 --num_stages 2
+python federated_train.py --gpus 3 --num_clients 3 --exp_code del25_2 --no_verbose --split_dir chimera_3_5_2_0.1_1 --num_rounds 4 --folds 2 --seed 1 --augmentation 'features_1536_fixed_aug3_3_440' --no_phases --max_epochs 3 --num_stages 2
+
+# python federated_train.py --gpus 3 --num_clients 3 --exp_code del16_1 --no_verbose --split_dir chimera_3_5_2_0.1_1 --num_rounds 4 --folds 2 --seed 1 --augmentation 'features_1536_fixed' --no_phases --max_epochs 3 --num_stages 2
+# python federated_train.py --gpus 3 --num_clients 3 --exp_code del16_2 --no_verbose --split_dir chimera_3_5_2_0.1_1 --num_rounds 4 --folds 2 --seed 1 --augmentation 'features_1536_fixed_aug3_3_440' --no_phases --max_epochs 3 --num_stages 2
+
+
+# python federated_train.py --gpus 3 --num_clients 3 --exp_code del14_1 --no_verbose --split_dir chimera_3_5_2_0.1_1 --num_rounds 1 --folds 2 --seed 1 --augmentation 'features_1536_fixed' --no_phases --max_epochs 3 --num_stages 2
+# python federated_train.py --gpus 3 --num_clients 3 --exp_code del14_2 --no_verbose --split_dir chimera_3_5_2_0.1_1 --num_rounds 1 --folds 2 --seed 1 --augmentation 'features_1536_fixed' --no_phases --max_epochs 3 --num_stages 2
+# python federated_train.py --gpus 3 --num_clients 3 --exp_code del12_2 --no_verbose --split_dir chimera_3_5_2_0.1_1 --num_rounds 3 --folds 5 --seed 1 --augmentation 'features_1536_fixed_aug3_3_440' --no_phases --max_epochs 3 --num_stages 2
+
+# python federated_train.py --gpus 3 --num_clients 3 --exp_code del1_3 --no_verbose --split_dir chimera_3_5_2_0.1_1 --num_rounds 3 --folds 5 --seed 1 --augmentation 'features_1536_fixed' --num_rounds 4 --no_phases --max_epochs 3 --num_stages 2
+# python federated_train.py --gpus 3 --num_clients 3 --exp_code del2 --no_verbose --split_dir chimera_3_5_2_0.1_1 --num_rounds 3 --folds 5 --seed 1 --augmentation 'features_1536_fixed_aug3_3_440' --num_rounds 4 --no_phases --max_epochs 3 --num_stages 2
+# python federated_train.py --gpus 3 --num_clients 3 --exp_code del3 --no_verbose --split_dir chimera_3_5_2_0.1_1 --num_rounds 3 --folds 5 --seed 1 --augmentation 'features_1536_fixed_aug4_4_450' --num_rounds 4 --no_phases --max_epochs 3 --num_stages 2
