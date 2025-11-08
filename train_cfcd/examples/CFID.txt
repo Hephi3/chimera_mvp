@@ -1,0 +1,19 @@
+python federated_train.py --gpus 6 --num_clients 3 --exp_code CFID_nocd --no_verbose --split_dir chimera_3_5_2_0.1_1_balanced_0.5_0.5_nocd  --folds 5 --seed 1 --num_rounds 40 --no_phases --max_epochs 3 --num_stages 2
+python federated_train.py --gpus 6 --num_clients 3 --exp_code CFID_nocd --no_verbose --split_dir chimera_3_5_2_0.1_1_balanced_0.5_0.5_nocd  --folds 5 --seed 2 --num_rounds 40 --no_phases --max_epochs 3 --num_stages 2
+python federated_train.py --gpus 6 --num_clients 3 --exp_code CFID_nocd --no_verbose --split_dir chimera_3_5_2_0.1_1_balanced_0.5_0.5_nocd  --folds 5 --seed 3 --num_rounds 40 --no_phases --max_epochs 3 --num_stages 2
+
+python federated_train.py --gpus 6 --num_clients 3 --exp_code CFID_nocd_sp2 --no_verbose --split_dir chimera_3_5_2_0.1_2_balanced_0.5_0.5_nocd  --folds 5 --seed 1 --num_rounds 40 --no_phases --max_epochs 3 --num_stages 2
+python federated_train.py --gpus 6 --num_clients 3 --exp_code CFID_nocd_sp2 --no_verbose --split_dir chimera_3_5_2_0.1_2_balanced_0.5_0.5_nocd  --folds 5 --seed 2 --num_rounds 40 --no_phases --max_epochs 3 --num_stages 2
+python federated_train.py --gpus 6 --num_clients 3 --exp_code CFID_nocd_sp2 --no_verbose --split_dir chimera_3_5_2_0.1_2_balanced_0.5_0.5_nocd  --folds 5 --seed 3 --num_rounds 40 --no_phases --max_epochs 3 --num_stages 2
+
+python federated_train.py --gpus 6 --num_clients 3 --exp_code CFID_nocd_sp3 --no_verbose --split_dir chimera_3_5_2_0.1_3_balanced_0.5_0.5_nocd  --folds 5 --seed 1 --num_rounds 40 --no_phases --max_epochs 3 --num_stages 2
+python federated_train.py --gpus 6 --num_clients 3 --exp_code CFID_nocd_sp3 --no_verbose --split_dir chimera_3_5_2_0.1_3_balanced_0.5_0.5_nocd  --folds 5 --seed 2 --num_rounds 40 --no_phases --max_epochs 3 --num_stages 2
+python federated_train.py --gpus 6 --num_clients 3 --exp_code CFID_nocd_sp3 --no_verbose --split_dir chimera_3_5_2_0.1_3_balanced_0.5_0.5_nocd  --folds 5 --seed 3 --num_rounds 40 --no_phases --max_epochs 3 --num_stages 2
+
+python federated_train.py --gpus 6 --num_clients 3 --exp_code CFID_nocd_sp4 --no_verbose --split_dir chimera_3_5_2_0.1_4_balanced_0.5_0.5_nocd  --folds 5 --seed 1 --num_rounds 40 --no_phases --max_epochs 3 --num_stages 2
+python federated_train.py --gpus 6 --num_clients 3 --exp_code CFID_nocd_sp4 --no_verbose --split_dir chimera_3_5_2_0.1_4_balanced_0.5_0.5_nocd  --folds 5 --seed 2 --num_rounds 40 --no_phases --max_epochs 3 --num_stages 2
+python federated_train.py --gpus 6 --num_clients 3 --exp_code CFID_nocd_sp4 --no_verbose --split_dir chimera_3_5_2_0.1_4_balanced_0.5_0.5_nocd  --folds 5 --seed 3 --num_rounds 40 --no_phases --max_epochs 3 --num_stages 2
+
+python federated_train.py --gpus 6 --num_clients 3 --exp_code CFID_nocd_sp5 --no_verbose --split_dir chimera_3_5_2_0.1_5_balanced_0.5_0.5_nocd  --folds 5 --seed 1 --num_rounds 40 --no_phases --max_epochs 3 --num_stages 2
+python federated_train.py --gpus 6 --num_clients 3 --exp_code CFID_nocd_sp5 --no_verbose --split_dir chimera_3_5_2_0.1_5_balanced_0.5_0.5_nocd  --folds 5 --seed 2 --num_rounds 40 --no_phases --max_epochs 3 --num_stages 2
+python federated_train.py --gpus 6 --num_clients 3 --exp_code CFID_nocd_sp5 --no_verbose --split_dir chimera_3_5_2_0.1_5_balanced_0.5_0.5_nocd  --folds 5 --seed 3 --num_rounds 40 --no_phases --max_epochs 3 --num_stages 2

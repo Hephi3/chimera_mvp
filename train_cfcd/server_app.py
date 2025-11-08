@@ -64,7 +64,7 @@ def server_config(args):
         
         # METHOD: Custom Federated Averaging with Prototype Integration
         
-        if args.method:
+        if args.method_global or args.num_sampled > 0:
             strategy = CustomFedAvg(
             fraction_fit=1.0,  # Sample 100% of available clients for training
             fraction_evaluate=1.0,  # Sample 100% of available clients for evaluation
@@ -75,6 +75,7 @@ def server_config(args):
             on_fit_config_fn=fit_config,
             on_evaluate_config_fn=fit_config,
             prototype_adaptation=args.proto_adaptation_rate_server, #TODO set adaptation rate
+            hyps=args,
             # variance_scale=1.0,
             # num_samples=0,
             # fit_metrics_aggregation_fn=fit_metrics_aggregation_fn,

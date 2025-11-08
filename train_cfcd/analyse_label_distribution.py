@@ -247,7 +247,8 @@ class SimplePieChartAnalyzer:
 
 def main():
     """Main function to run the simple analysis."""
-    splits_dir = "/gris/gris-f/homelv/phempel/masterthesis/MM_flower/train_cdcf/splits/chimera_3_5_0.1_1_unbalanced_0.2_0.3_0.5"
+    # splits_dir = "/gris/gris-f/homelv/phempel/masterthesis/MM_flower/train_cdcf/splits/chimera_3_5_0.1_1_unbalanced_0.2_0.3_0.5"
+    splits_dir = "/gris/gris-f/homelv/phempel/masterthesis/MM_flower/train_cfcd/splits/chimera_3_5_2_0.1_1_unbalanced_0.8_0.2_nocd"
     
     if not os.path.exists(splits_dir):
         print(f"Error: Splits directory not found: {splits_dir}")

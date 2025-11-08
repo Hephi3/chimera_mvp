@@ -466,6 +466,9 @@ def plot_individual_folds_metric(ax, metric, title, fold_client_data, fold_serve
     for fold_idx, (fold_num, client_data) in enumerate(sorted(fold_client_data.items())):
         color = fold_colors[fold_idx % len(fold_colors)]
         
+        client_markers = ['o', 's', '^']
+        
+        
         if show_individual_clients:
             # Plot individual clients for this fold
             for client_id in sorted(client_data.keys()):
@@ -485,7 +488,7 @@ def plot_individual_folds_metric(ax, metric, title, fold_client_data, fold_serve
                     
                     if all_values:
                         ax.plot(all_steps, all_values, color=color, linewidth=1.5, 
-                               label=f'Fold {fold_num} C{client_id}', alpha=LINE_ALPHA, linestyle='--')
+                               label=f'Fold {fold_num} C{client_id}', marker=client_markers[client_id % len(client_markers)], alpha=LINE_ALPHA, linestyle='--')
                 else:
                     # Final values only
                     round_values = []
@@ -499,7 +502,7 @@ def plot_individual_folds_metric(ax, metric, title, fold_client_data, fold_serve
                                 round_positions.append(round_num)
                     
                     if round_values:
-                        ax.plot(round_positions, round_values, color=color, marker='o',
+                        ax.plot(round_positions, round_values, color=color, marker=client_markers[client_id % len(client_markers)],
                                linewidth=1.5, markersize=4, label=f'Fold {fold_num} C{client_id}', 
                                alpha=LINE_ALPHA, linestyle='--')
         else:
@@ -631,6 +634,7 @@ def plot_crossval_test_metric(ax, title, client_stats, server_stats, all_rounds,
     if show_individual_clients and client_stats:
         # Plot individual client test statistics
         base_client_colors = ['blue', 'green', 'orange', 'purple', 'brown', 'pink']
+        client_markers = ['o', 's', '^']
         
         for i in [0,1]:
             for client_idx, client_id in enumerate(sorted(client_stats[i].keys())):
@@ -664,8 +668,8 @@ def plot_crossval_test_metric(ax, title, client_stats, server_stats, all_rounds,
                         client_rounds.append(round_num)
                 
                 if client_means:
-                    # Plot client mean line with different styles for different stagees
-                    ax.plot(client_rounds, client_means, color=color, marker='o', linestyle=linestyle,
+                    # Plot client mean line with different styles for different stages
+                    ax.plot(client_rounds, client_means, color=color, marker=client_markers[client_id % len(client_markers)], linestyle=linestyle,
                             linewidth=2, markersize=4, label=f'Client {client_id} Stage {i} (CV avg)', alpha=LINE_ALPHA)
                     
                     # Plot standard deviation shaded band for individual clients
@@ -757,6 +761,8 @@ def plot_crossval_metric(ax, metric, title, client_stats, all_rounds,
         # Plot individual client statistics
         client_colors = ['blue', 'red', 'green', 'orange', 'purple', 'brown']
         
+        client_markers = ['o', 's', '^']
+        
         for client_idx, client_id in enumerate(sorted(client_stats.keys())):
             color = client_colors[client_idx % len(client_colors)]
             
@@ -784,7 +790,7 @@ def plot_crossval_metric(ax, metric, title, client_stats, all_rounds,
                 if all_means:
                     # Plot mean line
                     ax.plot(all_steps, all_means, color=color, linewidth=2, 
-                            label=f'Client {client_id} (CV avg)', alpha=LINE_ALPHA)
+                            label=f'Client {client_id} (CV avg)', alpha=LINE_ALPHA, marker=client_markers[client_id % len(client_markers)])
                     
                     # Plot standard deviation band
                     if show_std and any(std > 0 for std in all_stds):
@@ -809,7 +815,7 @@ def plot_crossval_metric(ax, metric, title, client_stats, all_rounds,
                 
                 if round_means:
                     # Plot mean line
-                    ax.plot(round_positions, round_means, color=color, marker='o',
+                    ax.plot(round_positions, round_means, color=color, marker=client_markers[client_id % len(client_markers)],
                             linewidth=2, markersize=6, label=f'Client {client_id} (CV avg)', 
                             alpha=LINE_ALPHA)
                     
@@ -981,6 +987,8 @@ def plot_crossval_test_metric_comparison(ax, title, all_experiment_data, all_exp
     stage_linestyles = ['-', '--']  # Stage 0: solid, Stage 1: dashed
     stage_markers = ['s', '^']  # Stage 0: square, Stage 1: triangle
     
+    client_markers = ['o', 's', '^']
+    
     # For test metrics, show individual clients if requested
     if show_individual_clients:
         # Plot individual client test statistics for all experiments
@@ -1022,7 +1030,7 @@ def plot_crossval_test_metric_comparison(ax, title, all_experiment_data, all_exp
                     
                     if client_means:
                         # Plot client mean line with same color but different line styles for different stages
-                        ax.plot(client_rounds, client_means, color=exp_color, marker='o', linestyle=linestyle,
+                        ax.plot(client_rounds, client_means, color=exp_color, marker=client_markers[client_id % len(client_markers)], linestyle=linestyle,
                                 linewidth=2, markersize=4, 
                                 label=f'{exp_name} C{client_id} Stage {stage}', alpha=LINE_ALPHA)
                         
@@ -1317,6 +1325,7 @@ def plot_crossval_metric_with_color(ax, metric, title, client_stats, server_stat
     LINE_ALPHA = 0.8
     STD_ALPHA = 0.12
     
+    client_markers = ['o', 's', '^']
     # For train/val metrics, exclude round 0 (initial evaluation before training)
     if 'test' not in metric:
         plot_rounds = [r for r in all_rounds if r > 0]
@@ -1355,7 +1364,7 @@ def plot_crossval_metric_with_color(ax, metric, title, client_stats, server_stat
                 if client_means:
                     # Plot client mean line with dashed style (override client_line_style for test metrics)
                     client_label = f'{label_prefix} C{client_id} (CV avg)' if label_prefix else f'Client {client_id} (CV avg)'
-                    ax.plot(client_rounds, client_means, color=color, marker='o', linestyle='--',
+                    ax.plot(client_rounds, client_means, color=color, marker=client_markers[client_id % len(client_markers)], linestyle='--',
                            linewidth=2, markersize=4, label=client_label, alpha=LINE_ALPHA)
                     
                     # Plot standard deviation shaded band for individual clients

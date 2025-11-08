@@ -52,10 +52,11 @@ class MultimodalHierarchical(nn.Module):
         """
         # h_clinical = h_clinical.unsqueeze(0)
         h_combined = torch.cat([h_path, h_clinical], dim=1)
+        
         #TODO: Feature vector here
         h_fused = self.fusion_net(h_combined)
         #TODO: Or feature vector here
-        return h_fused
+        return h_fused, h_combined
 
     def forward(self, h_list, clinical_features, coords=None, label=None, instance_eval=False, return_features=False, attention_only=False, slide_id=None, plot_coords = False):
         
@@ -88,12 +89,27 @@ class MultimodalHierarchical(nn.Module):
             h_path = h_path * F.softplus(self.clam_weight)
             h_clinical = h_clinical * F.softplus(self.clinical_weight)
         
-        h_fused = self.fusion(h_path, h_clinical)
+        
+        
+        h_fused, concat_features = self.fusion(h_path, h_clinical)
         
         # Final classification
         logits = self.classifier(h_fused)
         Y_prob = F.softmax(logits, dim=1)
         Y_hat = torch.argmax(Y_prob, dim=1)
             
-        return {"CLAM": [logits_clam, Y_prob_clam, Y_hat_clam, A_raw, results_clam], "CD": [logits_clinical, Y_prob_clinical, Y_hat_clinical, None, None], "MM": [logits, Y_prob, Y_hat, None, None], "features": h_fused}
+        return {"CLAM": [logits_clam, Y_prob_clam, Y_hat_clam, A_raw, results_clam], "CD": [logits_clinical, Y_prob_clinical, Y_hat_clinical, None, None], "MM": [logits, Y_prob, Y_hat, None, None], "concat_features": concat_features}
+    
+    def forward_sample(self, h_combined):
+        print("Forward sample called with features:", h_combined.shape)
+        # print("First 5 feature values:", h_combined[0, :5])
+        h_fused = self.fusion_net(h_combined)
+        
+        
+        # Final classification
+        logits = self.classifier(h_fused)
+        Y_prob = F.softmax(logits, dim=0)
+        Y_hat = torch.argmax(Y_prob, dim=0)
+            
+        return {"MM": [logits, Y_prob, Y_hat, None, None], "concat_features": h_combined}
 

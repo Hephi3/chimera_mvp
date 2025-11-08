@@ -12,9 +12,15 @@ def get_hyperparameters():
                     help='Client augmentation mappings as key=value pairs, e.g., --augmentations 1=features_1536_fixed_aug2_2_420 2=features_1536_fixed_aug3_3_430')
     parser.add_argument('--num_stages', type=int, default=1, help='number of stages (default: 2)')
     
-    parser.add_argument('--method', action='store_true', default=False, help='enable prototype-based federated learning method')
+    parser.add_argument('--method_global', action='store_true', default=False, help='enable prototype-based federated learning method')
+    parser.add_argument('--method_local', action='store_true', default=False, help='enable prototype-based federated learning method')
+    parser.add_argument('--debug', action='store_true', default=False, help='enable debug mode')
+    # parser.add_argument('--method_sample', action='store_true', default=False, help='enable prototype-based federated learning method')
     parser.add_argument('--proto_adaptation_rate_client', type=float, default=0.5, help='prototype adaptation rate for clients (default: 0.5)')
     parser.add_argument('--proto_adaptation_rate_server', type=float, default=0.5, help='prototype adaptation rate for server (default: 0.5)')
+    parser.add_argument('--num_sampled', type=int, default=0,  help='number of sampled datapoints per client')
+    parser.add_argument('--temperature', type=float, default=1.0, help='temperature for prototype-based methods (default: 1.0)')
+    parser.add_argument('--variance_scale', type=float, default=1.0, help='variance scale for prototype sampling (default: 1.0)')
     
     parser.add_argument('--num_clients', type=int, default=3, help='number of clients (default: 3)')
     parser.add_argument('--num_rounds', type=int, default=3, help='number of federated learning rounds (default: 3)')

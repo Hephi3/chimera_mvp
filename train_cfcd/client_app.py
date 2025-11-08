@@ -7,6 +7,7 @@ from utils.fl_utils import get_parameters, get_stage, load_data, set_parameters,
 from utils.core_utils_simul import test, train, validate
 from utils.method_utils import Prototype
 # from utils.core_utils_random import test, train
+import numpy as np
 
 # Define Flower Client and client_fn
 class FlowerClient(NumPyClient):
@@ -44,7 +45,7 @@ class FlowerClient(NumPyClient):
         if round_num == 1:
             test(self.net, self.test_splits[0], self.args, self.device, results_dir=self.args.results_dir, client_nr=self.partition_id, round_nr=0, stage=0)  # Initial evaluation before training
         
-        if self.args.method:
+        if self.args.method_global or self.args.method_local or self.args.num_sampled > 0:
             proto_path = f"{self.args.results_dir}/prototypes/prototype_client_{self.partition_id}.json"
             if round_num == 1:
                 _, _, features_list, labels_list = train(
@@ -55,12 +56,41 @@ class FlowerClient(NumPyClient):
                     self.partition_id,
                     self.device,
                     round_num=round_num,
-                    use_phases= False# self.args.phases_always or (not self.args.no_phases and round_num < 2),
+                    use_phases= False,# self.args.phases_always or (not self.args.no_phases and round_num < 2),
+                    no_training=True
                 )
+                if self.args.debug:
+                    features_arr = np.stack([f.detach().cpu().numpy() if isinstance(f, torch.Tensor) else np.array(f) for f in features_list])
+                    labels_arr = np.array(labels_list)
+                    np.savez(f"{self.args.results_dir}/debug_features_client_{self.partition_id}_round_0.npz",
+                            features=features_arr, labels=labels_arr)
                 self.prototype = Prototype.from_data(features_list)#, plot=True)
+                if self.args.num_sampled > 0:
+                    
+                    features_arr = np.array([f.detach().cpu().numpy() if isinstance(f, torch.Tensor) else np.array(f) for f in features_list])
+                    labels_arr = np.array(labels_list)
+                    print("Prototypes based on number of samples per class:", len(features_arr[labels_arr==0]), len(features_arr[labels_arr==1]), len(features_arr[labels_arr==2]))
+                    prototypes_brs1 = Prototype.from_data(features_arr[labels_arr==0])
+                    prototypes_brs2 = Prototype.from_data(features_arr[labels_arr==1])
+                    prototypes_brs3 = Prototype.from_data(features_arr[labels_arr==2])
+                    prototypes_brs1.save(f"{self.args.results_dir}/prototypes/prototype_client_{self.partition_id}_brs1.json")
+                    prototypes_brs2.save(f"{self.args.results_dir}/prototypes/prototype_client_{self.partition_id}_brs2.json")
+                    prototypes_brs3.save(f"{self.args.results_dir}/prototypes/prototype_client_{self.partition_id}_brs3.json")
             else:
-                self.prototype = Prototype.load(proto_path)
-
+                if self.args.method_global or self.args.method_local:
+                    self.prototype = Prototype.load(proto_path)
+                if self.args.num_sampled > 0:
+                    brs_samples = []
+                    for i in [1,2,3]:
+                        global_brs_prototype = Prototype.load(f"{self.args.results_dir}/prototypes/prototype_global_brs{i}.json")
+                        sampled_brs = global_brs_prototype.sample(num_samples=self.args.num_sampled, variance_scale=self.args.variance_scale)
+                        brs_samples.append(sampled_brs)
+                    
+                    
+                    
+                        
+                
+                
         train_loss, f1, features_list, labels_list = train(
             self.net,
             train_data,
@@ -70,22 +100,57 @@ class FlowerClient(NumPyClient):
             self.device,
             round_num=round_num,
             use_phases= False,# self.args.phases_always or (not self.args.no_phases and round_num < 2),
-            prototype=self.prototype if self.args.method else None
+            prototype=self.prototype if self.args.method_local else None,
+            brs_samples=brs_samples if self.args.num_sampled > 0 and round_num > 1 else None,
+            # no_training=self.args.debug
         )
+        if self.args.debug:
+            features_arr = np.stack([f.detach().cpu().numpy() if isinstance(f, torch.Tensor) else np.array(f) for f in features_list])
+            labels_arr = np.array(labels_list)
+            np.savez(f"{self.args.results_dir}/debug_features_client_{self.partition_id}_round_{round_num}.npz",
+                    features=features_arr, labels=labels_arr)
+
         test(self.net,  self.test_splits[0], self.args, self.device, results_dir=self.args.results_dir, client_nr=self.partition_id, round_nr=round_num, stage=0)
         if stage == 1:
             test(self.net,  self.test_splits[1], self.args, self.device, results_dir=self.args.results_dir, client_nr=self.partition_id, round_nr=round_num, stage=1)
-        
-        if self.args.method:
+
+        if self.args.method_global or self.args.method_local:
             new_prototype = Prototype.from_data(features_list)#, plot=True)
-            self.prototype.adapt_towards(new_prototype, adaptation_rate=self.args.proto_adaptation_rate_client)
+            # print("New prototype info of client {} and round {}:".format(self.partition_id, round_num))
+            # new_prototype.print_info()
+            # self.prototype.adapt_towards(new_prototype, adaptation_rate=self.args.proto_adaptation_rate_client)
+            self.prototype = new_prototype
             self.prototype.save(proto_path)
+        
+        if self.args.num_sampled > 0:
+            old_prototypes_brs1 = Prototype.load(f"{self.args.results_dir}/prototypes/prototype_client_{self.partition_id}_brs1.json")
+            old_prototypes_brs2 = Prototype.load(f"{self.args.results_dir}/prototypes/prototype_client_{self.partition_id}_brs2.json")
+            old_prototypes_brs3 = Prototype.load(f"{self.args.results_dir}/prototypes/prototype_client_{self.partition_id}_brs3.json")
+            
+            prototypes_brs1 = Prototype.from_data(np.array([f.detach().cpu().numpy() if isinstance(f, torch.Tensor) else np.array(f) for f,l in zip(features_list, labels_list) if l==0]))
+            prototypes_brs2 = Prototype.from_data(np.array([f.detach().cpu().numpy() if isinstance(f, torch.Tensor) else np.array(f) for f,l in zip(features_list, labels_list) if l==1]))
+            prototypes_brs3 = Prototype.from_data(np.array([f.detach().cpu().numpy() if isinstance(f, torch.Tensor) else np.array(f) for f,l in zip(features_list, labels_list) if l==2]))
+            
+            prototypes_brs1.adapt_towards(old_prototypes_brs1, adaptation_rate=self.args.proto_adaptation_rate_client)
+            prototypes_brs2.adapt_towards(old_prototypes_brs2, adaptation_rate=self.args.proto_adaptation_rate_client)
+            prototypes_brs3.adapt_towards(old_prototypes_brs3, adaptation_rate=self.args.proto_adaptation_rate_client)
+            
+            prototypes_brs1.save(f"{self.args.results_dir}/prototypes/prototype_client_{self.partition_id}_brs1.json")
+            prototypes_brs2.save(f"{self.args.results_dir}/prototypes/prototype_client_{self.partition_id}_brs2.json")
+            prototypes_brs3.save(f"{self.args.results_dir}/prototypes/prototype_client_{self.partition_id}_brs3.json")
             
 
+        metrics = {"train_loss": train_loss, "f1": f1, "partition_id": self.partition_id}
+        
+        if self.args.num_sampled > 0:
+            metrics.update({"prototype_brs1": prototypes_brs1.serialize(), "prototype_brs2": prototypes_brs2.serialize(), "prototype_brs3": prototypes_brs3.serialize()})
+        if self.args.method_global:
+            metrics.update({"prototype": self.prototype.serialize()})
+        
         return (
             get_parameters(self.net),
             len(train_data),
-            {"train_loss": train_loss, "f1": f1, "prototype": self.prototype.serialize(),} if self.prototype else {"train_loss": train_loss, "f1": f1}
+            metrics
         )
 
     def evaluate(self, parameters, config):

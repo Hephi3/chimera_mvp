@@ -138,7 +138,7 @@ def get_writer_dir(client_nr, round_nr, results_dir):
     return writer_dir
     
 
-def train(model, train_split, val_split, args, cur, device, round_num=None, use_phases = True, prototype=None):
+def train(model, train_split, val_split, args, cur, device, round_num=None, use_phases = True, prototype=None, brs_samples=None, no_training=False):
     """   
         train for a single client
     """
@@ -202,7 +202,7 @@ def train(model, train_split, val_split, args, cur, device, round_num=None, use_
         #     if hasattr(model, 'fusion_net'):
         #         model.fusion_net.requires_grad_(phase == 'fusion')
         #         model.classifier.requires_grad_(phase == 'fusion')
-        train_loss, f1, features_list, labels_list = train_loop_clam(epoch, model, train_loader, optimizer,args.bag_weight, writer, loss_fn, verbose=verbose, phase=phase, device=device, prototype=prototype)
+        train_loss, f1, features_list, labels_list = train_loop_clam(epoch, model, train_loader, optimizer,args.bag_weight, writer, loss_fn, verbose=verbose, phase=phase, device=device, prototype=prototype, brs_samples=brs_samples, no_training=no_training)
         stop = validate_clam(cur=cur, epoch=epoch, model=model, loader=val_loader, n_classes=args.n_classes, 
             early_stopping=early_stopping, writer=writer, results_dir=args.results_dir, verbose=verbose, scheduler=scheduler, phase=phase, device=device, loss_fn=loss_fn)
 
@@ -238,7 +238,7 @@ def apply_model(loader_data, model, testing=False, plot_coords = False, device=N
 
     return results, label
 
-def train_loop_clam(epoch, model, loader, optimizer, bag_weight, writer = None, loss_fn = None, verbose = True, phase = None, device=None, prototype:Prototype=None):
+def train_loop_clam(epoch, model, loader, optimizer, bag_weight, writer = None, loss_fn = None, verbose = True, phase = None, device=None, prototype:Prototype=None, brs_samples:list[list]=None, no_training=False):
     # print information about loader data to compare with other experiment:
     # data, label, coords, clinical_data, slide_id = next(iter(loader))
     # print(f"Data batch shapes: {[d.shape for d in data]}, Labels: {label}, Coords: {[c.shape for c in coords]}, Clinical data: {clinical_data.shape}, Slide IDs: {slide_id}")
@@ -270,88 +270,122 @@ def train_loop_clam(epoch, model, loader, optimizer, bag_weight, writer = None, 
 
     if verbose: print('\n')
     
-    for batch_idx, loader_data in enumerate(loader):
-        
-        result_dict, label = apply_model(loader_data, model, plot_coords = False, device=device)
-
-        features_list.append(result_dict['features'])
-
-        logits, Y_prob, Y_hat, _, _ = result_dict['MM']
-
-        all_labels.append(label.item())
-        
-        # MM
-        if isinstance(loss_fn, nn.NLLLoss):
-            Y_log_prob = torch.log(Y_prob + 1e-8)
-            loss_mm = loss_fn(Y_log_prob, label)
-        else:
-            loss_mm = loss_fn(logits, label)
-        loss_value = loss_mm.item()
-        train_loss_mm += loss_value
-        Y_log_prob = torch.log(Y_prob + 1e-8)  # Add small value to avoid log(0)
-        all_probs.append(Y_prob.cpu().detach().numpy())
-        all_preds.append(Y_hat.item())
-        
-        # CLAM
-        if isinstance(loss_fn, nn.NLLLoss):
-            Y_log_prob = torch.log(result_dict['CLAM'][0] + 1e-8)
-            loss_clam = loss_fn(Y_log_prob, label)
-        else:
-            loss_clam = loss_fn(result_dict['CLAM'][0], label)
-        train_loss_clam += loss_clam.item()
-        all_probs_clam.append(result_dict['CLAM'][1].cpu().detach().numpy())
-        all_preds_clam.append(result_dict['CLAM'][2].item())
-        instance_dict = result_dict['CLAM'][4]  # Get instance-related results from MM
-        instance_loss_clam = instance_dict['instance_loss']
-        inst_count+=1
-        instance_loss_value = instance_loss_clam.item()
-        train_inst_loss += instance_loss_value
-        
-        loss_clam = bag_weight * loss_clam + (1-bag_weight) * instance_loss_clam 
-        
-        # CD
-        logits_cd = result_dict['CD'][0]
-        if logits_cd is not None:
-            if isinstance(loss_fn, nn.NLLLoss):
-                Y_log_prob = torch.log(result_dict['CD'][0] + 1e-8)
-                loss_cd = loss_fn(Y_log_prob, label)
-            else:
-                cd_results = result_dict['CD'][0].squeeze(0)
-                loss_cd = loss_fn(result_dict['CD'][0], label)
-            train_loss_cd += loss_cd.item()
-            all_probs_cd.append(result_dict['CD'][1].cpu().detach().numpy())
-            all_preds_cd.append(result_dict['CD'][2].item())
-        
-        w_mm = torch.exp(model.loss_weight_mm)
-        w_clam = torch.exp(model.loss_weight_clam)
-        w_cd = torch.exp(model.loss_weight_cd) if logits_cd is not None else 0.0
-
-        
-        # # redo:            
-        if phase == 'clam_only':
-            total_loss = loss_clam
-        elif phase == 'cd_only':
-            total_loss = loss_cd
-        else:
+    loader_iter = iter(loader)
+    total_steps = len(loader)
+    if brs_samples is not None:
+        num_brs = sum(len(brs_i_samples) for brs_i_samples in brs_samples)
+        total_steps = total_steps + num_brs
+    
+        brs_indices = np.random.choice(range(total_steps), num_brs, replace=False)
+        brs_samples_flat = [(sample, label) for label, brs_i_samples in enumerate(brs_samples) for sample in brs_i_samples]
+        random_indices = np.random.permutation(len(brs_samples_flat))
+        shuffled_brs_samples = [brs_samples_flat[i] for i in random_indices]
+    else:
+        brs_indices = []
+    
+    for batch_idx in range(total_steps):
+    
+    # brs_samples: list of lists of sampled data points per BRS prototype
+    # for batch_idx, loader_data in enumerate(loader):
+        if batch_idx in brs_indices:
+            print("Using BRS sampled data for this step.")
+            data, label = shuffled_brs_samples.pop(0)
+            data = torch.tensor(data, dtype=torch.float32).to(device)
+            label = torch.tensor([label], dtype=torch.long).to(device)
             
-            # Fusion + submodale Hilfsverluste
-            norm = w_mm + w_clam + w_cd
-            total_loss = (w_mm * loss_mm + w_clam * loss_clam + w_cd * loss_cd) / norm
+            results = model.forward_sample(data)
+            logits, Y_prob, Y_hat, _, _ = results['MM']
+            logits = logits.unsqueeze(0)
+            # print("!!!LABEL:", label, " LOGITS:", logits)
+            total_loss = loss_fn(logits, label)
+            
+        else:
+            loader_data = next(loader_iter)
         
-        if verbose and (batch_idx + 1) % 20 == 0:
-            print('batch {}, loss_mm: {:.4f}, instance_loss: {:.4f}, weighted_loss: {:.4f}, '.format(batch_idx, loss_value, instance_loss_value, total_loss.item()) + 
-                'label: {}'.format(label.item()))
+            result_dict, label = apply_model(loader_data, model, plot_coords = False, device=device)
 
-        error = calculate_error(Y_hat, label)
-        train_error += error
+            features_list.append(result_dict["concat_features"])
+
+            logits, Y_prob, Y_hat, _, _ = result_dict['MM']
+
+            all_labels.append(label.item())
+            
+            # MM
+            if isinstance(loss_fn, nn.NLLLoss):
+                Y_log_prob = torch.log(Y_prob + 1e-8)
+                loss_mm = loss_fn(Y_log_prob, label)
+            else:
+                # print("LABEL:", label, " LOGITS:", logits)
+                loss_mm = loss_fn(logits, label)
+            loss_value = loss_mm.item()
+            train_loss_mm += loss_value
+            Y_log_prob = torch.log(Y_prob + 1e-8)  # Add small value to avoid log(0)
+            all_probs.append(Y_prob.cpu().detach().numpy())
+            all_preds.append(Y_hat.item())
+            
+            # CLAM
+            if isinstance(loss_fn, nn.NLLLoss):
+                Y_log_prob = torch.log(result_dict['CLAM'][0] + 1e-8)
+                loss_clam = loss_fn(Y_log_prob, label)
+            else:
+                loss_clam = loss_fn(result_dict['CLAM'][0], label)
+            train_loss_clam += loss_clam.item()
+            all_probs_clam.append(result_dict['CLAM'][1].cpu().detach().numpy())
+            all_preds_clam.append(result_dict['CLAM'][2].item())
+            instance_dict = result_dict['CLAM'][4]  # Get instance-related results from MM
+            instance_loss_clam = instance_dict['instance_loss']
+            inst_count+=1
+            instance_loss_value = instance_loss_clam.item()
+            train_inst_loss += instance_loss_value
+            
+            loss_clam = bag_weight * loss_clam + (1-bag_weight) * instance_loss_clam 
+            
+            # CD
+            logits_cd = result_dict['CD'][0]
+            if logits_cd is not None:
+                if isinstance(loss_fn, nn.NLLLoss):
+                    Y_log_prob = torch.log(result_dict['CD'][0] + 1e-8)
+                    loss_cd = loss_fn(Y_log_prob, label)
+                else:
+                    cd_results = result_dict['CD'][0].squeeze(0)
+                    loss_cd = loss_fn(result_dict['CD'][0], label)
+                train_loss_cd += loss_cd.item()
+                all_probs_cd.append(result_dict['CD'][1].cpu().detach().numpy())
+                all_preds_cd.append(result_dict['CD'][2].item())
+            
+            w_mm = torch.exp(model.loss_weight_mm)
+            w_clam = torch.exp(model.loss_weight_clam)
+            w_cd = torch.exp(model.loss_weight_cd) if logits_cd is not None else 0.0
+
+            
+            # # redo:            
+            if phase == 'clam_only':
+                total_loss = loss_clam
+            elif phase == 'cd_only':
+                total_loss = loss_cd
+            else:
+                
+                # Fusion + submodale Hilfsverluste
+                norm = w_mm + w_clam + w_cd
+                total_loss = (w_mm * loss_mm + w_clam * loss_clam + w_cd * loss_cd) / norm
+            
+            if verbose and (batch_idx + 1) % 20 == 0:
+                print('batch {}, loss_mm: {:.4f}, instance_loss: {:.4f}, weighted_loss: {:.4f}, '.format(batch_idx, loss_value, instance_loss_value, total_loss.item()) + 
+                    'label: {}'.format(label.item()))
+
+            error = calculate_error(Y_hat, label)
+            train_error += error
         
+             # METHOD: apply prototype weighting if prototype is given
+             #TODO: Only weighs not sampled points
+            if prototype is not None:
+                weight = prototype.weight_point(result_dict['concat_features'].cpu().detach().numpy()) 
+                # print("LOSS OLD:", total_loss.item(), " LOSS NEW:", (total_loss * weight), " WEIGHT:", weight)
+                total_loss = total_loss * weight
+       
+        if no_training:
+            continue
         optimizer.zero_grad()
-
-        # METHOD: apply prototype weighting if prototype is given
-        # if prototype is not None:
-        #     weight = prototype.weight_point(result_dict['features'].cpu().detach().numpy()) 
-        #     # print("LOSS OLD:", total_loss.item(), " LOSS NEW:", (total_loss * weight), " WEIGHT:", weight)
-        #     total_loss = total_loss * weight
         total_loss.backward()
         optimizer.step()
         

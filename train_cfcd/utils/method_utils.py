@@ -14,8 +14,8 @@ class Prototype:
     @classmethod
     def from_data(cls, data, label=None, plot=False):
         data_np = np.stack([x.cpu().detach().numpy().reshape(-1) if isinstance(x, torch.Tensor) else x for x in data])
-        mean = np.mean(data_np, axis=0)
-        var = np.var(data_np, axis=0, ddof=1)
+        mean = np.mean(data_np, axis=0).reshape(-1)
+        var = np.var(data_np, axis=0, ddof=1).reshape(-1)
 
         if plot:
             plot_data_and_prototype(data_np, cls(mean, var, label=label))
@@ -34,8 +34,8 @@ class Prototype:
             if sum_weights != 1.0:
                 weights = [w / sum_weights for w in weights]
 
-        mean = np.average(means, axis=0, weights=weights)
-        var = np.average(vars, axis=0, weights=weights)
+        mean = np.average(means, axis=0, weights=weights).reshape(-1)
+        var = np.average(vars, axis=0, weights=weights).reshape(-1)
         label = labels[0] if all(l == labels[0] for l in labels) else None
         
         if plot:
@@ -63,17 +63,17 @@ class Prototype:
     def distance_prototype(self, other_prototype):
         # KL divergence between two Gaussians maybe not a good idea as it is not a metric (not symmetric)
         # Wasserstein distance between two Gaussians?!
-        squared_distances = np.sum(self.mean - other_prototype.mean) ** 2 + np.sum(self.var + other_prototype.var - 2 * np.sqrt(self.var * other_prototype.var))
+        squared_distances = np.sum(self.mean - other_prototype.mean) ** 2# TODO + np.sum(self.var + other_prototype.var - 2 * np.sqrt(self.var * other_prototype.var))
         distances = np.sqrt(squared_distances)
         return np.mean(distances)
-        
         
         
         
 
     def print_info(self):
         print("Prototype Info:")
-        print(f" Mean: {self.mean}, Var: {self.var}")
+        print(f"Mean mean: {np.mean(self.mean)}, Var mean: {np.mean(self.var)}")
+        # print(f" Mean: {self.mean}, Var: {self.var}")
         if self.label is not None:
             print(f" Label: {self.label}")
 
@@ -93,6 +93,7 @@ class Prototype:
         return cls(mean, var, label=label)
     
     def sample(self, num_samples=1, variance_scale=1.0):
+        print("Size:", (num_samples, len(self.mean)), "Mean shape:", self.mean.shape, "Var shape:", self.var.shape)
         return np.random.normal(loc=self.mean, scale=np.sqrt(self.var) * variance_scale, size=(num_samples, len(self.mean)))
     
     def save(self, filepath):
