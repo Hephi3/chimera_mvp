@@ -368,7 +368,11 @@ def main():
     """Main function to run the stages analysis."""
     # Path to the stages splits directory - update this to your actual path
     # splits_dir = "/gris/gris-f/homelv/phempel/masterthesis/MM_flower/train_cfcd/splits/chimera_3_5_2_0.1_1_unbalanced_0.1_0.2_0.7"
-    splits_dir = "/gris/gris-f/homelv/phempel/masterthesis/MM_flower/train_cfcd/splits/chimera_3_5_2_0.1_1_unbalanced_0.8_0.2_nocd"
+    # splits_dir = "/gris/gris-f/homelv/phempel/masterthesis/MM_flower/train_cfcd/splits/chimera_3_5_2_0.1_1_unbalanced_0.8_0.2_nocd"
+    # splits_dir = "/gris/gris-f/homelv/phempel/masterthesis/MM_flower/train_cfcd/splits/chimera_3_5_2_1_each_1_balanced_0.8_0.2_nocd"
+    # splits_dir = "/gris/gris-f/homelv/phempel/masterthesis/MM_flower/train_cfcd/splits/chimera_3_5_2_1_each_1_unbalanced_0.8_0.2_nocd"
+    # splits_dir = "/gris/gris-f/homelv/phempel/masterthesis/MM_flower/train_cfcd/splits/chimera_3_5_2_1_each_1_balanced_0.5_0.5_nocd"
+    splits_dir = "/gris/gris-f/homelv/phempel/masterthesis/MM_flower/train_cfcd/splits/chimera_3_5_2_same_1_each_1_unbalanced_0.8_0.2_nocd"
     
     if not os.path.exists(splits_dir):
         print(f"Error: Splits directory not found: {splits_dir}")
