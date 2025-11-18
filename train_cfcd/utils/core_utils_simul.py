@@ -72,17 +72,33 @@ def log_metrics(writer, epoch, loss, all_labels, all_preds, all_probs, kind:str,
     # Convert to one-vs-rest for AUC calculation (0 and 1 vs 2)
     binary_labels = np.array(all_labels) == pos_class_idx
     
-    if type(all_probs[0]) == np.ndarray and type(all_probs[0][0]) == np.ndarray and len(all_probs[0][0]) == pos_class_idx + 1:
-        roc_auc = roc_auc_score(binary_labels, [p[0][pos_class_idx] for p in all_probs] if type(all_probs[0]) == np.ndarray else all_probs)
-    elif type(all_probs[0]) == np.ndarray and len(all_probs[0]) == pos_class_idx + 1:
-        roc_auc = roc_auc_score(binary_labels, [p[pos_class_idx] for p in all_probs])
-    elif type(all_probs) == list and type(all_probs[0]) == float:   
-        roc_auc = roc_auc_score(binary_labels, all_probs)
+    probs_for_auc = []
+    for p in all_probs:
+        if isinstance(p, np.ndarray):
+            if p.ndim == 2 and p.shape[0] == 1:  # Shape (1, 3)
+                probs_for_auc.append(p[0][pos_class_idx])
+            elif p.ndim == 1 and len(p) == pos_class_idx + 1:  # Shape (3,)
+                probs_for_auc.append(p[pos_class_idx])
+            else:
+                raise ValueError(f"Unexpected probability array shape: {p.shape}")
+        elif isinstance(p, float):
+            probs_for_auc.append(p)
+        else:
+            raise ValueError(f"Unexpected probability type: {type(p)}")
+    
+    # Check for NaN values and handle them
+    probs_for_auc = np.array(probs_for_auc)
+    if np.any(np.isnan(probs_for_auc)):
+        print(f"WARNING: NaN values detected in {kind}/{submodel} probabilities. Replacing with 0.5")
+        probs_for_auc = np.nan_to_num(probs_for_auc, nan=0.5)
+    
+    # Check if we have enough variety in labels for ROC AUC
+    if len(np.unique(binary_labels)) < 2:
+        print(f"WARNING: Only one class present in {kind}/{submodel}. Skipping ROC AUC calculation")
+        roc_auc = 0.5  # Default value when ROC AUC cannot be computed
     else:
-        # print("Used this path")
-        # roc_auc = roc_auc_score(binary_labels, [p[0][pos_class_idx] for p in all_probs])
-
-        raise ValueError("Invalid format for all_probs. Expected a list of probabilities or logits.")
+        roc_auc = roc_auc_score(binary_labels, probs_for_auc)
+        
     f1 = f1_score(binary_labels, np.array(all_preds) == pos_class_idx)
     binary_acc = accuracy_score(binary_labels, np.array(all_preds) == pos_class_idx)
     
@@ -202,7 +218,7 @@ def train(model, train_split, val_split, args, cur, device, round_num=None, use_
         #     if hasattr(model, 'fusion_net'):
         #         model.fusion_net.requires_grad_(phase == 'fusion')
         #         model.classifier.requires_grad_(phase == 'fusion')
-        train_loss, f1, features_list, labels_list = train_loop_clam(epoch, model, train_loader, optimizer,args.bag_weight, writer, loss_fn, verbose=verbose, phase=phase, device=device, prototype=prototype, brs_samples=brs_samples, no_training=no_training)
+        train_loss, f1, features_list, labels_list = train_loop_clam(epoch, model, train_loader, optimizer,args.bag_weight, writer, loss_fn, verbose=verbose, phase=phase, device=device, prototype=prototype, brs_samples=brs_samples, no_training=no_training, local_weight_weight=args.local_weight_weight)
         stop = validate_clam(cur=cur, epoch=epoch, model=model, loader=val_loader, n_classes=args.n_classes, 
             early_stopping=early_stopping, writer=writer, results_dir=args.results_dir, verbose=verbose, scheduler=scheduler, phase=phase, device=device, loss_fn=loss_fn)
 
@@ -238,7 +254,7 @@ def apply_model(loader_data, model, testing=False, plot_coords = False, device=N
 
     return results, label
 
-def train_loop_clam(epoch, model, loader, optimizer, bag_weight, writer = None, loss_fn = None, verbose = True, phase = None, device=None, prototype:Prototype=None, brs_samples:list[list]=None, no_training=False):
+def train_loop_clam(epoch, model, loader, optimizer, bag_weight, writer = None, loss_fn = None, verbose = True, phase = None, device=None, prototype:Prototype=None, brs_samples:list[list]=None, no_training=False, local_weight_weight = 1):
     # print information about loader data to compare with other experiment:
     # data, label, coords, clinical_data, slide_id = next(iter(loader))
     # print(f"Data batch shapes: {[d.shape for d in data]}, Labels: {label}, Coords: {[c.shape for c in coords]}, Clinical data: {clinical_data.shape}, Slide IDs: {slide_id}")
@@ -293,11 +309,40 @@ def train_loop_clam(epoch, model, loader, optimizer, bag_weight, writer = None, 
             data = torch.tensor(data, dtype=torch.float32).to(device)
             label = torch.tensor([label], dtype=torch.long).to(device)
             
+            features_list.append(data.cpu().unsqueeze(0))
+            
             results = model.forward_sample(data)
             logits, Y_prob, Y_hat, _, _ = results['MM']
-            logits = logits.unsqueeze(0)
+            if Y_prob.dim() == 1:
+                Y_prob = Y_prob.unsqueeze(0)
+            if logits.dim() == 1:
+                logits = logits.unsqueeze(0)
             # print("!!!LABEL:", label, " LOGITS:", logits)
-            total_loss = loss_fn(logits, label)
+            if isinstance(loss_fn, nn.NLLLoss):
+                Y_log_prob = torch.log(Y_prob + 1e-8)
+                loss_mm = loss_fn(Y_log_prob, label)
+            else:
+                loss_mm = loss_fn(logits, label)
+                
+            loss_value = loss_mm.item()
+            train_loss_mm += loss_value
+            
+            instance_loss_value = 0.0
+            
+            total_loss = loss_mm
+        
+            if verbose and (batch_idx + 1) % 20 == 0:
+                print('batch {} (BRS), loss_mm: {:.4f}, label: {}'.format(
+                    batch_idx, loss_value, label.item()))
+            
+            error = calculate_error(Y_hat, label)
+            train_error += error
+            
+            # For BRS samples, add dummy values for CLAM and CD to maintain list length consistency
+            all_probs_clam.append(Y_prob.cpu().detach().numpy())  # Use MM prob as fallback
+            all_preds_clam.append(Y_hat.item())  # Use MM prediction as fallback
+            all_probs_cd.append(Y_prob.cpu().detach().numpy())  # Use MM prob as fallback
+            all_preds_cd.append(Y_hat.item())  # Use MM prediction as fallback
             
         else:
             loader_data = next(loader_iter)
@@ -308,7 +353,7 @@ def train_loop_clam(epoch, model, loader, optimizer, bag_weight, writer = None, 
 
             logits, Y_prob, Y_hat, _, _ = result_dict['MM']
 
-            all_labels.append(label.item())
+            
             
             # MM
             if isinstance(loss_fn, nn.NLLLoss):
@@ -320,8 +365,6 @@ def train_loop_clam(epoch, model, loader, optimizer, bag_weight, writer = None, 
             loss_value = loss_mm.item()
             train_loss_mm += loss_value
             Y_log_prob = torch.log(Y_prob + 1e-8)  # Add small value to avoid log(0)
-            all_probs.append(Y_prob.cpu().detach().numpy())
-            all_preds.append(Y_hat.item())
             
             # CLAM
             if isinstance(loss_fn, nn.NLLLoss):
@@ -379,9 +422,13 @@ def train_loop_clam(epoch, model, loader, optimizer, bag_weight, writer = None, 
              # METHOD: apply prototype weighting if prototype is given
              #TODO: Only weighs not sampled points
             if prototype is not None:
-                weight = prototype.weight_point(result_dict['concat_features'].cpu().detach().numpy()) 
+                weight = local_weight_weight * prototype.weight_point(result_dict['concat_features'].cpu().detach().numpy()) 
                 # print("LOSS OLD:", total_loss.item(), " LOSS NEW:", (total_loss * weight), " WEIGHT:", weight)
                 total_loss = total_loss * weight
+        
+        all_labels.append(label.item())
+        all_probs.append(Y_prob.cpu().detach().numpy())
+        all_preds.append(Y_hat.item())
        
         if no_training:
             continue
@@ -406,6 +453,8 @@ def train_loop_clam(epoch, model, loader, optimizer, bag_weight, writer = None, 
 
     if verbose: print('Epoch: {}, train_loss_mm: {:.4f}, train_clustering_loss:  {:.4f}, train_error: {:.4f}'.format(epoch, train_loss_mm, train_inst_loss,  train_error))
     return train_loss_mm, f1, features_list, all_labels
+
+
 def validate(model, val_split, args, cur, device, round_num=None):
     if args.bag_loss == 'svm':
         from topk.svm import SmoothTop1SVM

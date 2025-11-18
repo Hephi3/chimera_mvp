@@ -14,6 +14,7 @@ def get_hyperparameters():
     
     parser.add_argument('--method_global', action='store_true', default=False, help='enable prototype-based federated learning method')
     parser.add_argument('--method_local', action='store_true', default=False, help='enable prototype-based federated learning method')
+    parser.add_argument('--local_weight_weight', type=float, default=1.0, help='weight for local prototype weighting (default: 1.0)')
     parser.add_argument('--debug', action='store_true', default=False, help='enable debug mode')
     # parser.add_argument('--method_sample', action='store_true', default=False, help='enable prototype-based federated learning method')
     parser.add_argument('--proto_adaptation_rate_client', type=float, default=0.5, help='prototype adaptation rate for clients (default: 0.5)')

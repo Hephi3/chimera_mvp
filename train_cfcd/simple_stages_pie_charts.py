@@ -372,7 +372,7 @@ def main():
     # splits_dir = "/gris/gris-f/homelv/phempel/masterthesis/MM_flower/train_cfcd/splits/chimera_3_5_2_1_each_1_balanced_0.8_0.2_nocd"
     # splits_dir = "/gris/gris-f/homelv/phempel/masterthesis/MM_flower/train_cfcd/splits/chimera_3_5_2_1_each_1_unbalanced_0.8_0.2_nocd"
     # splits_dir = "/gris/gris-f/homelv/phempel/masterthesis/MM_flower/train_cfcd/splits/chimera_3_5_2_1_each_1_balanced_0.5_0.5_nocd"
-    splits_dir = "/gris/gris-f/homelv/phempel/masterthesis/MM_flower/train_cfcd/splits/chimera_3_5_2_same_1_each_1_unbalanced_0.8_0.2_nocd"
+    splits_dir = "/gris/gris-f/homelv/phempel/masterthesis/MM_flower/train_cfcd/splits/chimera_3_5_2_same_1_each_3_unbalanced_0.8_0.2_nocd"
     
     if not os.path.exists(splits_dir):
         print(f"Error: Splits directory not found: {splits_dir}")

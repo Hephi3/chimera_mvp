@@ -104,6 +104,10 @@ class FlowerClient(NumPyClient):
             brs_samples=brs_samples if self.args.num_sampled > 0 and round_num > 1 else None,
             # no_training=self.args.debug
         )
+        
+        print("LEGNTH FEATURES LIST:", len(features_list), " LENGTH LABELS LIST:", len(labels_list))
+        
+        
         if self.args.debug:
             features_arr = np.stack([f.detach().cpu().numpy() if isinstance(f, torch.Tensor) else np.array(f) for f in features_list])
             labels_arr = np.array(labels_list)

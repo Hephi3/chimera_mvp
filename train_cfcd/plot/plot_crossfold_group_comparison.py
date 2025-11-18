@@ -11,6 +11,24 @@ from collections import defaultdict
 ROOT_RESULTS = "/gris/gris-f/homelv/phempel/masterthesis/MM_flower/train_cfcd/results"
 OLD_DATA_ROOT_RESULTS = "/gris/gris-f/homelv/phempel/masterthesis/MM_flower/train_cfcd/results_old_data"
 
+
+def calculate_avg_f1_metric(f1_s1test_s1, f1_s1test_s2, f1_s2test_s1, f1_s2test_s2, plasticity_weight=0.5):
+    '''
+    Calculate the avg_f1 metric for continual learning evaluation.
+    
+    Parameters:
+        - f1_s1test_s1: F1 Score of the stage 1 testset at the end of stage 1
+        - f1_s1test_s2: F1 Score of the stage 1 testset at stage 2
+        - f1_s2test_s1: F1 Score of the stage 2 testset at the end of stage 1
+        - f1_s2test_s2: F1 Score of the stage 2 testset at stage 2
+        
+    Measures plasticity and performance retention of CF setups:
+        - Plasticity: Improvement on stage 2 testset from stage 1 to stage 2
+        - Retention: Change on stage 1 testset from stage 1 to stage 2
+    '''
+    retention_weight = 1.0 - plasticity_weight
+    return retention_weight * f1_s1test_s2 + plasticity_weight * f1_s2test_s2 - (retention_weight * f1_s1test_s1 + plasticity_weight * f1_s2test_s1)
+
 def smooth_client_data(client_data, window_size=5):
     """
     Apply smoothing to federated client data structure.
@@ -61,11 +79,12 @@ federated_metrics = {
     'F1/train': 'Training F1 Score',
     'Loss/train': 'Training Loss',
     'Accuracy/val': 'Validation Accuracy',
-    # 'F1/val': 'Validation F1 Score',
-    # 'Loss/val': 'Validation Loss',
-    'Accuracy/test': 'Test Accuracy',
-    'Binary_Accuracy/test': 'Test Binary Accuracy',
-    'ROC_AUC/test': 'Test ROC AUC',
+    'F1/val': 'Validation F1 Score',
+    'Loss/val': 'Validation Loss',
+    # 'Accuracy/test': 'Test Accuracy',
+    # 'Binary_Accuracy/test': 'Test Binary Accuracy',
+    # 'ROC_AUC/test': 'Test ROC AUC',
+    'Avg_f1/test': 'Test Average F1',
     'F1/test': 'Test F1 Score',
     'Legend': None,
 }
@@ -665,12 +684,67 @@ def plot_crossfold_group_test_metric(ax, metric, title, client_stats, server_sta
             ax.legend(fontsize=8)
 
 
+def plot_avg_f1_metric(ax, title, server_stats, all_rounds,
+                       show_std=True, show_legend=True, color='blue', label_prefix=''):
+    """
+    Plot Avg_f1 metric (single-series server evaluation across rounds).
+    server_stats: dict mapping round -> {'mean': val, 'std': val}
+    """
+    LINE_ALPHA = 0.8
+    STD_ALPHA = 0.12
+    
+    print("PLOTTING AVG F1 METRIC!!!")
+    
+    print("Server STATS:", server_stats)
+    print("ALL ROUnds:", all_rounds)
+
+    if not server_stats:
+        return
+
+    server_rounds = []
+    server_means = []
+    server_stds = []
+
+    for round_num in sorted(server_stats.keys()):
+        if round_num in all_rounds:
+            server_rounds.append(round_num)
+            server_means.append(server_stats[round_num].get('mean', 0.0))
+            server_stds.append(server_stats[round_num].get('std', 0.0))
+
+    if not server_rounds:
+        return
+
+    label = f'{label_prefix} (Avg F1)' if label_prefix else 'Avg F1 (Group avg)'
+    ax.plot(server_rounds, server_means, color=color, marker='o', linewidth=2, markersize=6,
+            label=label, alpha=LINE_ALPHA)
+
+    if show_std and any(std > 0 for std in server_stds):
+        server_means_arr = np.array(server_means)
+        server_stds_arr = np.array(server_stds)
+        ax.fill_between(server_rounds,
+                        server_means_arr - server_stds_arr,
+                        server_means_arr + server_stds_arr,
+                        color=color, alpha=STD_ALPHA)
+
+    ax.set_xlabel('Federated Round')
+    ax.set_title(title)
+    ax.set_ylabel(title)
+    ax.grid(True, alpha=0.3)
+    if show_legend:
+        handles, labels = ax.get_legend_handles_labels()
+        if handles:
+            ax.legend(fontsize=8)
+
+
 def plot_crossfold_group_metric(ax, metric, title, client_stats, server_stats, all_rounds, 
                                global_max_steps_per_round, show_full_training, show_individual_clients, 
                                show_std=True, show_legend=True, color='blue', label_prefix=''):
     """
     Plot a single metric for cross-fold group comparison results
     """
+    
+    if "test" in metric:
+        print(f"Plotting test metric: {metric}")
     
     # Alpha (transparency) settings
     LINE_ALPHA = 0.8
@@ -905,7 +979,7 @@ def create_comparison_legend_subplot(axs, ax_dims, ax_width, legend_handles, met
 
 def plot_crossfold_group_comparison(experiment_groups: dict, submodel: str = 'MM', metric_filter: str = 'test',
                                    show_individual_clients: bool = False, show_full_training: bool = False,
-                                   smooth_window: int = 0, show_std: bool = True, folds: list = None):
+                                   smooth_window: int = 0, show_std: bool = True, folds: list = None, name: str = 'crossfold_group_comparison'):
     """
     Compare groups of cross-fold validation experiments from multiple federated learning experiments
     
@@ -1022,6 +1096,10 @@ def plot_crossfold_group_comparison(experiment_groups: dict, submodel: str = 'MM
             if base_metric == 'Legend':
                 continue
             
+            # Skip Avg_f1 here - it will be computed after F1/test
+            if base_metric == 'Avg_f1':
+                continue
+            
             if 'test' in base_metric:
                 # For test metrics, process both stages separately
                 metric_no_stage = f"{base_metric}/{submodel}"
@@ -1061,6 +1139,14 @@ def plot_crossfold_group_comparison(experiment_groups: dict, submodel: str = 'MM
                             combined_server_stats[round_num] = {}
                         combined_server_stats[round_num]['stage_1'] = server_stats_1[round_num]
                 
+                # If this is F1 metric, calculate avg_f1 (only available in Stage 2)
+                if base_metric == 'F1/test':
+                    # Store F1 scores for avg_f1 calculation
+                    if group_name not in all_group_stats:
+                        all_group_stats[group_name] = {}
+                    all_group_stats[group_name]['_f1_stage_0'] = server_stats_0
+                    all_group_stats[group_name]['_f1_stage_1'] = server_stats_1
+                
                 metric = f"{base_metric}/{submodel}"
                 all_group_stats[group_name][metric] = (None, combined_server_stats)
             else:
@@ -1073,6 +1159,65 @@ def plot_crossfold_group_comparison(experiment_groups: dict, submodel: str = 'MM
                 )
                 
                 all_group_stats[group_name][metric] = (client_stats, server_stats)
+    
+    # Compute avg_f1 metric for all groups (after F1/test has been processed)
+    for group_name in all_group_stats.keys():
+        if '_f1_stage_0' in all_group_stats[group_name] and '_f1_stage_1' in all_group_stats[group_name]:
+            f1_stage_0 = all_group_stats[group_name]['_f1_stage_0']
+            f1_stage_1 = all_group_stats[group_name]['_f1_stage_1']
+            
+            # Calculate avg_f1 metric for each round in stage 2
+            avg_f1_stats = {}
+            all_rounds_sorted = sorted(global_all_rounds)
+            
+            # Find the midpoint (transition from stage 1 to stage 2)
+            midpoint = len(all_rounds_sorted) // 2
+            
+            # Get the last round of stage 1 for baseline F1 scores
+            if midpoint > 0 and midpoint < len(all_rounds_sorted):
+                last_stage1_round = all_rounds_sorted[midpoint - 1]
+                
+                # Get baseline F1 scores at end of stage 1
+                f1_s1test_s1_baseline = f1_stage_0.get(last_stage1_round, {}).get('mean', 0)
+                f1_s2test_s1_baseline = f1_stage_1.get(last_stage1_round, {}).get('mean', 0)
+                
+                # Calculate avg_f1 for each round in stage 2
+                for round_num in all_rounds_sorted[midpoint:]:
+                    # Current F1 scores in stage 2
+                    f1_s1test_s2 = f1_stage_0.get(round_num, {}).get('mean', None)
+                    f1_s2test_s2 = f1_stage_1.get(round_num, {}).get('mean', None)
+                    
+                    if f1_s1test_s2 is not None and f1_s2test_s2 is not None:
+                        # Calculate avg_f1 metric
+                        avg_f1_value = calculate_avg_f1_metric(
+                            f1_s1test_s1_baseline,
+                            f1_s1test_s2,
+                            f1_s2test_s1_baseline,
+                            f1_s2test_s2,
+                            plasticity_weight=0.5
+                        )
+                        
+                        # Calculate std (simplified - using combined std from both stages)
+                        std_s1 = f1_stage_0.get(round_num, {}).get('std', 0)
+                        std_s2 = f1_stage_1.get(round_num, {}).get('std', 0)
+                        combined_std = np.sqrt(std_s1**2 + std_s2**2) / 2  # Approximate combined std
+                        
+                        avg_f1_stats[round_num] = {
+                            'mean': avg_f1_value,
+                            'std': combined_std
+                        }
+                
+                # For stage 1 rounds, set avg_f1 to 0 as it cannot be calculated yet
+                for round_num in all_rounds_sorted[:midpoint]:
+                    avg_f1_stats[round_num] = {
+                        'mean': 0.0,
+                        'std': 0.0
+                    }
+            
+            # Store the avg_f1 metric (use same key format as other metrics)
+            all_group_stats[group_name][f'Avg_f1/test/{submodel}'] = (None, avg_f1_stats)
+    
+    print("KEYS:", all_group_stats[group_name].keys())
     
     ax_dims = axs.shape if hasattr(axs, 'shape') else (1, 1)
     ax_width = ax_dims[1] if len(ax_dims) > 1 else 1
@@ -1099,8 +1244,14 @@ def plot_crossfold_group_comparison(experiment_groups: dict, submodel: str = 'MM
             client_stats, server_stats = all_group_stats[group_name][metric]
             color = group_colors[group_idx % len(group_colors)]
             
+            # Special-case Avg_f1: plot as a server test-series (no stage split)
+            # print("BASE METRIC:", base_metric)
+            if 'Avg_f1' in base_metric:
+                plot_avg_f1_metric(ax, title, server_stats, global_all_rounds,
+                                   show_std=show_std, show_legend=not has_legend_entry, color=color,
+                                   label_prefix=group_name)
             # Use specialized function for test metrics to handle stages
-            if 'test' in base_metric:
+            elif 'test' in base_metric:
                 plot_crossfold_group_test_metric(ax, metric, title, client_stats, server_stats, global_all_rounds,
                                                global_max_steps_per_round, show_full_training, show_individual_clients,
                                                show_std, show_legend=not has_legend_entry, color=color, 
@@ -1165,9 +1316,9 @@ def plot_crossfold_group_comparison(experiment_groups: dict, submodel: str = 'MM
     if show_std:
         suffix_parts.append("withstd")
     
-    suffix = "_".join(suffix_parts)
-    group_names_clean = "_vs_".join([name.replace("_", "-") for name in all_group_data.keys()])
-    plot_path = os.path.join(ROOT_RESULTS, f"crossfold_group_comparison4.png")
+    # suffix = "_".join(suffix_parts)
+    # group_names_clean = "_vs_".join([name.replace("_", "-") for name in all_group_data.keys()])
+    plot_path = os.path.join(ROOT_RESULTS, f"{name}.png")
     plt.savefig(plot_path, dpi=300, bbox_inches='tight')
     print(f"Cross-fold group comparison plot saved to {plot_path}")
     plt.show()
@@ -1193,6 +1344,8 @@ if __name__ == "__main__":
                        help='Do not show standard deviation (overrides --show_std)')
     parser.add_argument('--folds', nargs='+', type=int,
                        help='Specific fold numbers to include (default: use all available)')
+    parser.add_argument('--name', type=str, default='crossfold_group_comparison',
+                       help='Base name for the output plot file')
     
     args = parser.parse_args()
     
@@ -1208,7 +1361,7 @@ if __name__ == "__main__":
     
     plot_crossfold_group_comparison(experiment_groups, args.submodel, args.metric_filter,
                                    args.show_individual_clients, args.show_full_training,
-                                   args.smooth_window, show_std, args.folds)
+                                   args.smooth_window, show_std, args.folds, args.name)
 
 # Example usage:
 
@@ -1342,3 +1495,36 @@ if __name__ == "__main__":
 # python plot_crossfold_group_comparison.py --groups '{"CFCDIDnew_same_1_each": ["CFCDIDnew_same_1_each_s1", "CFCDIDnew_same_1_each_s2", "CFCDIDnew_same_1_each_s3", "CFCDIDnew_same_1_each_sp2_s1", "CFCDIDnew_same_1_each_sp2_s2", "CFCDIDnew_same_1_each_sp2_s3", "CFCDIDnew_same_1_each_sp3_s1","CFCDIDnew_same_1_each_sp3_s2","CFCDIDnew_same_1_each_sp3_s3","CFCDIDnew_same_1_each_sp4_s1","CFCDIDnew_same_1_each_sp4_s2","CFCDIDnew_same_1_each_sp4_s3","CFCDIDnew_same_1_each_sp5_s1","CFCDIDnew_same_1_each_sp5_s2","CFCDIDnew_same_1_each_sp5_s3"], "CFCDnew_swap_same_1_each_fullaug": ["CFCDnew_swap_same_1_each_fullaug_s1", "CFCDnew_swap_same_1_each_fullaug_s2", "CFCDnew_swap_same_1_each_fullaug_s3", "CFCDnew_swap_same_1_each_fullaug_sp2_s1", "CFCDnew_swap_same_1_each_fullaug_sp2_s2", "CFCDnew_swap_same_1_each_fullaug_sp2_s3", "CFCDnew_swap_same_1_each_fullaug_sp3_s1","CFCDnew_swap_same_1_each_fullaug_sp3_s2","CFCDnew_swap_same_1_each_fullaug_sp3_s3","CFCDnew_swap_same_1_each_fullaug_sp4_s1","CFCDnew_swap_same_1_each_fullaug_sp4_s2","CFCDnew_swap_same_1_each_fullaug_sp4_s3","CFCDnew_swap_same_1_each_fullaug_sp5_s1","CFCDnew_swap_same_1_each_fullaug_sp5_s2","CFCDnew_swap_same_1_each_fullaug_sp5_s3"]}' --submodel MM --metric_filter all --show_full_training --smooth_window 5 --show_std
 
 # python plot_crossfold_group_comparison.py --groups '{"CFCDID Balanced": ["CFCDIDnew_1_each_s1", "CFCDIDnew_1_each_s2", "CFCDIDnew_1_each_s3", "CFCDIDnew_1_each_sp2_s1", "CFCDIDnew_1_each_sp2_s2", "CFCDIDnew_1_each_sp2_s3", "CFCDIDnew_1_each_sp3_s1","CFCDIDnew_1_each_sp3_s2","CFCDIDnew_1_each_sp3_s3","CFCDIDnew_1_each_sp4_s1","CFCDIDnew_1_each_sp4_s2","CFCDIDnew_1_each_sp4_s3","CFCDIDnew_1_each_sp5_s1","CFCDIDnew_1_each_sp5_s2","CFCDIDnew_1_each_sp5_s3"],"CFCD Full": ["CFCDnew_swap_1_each_fullaug_s1", "CFCDnew_swap_1_each_fullaug_s2", "CFCDnew_swap_1_each_fullaug_s3", "CFCDnew_swap_1_each_fullaug_sp2_s1", "CFCDnew_swap_1_each_fullaug_sp2_s2", "CFCDnew_swap_1_each_fullaug_sp2_s3", "CFCDnew_swap_1_each_fullaug_sp3_s1","CFCDnew_swap_1_each_fullaug_sp3_s2","CFCDnew_swap_1_each_fullaug_sp3_s3","CFCDnew_swap_1_each_fullaug_sp4_s1","CFCDnew_swap_1_each_fullaug_sp4_s2","CFCDnew_swap_1_each_fullaug_sp4_s3","CFCDnew_swap_1_each_fullaug_sp5_s1","CFCDnew_swap_1_each_fullaug_sp5_s2","CFCDnew_swap_1_each_fullaug_sp5_s3"]}' --submodel MM --metric_filter all --show_full_training --smooth_window 5 --show_std
+
+
+
+
+
+
+
+
+# python plot_crossfold_group_comparison.py --groups '{"CFCDIDnew_same_1_each": ["CFCDIDnew_same_1_each_s1", "CFCDIDnew_same_1_each_s2", "CFCDIDnew_same_1_each_s3", "CFCDIDnew_same_1_each_sp2_s1", "CFCDIDnew_same_1_each_sp2_s2", "CFCDIDnew_same_1_each_sp2_s3", "CFCDIDnew_same_1_each_sp3_s1","CFCDIDnew_same_1_each_sp3_s2","CFCDIDnew_same_1_each_sp3_s3","CFCDIDnew_same_1_each_sp4_s1","CFCDIDnew_same_1_each_sp4_s2","CFCDIDnew_same_1_each_sp4_s3","CFCDIDnew_same_1_each_sp5_s1","CFCDIDnew_same_1_each_sp5_s2","CFCDIDnew_same_1_each_sp5_s3"], "CFCDnew_swap_same_1_each_fullaug": ["CFCDnew_swap_same_1_each_fullaug_s1", "CFCDnew_swap_same_1_each_fullaug_s2", "CFCDnew_swap_same_1_each_fullaug_s3", "CFCDnew_swap_same_1_each_fullaug_sp2_s1", "CFCDnew_swap_same_1_each_fullaug_sp2_s2", "CFCDnew_swap_same_1_each_fullaug_sp2_s3", "CFCDnew_swap_same_1_each_fullaug_sp3_s1","CFCDnew_swap_same_1_each_fullaug_sp3_s2","CFCDnew_swap_same_1_each_fullaug_sp3_s3","CFCDnew_swap_same_1_each_fullaug_sp4_s1","CFCDnew_swap_same_1_each_fullaug_sp4_s2","CFCDnew_swap_same_1_each_fullaug_sp4_s3","CFCDnew_swap_same_1_each_fullaug_sp5_s1","CFCDnew_swap_same_1_each_fullaug_sp5_s2","CFCDnew_swap_same_1_each_fullaug_sp5_s3"], "MG 02": ["MG_02_s1", "MG_02_s2", "MG_02_s3", "MG_02_sp2_s1", "MG_02_sp2_s2", "MG_02_sp2_s3", "MG_02_sp3_s1","MG_02_sp3_s2","MG_02_sp3_s3","MG_02_sp4_s1","MG_02_sp4_s2","MG_02_sp4_s3","MG_02_sp5_s1","MG_02_sp5_s2","MG_02_sp5_s3"], "MG 05": ["MG_05_s1", "MG_05_s2", "MG_05_s3", "MG_05_sp2_s1", "MG_05_sp2_s2", "MG_05_sp2_s3", "MG_05_sp3_s1","MG_05_sp3_s2","MG_05_sp3_s3","MG_05_sp4_s1","MG_05_sp4_s2","MG_05_sp4_s3","MG_05_sp5_s1","MG_05_sp5_s2","MG_05_sp5_s3"], "MG 08": ["MG_08_s1", "MG_08_s2", "MG_08_s3", "MG_08_sp2_s1", "MG_08_sp2_s2", "MG_08_sp2_s3", "MG_08_sp3_s1","MG_08_sp3_s2","MG_08_sp3_s3","MG_08_sp4_s1","MG_08_sp4_s2","MG_08_sp4_s3","MG_08_sp5_s1","MG_08_sp5_s2","MG_08_sp5_s3"]}' --submodel MM --metric_filter all --show_full_training --smooth_window 5 --show_std --name "MG"
+
+
+# python plot_crossfold_group_comparison.py --groups '{"CFCDIDnew_same_1_each": ["CFCDIDnew_same_1_each_s1", "CFCDIDnew_same_1_each_s2", "CFCDIDnew_same_1_each_s3", "CFCDIDnew_same_1_each_sp2_s1", "CFCDIDnew_same_1_each_sp2_s2", "CFCDIDnew_same_1_each_sp2_s3", "CFCDIDnew_same_1_each_sp3_s1","CFCDIDnew_same_1_each_sp3_s2","CFCDIDnew_same_1_each_sp3_s3","CFCDIDnew_same_1_each_sp4_s1","CFCDIDnew_same_1_each_sp4_s2","CFCDIDnew_same_1_each_sp4_s3","CFCDIDnew_same_1_each_sp5_s1","CFCDIDnew_same_1_each_sp5_s2","CFCDIDnew_same_1_each_sp5_s3"], "CFCDnew_swap_same_1_each_fullaug": ["CFCDnew_swap_same_1_each_fullaug_s1", "CFCDnew_swap_same_1_each_fullaug_s2", "CFCDnew_swap_same_1_each_fullaug_s3", "CFCDnew_swap_same_1_each_fullaug_sp2_s1", "CFCDnew_swap_same_1_each_fullaug_sp2_s2", "CFCDnew_swap_same_1_each_fullaug_sp2_s3", "CFCDnew_swap_same_1_each_fullaug_sp3_s1","CFCDnew_swap_same_1_each_fullaug_sp3_s2","CFCDnew_swap_same_1_each_fullaug_sp3_s3","CFCDnew_swap_same_1_each_fullaug_sp4_s1","CFCDnew_swap_same_1_each_fullaug_sp4_s2","CFCDnew_swap_same_1_each_fullaug_sp4_s3","CFCDnew_swap_same_1_each_fullaug_sp5_s1","CFCDnew_swap_same_1_each_fullaug_sp5_s2","CFCDnew_swap_same_1_each_fullaug_sp5_s3"], "ML 02": ["ML_02_s1", "ML_02_s2", "ML_02_s3", "ML_02_sp2_s1", "ML_02_sp2_s2", "ML_02_sp2_s3", "ML_02_sp3_s1","ML_02_sp3_s2","ML_02_sp3_s3","ML_02_sp4_s1","ML_02_sp4_s2","ML_02_sp4_s3","ML_02_sp5_s1","ML_02_sp5_s2","ML_02_sp5_s3"], "ML 05": ["ML_05_s1", "ML_05_s2", "ML_05_s3", "ML_05_sp2_s1", "ML_05_sp2_s2", "ML_05_sp2_s3", "ML_05_sp3_s1","ML_05_sp3_s2","ML_05_sp3_s3","ML_05_sp4_s1","ML_05_sp4_s2","ML_05_sp4_s3","ML_05_sp5_s1","ML_05_sp5_s2","ML_05_sp5_s3"], "ML 08": ["ML_08_s1", "ML_08_s2", "ML_08_s3", "ML_08_sp2_s1", "ML_08_sp2_s2", "ML_08_sp2_s3", "ML_08_sp3_s1","ML_08_sp3_s2","ML_08_sp3_s3","ML_08_sp4_s1","ML_08_sp4_s2","ML_08_sp4_s3","ML_08_sp5_s1","ML_08_sp5_s2","ML_08_sp5_s3"]}' --submodel MM --metric_filter all --show_full_training --smooth_window 5 --show_std --name "ML"
+
+
+# python plot_crossfold_group_comparison.py --groups '{"CFCDIDnew_same_1_each": ["CFCDIDnew_same_1_each_s1", "CFCDIDnew_same_1_each_s2", "CFCDIDnew_same_1_each_s3", "CFCDIDnew_same_1_each_sp2_s1", "CFCDIDnew_same_1_each_sp2_s2", "CFCDIDnew_same_1_each_sp2_s3", "CFCDIDnew_same_1_each_sp3_s1","CFCDIDnew_same_1_each_sp3_s2","CFCDIDnew_same_1_each_sp3_s3","CFCDIDnew_same_1_each_sp4_s1","CFCDIDnew_same_1_each_sp4_s2","CFCDIDnew_same_1_each_sp4_s3","CFCDIDnew_same_1_each_sp5_s1","CFCDIDnew_same_1_each_sp5_s2","CFCDIDnew_same_1_each_sp5_s3"], "CFCDnew_swap_same_1_each_fullaug": ["CFCDnew_swap_same_1_each_fullaug_s1", "CFCDnew_swap_same_1_each_fullaug_s2", "CFCDnew_swap_same_1_each_fullaug_s3", "CFCDnew_swap_same_1_each_fullaug_sp2_s1", "CFCDnew_swap_same_1_each_fullaug_sp2_s2", "CFCDnew_swap_same_1_each_fullaug_sp2_s3", "CFCDnew_swap_same_1_each_fullaug_sp3_s1","CFCDnew_swap_same_1_each_fullaug_sp3_s2","CFCDnew_swap_same_1_each_fullaug_sp3_s3","CFCDnew_swap_same_1_each_fullaug_sp4_s1","CFCDnew_swap_same_1_each_fullaug_sp4_s2","CFCDnew_swap_same_1_each_fullaug_sp4_s3","CFCDnew_swap_same_1_each_fullaug_sp5_s1","CFCDnew_swap_same_1_each_fullaug_sp5_s2","CFCDnew_swap_same_1_each_fullaug_sp5_s3"], "MLG 02 02": ["MLG_02_02_s1", "MLG_02_02_s2", "MLG_02_02_s3", "MLG_02_02_sp2_s1", "MLG_02_02_sp2_s2", "MLG_02_02_sp2_s3", "MLG_02_02_sp3_s1","MLG_02_02_sp3_s2","MLG_02_02_sp3_s3","MLG_02_02_sp4_s1","MLG_02_02_sp4_s2","MLG_02_02_sp4_s3","MLG_02_02_sp5_s1","MLG_02_02_sp5_s2","MLG_02_02_sp5_s3"], "MLG 05 05": ["MLG_05_05_s1", "MLG_05_05_s2", "MLG_05_05_s3", "MLG_05_05_sp2_s1", "MLG_05_05_sp2_s2", "MLG_05_05_sp2_s3", "MLG_05_05_sp3_s1","MLG_05_05_sp3_s2","MLG_05_05_sp3_s3","MLG_05_05_sp4_s1","MLG_05_05_sp4_s2","MLG_05_05_sp4_s3","MLG_05_05_sp5_s1","MLG_05_05_sp5_s2","MLG_05_05_sp5_s3"], "MLG 08 08": ["MLG_08_08_s1", "MLG_08_08_s2", "MLG_08_08_s3", "MLG_08_08_sp2_s1", "MLG_08_08_sp2_s2", "MLG_08_08_sp2_s3", "MLG_08_08_sp3_s1","MLG_08_08_sp3_s2","MLG_08_08_sp3_s3","MLG_08_08_sp4_s1","MLG_08_08_sp4_s2","MLG_08_08_sp4_s3","MLG_08_08_sp5_s1","MLG_08_08_sp5_s2","MLG_08_08_sp5_s3"]}' --submodel MM --metric_filter all --show_full_training --smooth_window 5 --show_std --name "MLG"
+
+
+
+# python plot/plot_crossfold_group_comparison.py --groups '{"CFCDID": ["CFCDIDnew_same_1_each_s1", "CFCDIDnew_same_1_each_s2", "CFCDIDnew_same_1_each_s3", "CFCDIDnew_same_1_each_sp2_s1", "CFCDIDnew_same_1_each_sp2_s2", "CFCDIDnew_same_1_each_sp2_s3", "CFCDIDnew_same_1_each_sp3_s1","CFCDIDnew_same_1_each_sp3_s2","CFCDIDnew_same_1_each_sp3_s3","CFCDIDnew_same_1_each_sp4_s1","CFCDIDnew_same_1_each_sp4_s2","CFCDIDnew_same_1_each_sp4_s3","CFCDIDnew_same_1_each_sp5_s1","CFCDIDnew_same_1_each_sp5_s2","CFCDIDnew_same_1_each_sp5_s3"],"CFCD": ["CFCDnew_swap_same_1_each_fullaug_s1", "CFCDnew_swap_same_1_each_fullaug_s2", "CFCDnew_swap_same_1_each_fullaug_s3", "CFCDnew_swap_same_1_each_fullaug_sp2_s1", "CFCDnew_swap_same_1_each_fullaug_sp2_s2", "CFCDnew_swap_same_1_each_fullaug_sp2_s3", "CFCDnew_swap_same_1_each_fullaug_sp3_s1","CFCDnew_swap_same_1_each_fullaug_sp3_s2","CFCDnew_swap_same_1_each_fullaug_sp3_s3","CFCDnew_swap_same_1_each_fullaug_sp4_s1","CFCDnew_swap_same_1_each_fullaug_sp4_s2","CFCDnew_swap_same_1_each_fullaug_sp4_s3","CFCDnew_swap_same_1_each_fullaug_sp5_s1","CFCDnew_swap_same_1_each_fullaug_sp5_s2","CFCDnew_swap_same_1_each_fullaug_sp5_s3"], "MSam": ["MSam_311_s1", "MSam_311_s2", "MSam_311_s3", "MSam_311_sp2_s1", "MSam_311_sp2_s2", "MSam_311_sp2_s3", "MSam_311_sp3_s1","MSam_311_sp3_s2","MSam_311_sp3_s3","MSam_311_sp4_s1","MSam_311_sp4_s2","MSam_311_sp4_s3","MSam_311_sp5_s1","MSam_311_sp5_s2","MSam_311_sp5_s3"]}' --submodel MM --metric_filter all --show_full_training --smooth_window 5 --show_std --name MSam_311
+
+
+# python plot/plot_crossfold_group_comparison.py --groups '{"CFCDID": ["CFCDID_s1", "CFCDID_s2", "CFCDID_s3", "CFCDID_sp2_s1", "CFCDID_sp2_s2", "CFCDID_sp2_s3", "CFCDID_sp3_s1","CFCDID_sp3_s2","CFCDID_sp3_s3","CFCDID_sp4_s1","CFCDID_sp4_s2","CFCDID_sp4_s3","CFCDID_sp5_s1","CFCDID_sp5_s2","CFCDID_sp5_s3"],"CFCD": ["CFCD_s1", "CFCD_s2", "CFCD_s3", "CFCD_sp2_s1", "CFCD_sp2_s2", "CFCD_sp2_s3", "CFCD_sp3_s1","CFCD_sp3_s2","CFCD_sp3_s3","CFCD_sp4_s1","CFCD_sp4_s2","CFCD_sp4_s3","CFCD_sp5_s1","CFCD_sp5_s2","CFCD_sp5_s3"], "MLG 08 08": ["MLG_08_08_s1", "MLG_08_08_s2", "MLG_08_08_s3", "MLG_08_08_sp2_s1", "MLG_08_08_sp2_s2", "MLG_08_08_sp2_s3", "MLG_08_08_sp3_s1","MLG_08_08_sp3_s2","MLG_08_08_sp3_s3","MLG_08_08_sp4_s1","MLG_08_08_sp4_s2","MLG_08_08_sp4_s3","MLG_08_08_sp5_s1","MLG_08_08_sp5_s2","MLG_08_08_sp5_s3"]}' --submodel MM --metric_filter all --show_full_training --smooth_window 5 --show_std --name delMLG
+
+
+# python plot/plot_crossfold_group_comparison.py --groups '{"CFCDID": ["CFCDID_s1", "CFCDID_s2", "CFCDID_s3", "CFCDID_sp2_s1", "CFCDID_sp2_s2", "CFCDID_sp2_s3", "CFCDID_sp3_s1","CFCDID_sp3_s2","CFCDID_sp3_s3","CFCDID_sp4_s1","CFCDID_sp4_s2","CFCDID_sp4_s3","CFCDID_sp5_s1","CFCDID_sp5_s2","CFCDID_sp5_s3"],"CFCD": ["CFCD_s1", "CFCD_s2", "CFCD_s3", "CFCD_sp2_s1", "CFCD_sp2_s2", "CFCD_sp2_s3", "CFCD_sp3_s1","CFCD_sp3_s2","CFCD_sp3_s3","CFCD_sp4_s1","CFCD_sp4_s2","CFCD_sp4_s3","CFCD_sp5_s1","CFCD_sp5_s2","CFCD_sp5_s3"], "MSam 3, 1 temp, 1 var": ["MSam_311_s1", "MSam_311_s2", "MSam_311_s3", "MSam_311_sp2_s1", "MSam_311_sp2_s2", "MSam_311_sp2_s3", "MSam_311_sp3_s1","MSam_311_sp3_s2","MSam_311_sp3_s3","MSam_311_sp4_s1","MSam_311_sp4_s2","MSam_311_sp4_s3","MSam_311_sp5_s1","MSam_311_sp5_s2","MSam_311_sp5_s3"], "MSam 3, 0.3 temp, 1 var": ["MSam_3031_s1", "MSam_3031_s2", "MSam_3031_s3", "MSam_3031_sp2_s1", "MSam_3031_sp2_s2", "MSam_3031_sp2_s3", "MSam_3031_sp3_s1","MSam_3031_sp3_s2","MSam_3031_sp3_s3","MSam_3031_sp4_s1","MSam_3031_sp4_s2","MSam_3031_sp4_s3","MSam_3031_sp5_s1","MSam_3031_sp5_s2","MSam_3031_sp5_s3"], "MSam 3, 1 temp, 0.5 var": ["MSam_3105_s1", "MSam_3105_s2", "MSam_3105_s3", "MSam_3105_sp2_s1", "MSam_3105_sp2_s2", "MSam_3105_sp2_s3", "MSam_3105_sp3_s1","MSam_3105_sp3_s2","MSam_3105_sp3_s3","MSam_3105_sp4_s1","MSam_3105_sp4_s2","MSam_3105_sp4_s3","MSam_3105_sp5_s1","MSam_3105_sp5_s2","MSam_3105_sp5_s3"]}' --submodel MM --metric_filter all --show_full_training --smooth_window 5 --show_std --name M_Sampling
+
+
+# python plot/plot_crossfold_group_comparison.py --groups '{"CFCDID": ["CFCDID_s1", "CFCDID_s2", "CFCDID_s3", "CFCDID_sp2_s1", "CFCDID_sp2_s2", "CFCDID_sp2_s3", "CFCDID_sp3_s1","CFCDID_sp3_s2","CFCDID_sp3_s3","CFCDID_sp4_s1","CFCDID_sp4_s2","CFCDID_sp4_s3","CFCDID_sp5_s1","CFCDID_sp5_s2","CFCDID_sp5_s3"],"CFCD": ["CFCD_s1", "CFCD_s2", "CFCD_s3", "CFCD_sp2_s1", "CFCD_sp2_s2", "CFCD_sp2_s3", "CFCD_sp3_s1","CFCD_sp3_s2","CFCD_sp3_s3","CFCD_sp4_s1","CFCD_sp4_s2","CFCD_sp4_s3","CFCD_sp5_s1","CFCD_sp5_s2","CFCD_sp5_s3"], "MG 08": ["MG_08_s1", "MG_08_s2", "MG_08_s3", "MG_08_sp2_s1", "MG_08_sp2_s2", "MG_08_sp2_s3", "MG_08_sp3_s1","MG_08_sp3_s2","MG_08_sp3_s3","MG_08_sp4_s1","MG_08_sp4_s2","MG_08_sp4_s3","MG_08_sp5_s1","MG_08_sp5_s2","MG_08_sp5_s3"], "MLG 08 08": ["MLG_08_08_s1", "MLG_08_08_s2", "MLG_08_08_s3", "MLG_08_08_sp2_s1", "MLG_08_08_sp2_s2", "MLG_08_08_sp2_s3", "MLG_08_08_sp3_s1","MLG_08_08_sp3_s2","MLG_08_08_sp3_s3","MLG_08_08_sp4_s1","MLG_08_08_sp4_s2","MLG_08_08_sp4_s3","MLG_08_08_sp5_s1","MLG_08_08_sp5_s2","MLG_08_08_sp5_s3"], "MG 08 01t": ["MG_01t_s1", "MG_01t_s2", "MG_01t_s3", "MG_01t_sp2_s1", "MG_01t_sp2_s2", "MG_01t_sp2_s3", "MG_01t_sp3_s1","MG_01t_sp3_s2","MG_01t_sp3_s3","MG_01t_sp4_s1","MG_01t_sp4_s2","MG_01t_sp4_s3","MG_01t_sp5_s1","MG_01t_sp5_s2","MG_01t_sp5_s3"], "MLG 08 08 01t": ["MLG_01t_s1", "MLG_01t_s2", "MLG_01t_s3", "MLG_01t_sp2_s1", "MLG_01t_sp2_s2", "MLG_01t_sp2_s3", "MLG_01t_sp3_s1","MLG_01t_sp3_s2","MLG_01t_sp3_s3","MLG_01t_sp4_s1","MLG_01t_sp4_s2","MLG_01t_sp4_s3","MLG_01t_sp5_s1","MLG_01t_sp5_s2","MLG_01t_sp5_s3"]}' --submodel MM --metric_filter all --show_full_training --smooth_window 5 --show_std --name MLG_temps_redo
+
+# python plot/plot_crossfold_group_comparison.py --groups '{"CFCDID": ["CFCDID_s1", "CFCDID_s2", "CFCDID_s3", "CFCDID_sp2_s1", "CFCDID_sp2_s2", "CFCDID_sp2_s3", "CFCDID_sp3_s1","CFCDID_sp3_s2","CFCDID_sp3_s3","CFCDID_sp4_s1","CFCDID_sp4_s2","CFCDID_sp4_s3","CFCDID_sp5_s1","CFCDID_sp5_s2","CFCDID_sp5_s3"],"CFCD": ["CFCD_s1", "CFCD_s2", "CFCD_s3", "CFCD_sp2_s1", "CFCD_sp2_s2", "CFCD_sp2_s3", "CFCD_sp3_s1","CFCD_sp3_s2","CFCD_sp3_s3","CFCD_sp4_s1","CFCD_sp4_s2","CFCD_sp4_s3","CFCD_sp5_s1","CFCD_sp5_s2","CFCD_sp5_s3"], "MLG 08 08": ["MLG_08_08_s1", "MLG_08_08_s2", "MLG_08_08_s3", "MLG_08_08_sp2_s1", "MLG_08_08_sp2_s2", "MLG_08_08_sp2_s3", "MLG_08_08_sp3_s1","MLG_08_08_sp3_s2","MLG_08_08_sp3_s3","MLG_08_08_sp4_s1","MLG_08_08_sp4_s2","MLG_08_08_sp4_s3","MLG_08_08_sp5_s1","MLG_08_08_sp5_s2","MLG_08_08_sp5_s3"], "MLG 08 08 01t": ["MLG_01t_s1", "MLG_01t_s2", "MLG_01t_s3", "MLG_01t_sp2_s1", "MLG_01t_sp2_s2", "MLG_01t_sp2_s3", "MLG_01t_sp3_s1","MLG_01t_sp3_s2","MLG_01t_sp3_s3","MLG_01t_sp4_s1","MLG_01t_sp4_s2","MLG_01t_sp4_s3","MLG_01t_sp5_s1","MLG_01t_sp5_s2","MLG_01t_sp5_s3"]}' --submodel MM --metric_filter all --show_full_training --smooth_window 5 --show_std --name MLG_temps
+
+
+# python plot/plot_crossfold_group_comparison.py --groups '{"CFCDID": ["CFCDIDnew_same_1_each_s1", "CFCDIDnew_same_1_each_s2", "CFCDIDnew_same_1_each_s3", "CFCDIDnew_same_1_each_sp2_s1", "CFCDIDnew_same_1_each_sp2_s2", "CFCDIDnew_same_1_each_sp2_s3", "CFCDIDnew_same_1_each_sp3_s1","CFCDIDnew_same_1_each_sp3_s2","CFCDIDnew_same_1_each_sp3_s3","CFCDIDnew_same_1_each_sp4_s1","CFCDIDnew_same_1_each_sp4_s2","CFCDIDnew_same_1_each_sp4_s3","CFCDIDnew_same_1_each_sp5_s1","CFCDIDnew_same_1_each_sp5_s2","CFCDIDnew_same_1_each_sp5_s3"],"CFCD": ["CFCDnew_swap_same_1_each_fullaug_s1", "CFCDnew_swap_same_1_each_fullaug_s2", "CFCDnew_swap_same_1_each_fullaug_s3", "CFCDnew_swap_same_1_each_fullaug_sp2_s1", "CFCDnew_swap_same_1_each_fullaug_sp2_s2", "CFCDnew_swap_same_1_each_fullaug_sp2_s3", "CFCDnew_swap_same_1_each_fullaug_sp3_s1","CFCDnew_swap_same_1_each_fullaug_sp3_s2","CFCDnew_swap_same_1_each_fullaug_sp3_s3","CFCDnew_swap_same_1_each_fullaug_sp4_s1","CFCDnew_swap_same_1_each_fullaug_sp4_s2","CFCDnew_swap_same_1_each_fullaug_sp4_s3","CFCDnew_swap_same_1_each_fullaug_sp5_s1","CFCDnew_swap_same_1_each_fullaug_sp5_s2","CFCDnew_swap_same_1_each_fullaug_sp5_s3"], "MG 08": ["MG_08_s1", "MG_08_s2", "MG_08_s3", "MG_08_sp2_s1", "MG_08_sp2_s2", "MG_08_sp2_s3", "MG_08_sp3_s1","MG_08_sp3_s2","MG_08_sp3_s3","MG_08_sp4_s1","MG_08_sp4_s2","MG_08_sp4_s3","MG_08_sp5_s1","MG_08_sp5_s2","MG_08_sp5_s3"], "MLG 08 08": ["MLG_08_08_s1", "MLG_08_08_s2", "MLG_08_08_s3", "MLG_08_08_sp2_s1", "MLG_08_08_sp2_s2", "MLG_08_08_sp2_s3", "MLG_08_08_sp3_s1","MLG_08_08_sp3_s2","MLG_08_08_sp3_s3","MLG_08_08_sp4_s1","MLG_08_08_sp4_s2","MLG_08_08_sp4_s3","MLG_08_08_sp5_s1","MLG_08_08_sp5_s2","MLG_08_08_sp5_s3"], "MG 08 01t": ["MG_01t_s1", "MG_01t_s2", "MG_01t_s3", "MG_01t_sp2_s1", "MG_01t_sp2_s2", "MG_01t_sp2_s3", "MG_01t_sp3_s1","MG_01t_sp3_s2","MG_01t_sp3_s3","MG_01t_sp4_s1","MG_01t_sp4_s2","MG_01t_sp4_s3","MG_01t_sp5_s1","MG_01t_sp5_s2","MG_01t_sp5_s3"], "MLG 08 08 01t": ["MLG_01t_s1", "MLG_01t_s2", "MLG_01t_s3", "MLG_01t_sp2_s1", "MLG_01t_sp2_s2", "MLG_01t_sp2_s3", "MLG_01t_sp3_s1","MLG_01t_sp3_s2","MLG_01t_sp3_s3","MLG_01t_sp4_s1","MLG_01t_sp4_s2","MLG_01t_sp4_s3","MLG_01t_sp5_s1","MLG_01t_sp5_s2","MLG_01t_sp5_s3"]}' --submodel MM --metric_filter all --show_full_training --smooth_window 5 --show_std --name MLG_temps_redo

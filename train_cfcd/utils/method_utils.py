@@ -15,7 +15,13 @@ class Prototype:
     def from_data(cls, data, label=None, plot=False):
         data_np = np.stack([x.cpu().detach().numpy().reshape(-1) if isinstance(x, torch.Tensor) else x for x in data])
         mean = np.mean(data_np, axis=0).reshape(-1)
-        var = np.var(data_np, axis=0, ddof=1).reshape(-1)
+        # Handle case when we have very few samples
+        if len(data_np) <= 1:
+            raise ValueError("Not enough data points to compute variance.")
+        else:
+            var = np.var(data_np, axis=0, ddof=1).reshape(-1)
+            # Replace any NaN variances with a small positive value
+            var = np.nan_to_num(var, nan=0.01)
 
         if plot:
             plot_data_and_prototype(data_np, cls(mean, var, label=label))
