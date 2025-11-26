@@ -8,8 +8,8 @@ import os
 import json
 import torch
 
-import sys
-sys.path.append('/gris/gris-f/homelv/phempel/masterthesis/MMFL')  # Add path to Python path
+# import sys
+# sys.path.append('/gris/gris-f/homelv/phempel/masterthesis/MMFL')  # Add path to Python path
 from prepocessing import preproc_cd_file
 from dataset.dataset_iterator import root_iter, id_to_filename
 

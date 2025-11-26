@@ -43,7 +43,8 @@ def load_data(partition_id, args):
         args.augmentations = {i: "features_1536_fixed" for i in range(args.num_clients)}
     
     client_dataset = MM_Multi_Scale_Dataset(
-        csv_path = '/gris/gris-f/homelv/phempel/masterthesis/MMFL/data/chimera_new.csv',
+        csv_path = '/home/phempel/tmp_filerworkaround_phempel_nov_2025/train_cfcd/data/chimera_new.csv',
+        # csv_path = '/gris/gris-f/homelv/phempel/masterthesis/MMFL/data/chimera_new.csv',
         return_coords = args.return_coords,
         data_dir = f"/local/scratch/phempel/chimera/{args.augmentations[partition_id]}",
         # default="/local/scratch/phempel/chimera/features_1536",
@@ -154,3 +155,30 @@ def get_model(args, device):
             top_p=args.top_p)
     model = model.to(device)
     return model
+
+
+def avg_f1(f1_s1test_s1, f1_s1test_s2, f1_s2test_s1, f1_s2test_s2, plasticity_weight = 0.5):
+    '''
+    Parameter:
+        - f1_s1test_s1: F1 Score of the stage 1 testset at the end of stage 1
+            - Should be last f1 score of stage 1 testset during stage 1 training
+        - f1_s1test_s2: F1 Score of the stage 1 testset at stage 2
+            - Current F1 Score of stage 1 testset during stage 2 training
+        - f1_s2test_s1: F1 Score of the stage 2 testset at the end of stage 1
+            - Should be last f1 score of stage 2 testset during stage 1 training
+        - f1_s2test_s2: F1 Score of the stage 2 testset at stage 2
+            - Current F1 Score of stage 2 testset during stage 2 training
+            
+            
+        Measures plasticity and performance retention of CF setups:
+            - Plasticity: Improvement on stage 2 testset from stage 1 to stage 2
+            - Retention: Change on stage 1 testset from stage 1 to stage 2
+            
+        -> plasticity_weight: Weighting factor for plasticity vs retention (0.0 = only retention, 1.0 = only plasticity)
+        
+        
+        In Stage 1, for f1_s1test_s1 and f1_s2test_s1, use the f1 scores from previous round.
+    '''
+    
+    retention_weight = 1.0 - plasticity_weight
+    return retention_weight * f1_s1test_s2 + plasticity_weight * f1_s2test_s2 - ( retention_weight * f1_s1test_s1 + plasticity_weight * f1_s2test_s1)

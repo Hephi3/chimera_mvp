@@ -1,0 +1,21 @@
+# Final Framework for CF_nocd_1_each_same_test (Long Experiments), do not compare with ID, worse performance probably because of overfitting
+
+python federated_train.py --gpus 2 --num_clients 3 --exp_code CF_nocd_1_each_same_test --no_verbose --split_dir chimera_3_5_2_same_1_each_1_unbalanced_0.8_0.2_nocd  --folds 5 --seed 1 --num_rounds 40 --no_phases --max_epochs 3 --num_stages 2
+python federated_train.py --gpus 2 --num_clients 3 --exp_code CF_nocd_1_each_same_test --no_verbose --split_dir chimera_3_5_2_same_1_each_1_unbalanced_0.8_0.2_nocd  --folds 5 --seed 2 --num_rounds 40 --no_phases --max_epochs 3 --num_stages 2
+python federated_train.py --gpus 2 --num_clients 3 --exp_code CF_nocd_1_each_same_test --no_verbose --split_dir chimera_3_5_2_same_1_each_1_unbalanced_0.8_0.2_nocd  --folds 5 --seed 3 --num_rounds 40 --no_phases --max_epochs 3 --num_stages 2
+
+python federated_train.py --gpus 2 --num_clients 3 --exp_code CF_nocd_1_each_same_test_sp2 --no_verbose --split_dir chimera_3_5_2_same_1_each_2_unbalanced_0.8_0.2_nocd  --folds 5 --seed 1 --num_rounds 40 --no_phases --max_epochs 3 --num_stages 2
+python federated_train.py --gpus 2 --num_clients 3 --exp_code CF_nocd_1_each_same_test_sp2 --no_verbose --split_dir chimera_3_5_2_same_1_each_2_unbalanced_0.8_0.2_nocd  --folds 5 --seed 2 --num_rounds 40 --no_phases --max_epochs 3 --num_stages 2
+python federated_train.py --gpus 2 --num_clients 3 --exp_code CF_nocd_1_each_same_test_sp2 --no_verbose --split_dir chimera_3_5_2_same_1_each_2_unbalanced_0.8_0.2_nocd  --folds 5 --seed 3 --num_rounds 40 --no_phases --max_epochs 3 --num_stages 2
+
+python federated_train.py --gpus 2 --num_clients 3 --exp_code CF_nocd_1_each_same_test_sp3 --no_verbose --split_dir chimera_3_5_2_same_1_each_3_unbalanced_0.8_0.2_nocd  --folds 5 --seed 1 --num_rounds 40 --no_phases --max_epochs 3 --num_stages 2
+python federated_train.py --gpus 2 --num_clients 3 --exp_code CF_nocd_1_each_same_test_sp3 --no_verbose --split_dir chimera_3_5_2_same_1_each_3_unbalanced_0.8_0.2_nocd  --folds 5 --seed 2 --num_rounds 40 --no_phases --max_epochs 3 --num_stages 2
+python federated_train.py --gpus 2 --num_clients 3 --exp_code CF_nocd_1_each_same_test_sp3 --no_verbose --split_dir chimera_3_5_2_same_1_each_3_unbalanced_0.8_0.2_nocd  --folds 5 --seed 3 --num_rounds 40 --no_phases --max_epochs 3 --num_stages 2
+
+python federated_train.py --gpus 2 --num_clients 3 --exp_code CF_nocd_1_each_same_test_sp4 --no_verbose --split_dir chimera_3_5_2_same_1_each_4_unbalanced_0.8_0.2_nocd  --folds 5 --seed 1 --num_rounds 40 --no_phases --max_epochs 3 --num_stages 2
+python federated_train.py --gpus 2 --num_clients 3 --exp_code CF_nocd_1_each_same_test_sp4 --no_verbose --split_dir chimera_3_5_2_same_1_each_4_unbalanced_0.8_0.2_nocd  --folds 5 --seed 2 --num_rounds 40 --no_phases --max_epochs 3 --num_stages 2
+python federated_train.py --gpus 2 --num_clients 3 --exp_code CF_nocd_1_each_same_test_sp4 --no_verbose --split_dir chimera_3_5_2_same_1_each_4_unbalanced_0.8_0.2_nocd  --folds 5 --seed 3 --num_rounds 40 --no_phases --max_epochs 3 --num_stages 2
+
+python federated_train.py --gpus 2 --num_clients 3 --exp_code CF_nocd_1_each_same_test_sp5 --no_verbose --split_dir chimera_3_5_2_same_1_each_5_unbalanced_0.8_0.2_nocd  --folds 5 --seed 1 --num_rounds 40 --no_phases --max_epochs 3 --num_stages 2
+python federated_train.py --gpus 2 --num_clients 3 --exp_code CF_nocd_1_each_same_test_sp5 --no_verbose --split_dir chimera_3_5_2_same_1_each_5_unbalanced_0.8_0.2_nocd  --folds 5 --seed 2 --num_rounds 40 --no_phases --max_epochs 3 --num_stages 2
+python federated_train.py --gpus 2 --num_clients 3 --exp_code CF_nocd_1_each_same_test_sp5 --no_verbose --split_dir chimera_3_5_2_same_1_each_5_unbalanced_0.8_0.2_nocd  --folds 5 --seed 3 --num_rounds 40 --no_phases --max_epochs 3 --num_stages 2

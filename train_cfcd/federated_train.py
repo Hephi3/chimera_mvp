@@ -110,6 +110,7 @@ def run_experiment(args):
     args.augmentations = augmentations
 
     for i in tqdm(range(args.folds), desc='Folds'):
+    # for i in [2,3,4]:
         args.fold = i
     
         init_experiment(device=DEVICE, args=args)
@@ -134,10 +135,29 @@ if __name__ == "__main__":
             run_experiment(args)
     else:
         import time
-        start_time = time.time()
-        run_experiment(orig_args)
-        end_time = time.time()
-        print(f"Experiment completed in {end_time - start_time:.2f} seconds")
+        pairs = [(i + 1, s + 1) for i in range(5) for s in range(3)]
+        # for i in range(5):
+            # split = i+1
+            # for s in range(3):
+                # seed = s+1
+        # 0 -> all, 3 -> From Split 2, 6 -> From Split 3, 9 -> From Split 4, 12 -> From Split 5
+        import copy
+        for split, seed in pairs[3:]:
+            start_time = time.time()
+            print("Split {}, seed {}".format(split, seed))
+            args = copy.deepcopy(orig_args)
+            args.seed = seed
+            args.split_dir = f'{orig_args.split_dir}_{split}'
+            args.exp_code = f'{orig_args.exp_code}_sp{split}'
+            run_experiment(args)
+            end_time = time.time()
+            print(f"Experiment completed in {end_time - start_time:.2f} seconds")
+                
+        # import time
+        # start_time = time.time()
+        # run_experiment(orig_args)
+        # end_time = time.time()
+        # print(f"Experiment completed in {end_time - start_time:.2f} seconds")
     
     
     

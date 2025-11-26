@@ -1,0 +1,195 @@
+# python federated_train.py --gpus 1 --num_clients 3 --exp_code ML_02 --no_verbose --split_dir chimera_3_5_2_same_1_each_1_unbalanced_0.8_0.2_nocd --num_rounds 40 --folds 5 --seed 1 --no_phases --max_epochs 3 --augmentations 0=Aug0_brightness_460 1=features_1536_fixed 2=Aug0_blur_470 --num_stages 2  --method_local --proto_adaptation_rate_client 0.2
+# python federated_train.py --gpus 1 --num_clients 3 --exp_code ML_02 --no_verbose --split_dir chimera_3_5_2_same_1_each_1_unbalanced_0.8_0.2_nocd --num_rounds 40 --folds 5 --seed 2 --no_phases --max_epochs 3 --augmentations 0=Aug0_brightness_460 1=features_1536_fixed 2=Aug0_blur_470 --num_stages 2  --method_local --proto_adaptation_rate_client 0.2
+# python federated_train.py --gpus 1 --num_clients 3 --exp_code ML_02 --no_verbose --split_dir chimera_3_5_2_same_1_each_1_unbalanced_0.8_0.2_nocd --num_rounds 40 --folds 5 --seed 3 --no_phases --max_epochs 3 --augmentations 0=Aug0_brightness_460 1=features_1536_fixed 2=Aug0_blur_470 --num_stages 2  --method_local --proto_adaptation_rate_client 0.2
+
+# python federated_train.py --gpus 1 --num_clients 3 --exp_code ML_02_sp2 --no_verbose --split_dir chimera_3_5_2_same_1_each_2_unbalanced_0.8_0.2_nocd --num_rounds 40 --folds 5 --seed 1 --no_phases --max_epochs 3 --augmentations 0=Aug0_brightness_460 1=features_1536_fixed 2=Aug0_blur_470 --num_stages 2  --method_local --proto_adaptation_rate_client 0.2
+# python federated_train.py --gpus 1 --num_clients 3 --exp_code ML_02_sp2 --no_verbose --split_dir chimera_3_5_2_same_1_each_2_unbalanced_0.8_0.2_nocd --num_rounds 40 --folds 5 --seed 2 --no_phases --max_epochs 3 --augmentations 0=Aug0_brightness_460 1=features_1536_fixed 2=Aug0_blur_470 --num_stages 2  --method_local --proto_adaptation_rate_client 0.2
+# python federated_train.py --gpus 1 --num_clients 3 --exp_code ML_02_sp2 --no_verbose --split_dir chimera_3_5_2_same_1_each_2_unbalanced_0.8_0.2_nocd --num_rounds 40 --folds 5 --seed 3 --no_phases --max_epochs 3 --augmentations 0=Aug0_brightness_460 1=features_1536_fixed 2=Aug0_blur_470 --num_stages 2  --method_local --proto_adaptation_rate_client 0.2
+
+# python federated_train.py --gpus 1 --num_clients 3 --exp_code ML_02_sp3 --no_verbose --split_dir chimera_3_5_2_same_1_each_3_unbalanced_0.8_0.2_nocd --num_rounds 40 --folds 5 --seed 1 --no_phases --max_epochs 3 --augmentations 0=Aug0_brightness_460 1=features_1536_fixed 2=Aug0_blur_470 --num_stages 2  --method_local --proto_adaptation_rate_client 0.2
+# python federated_train.py --gpus 1 --num_clients 3 --exp_code ML_02_sp3 --no_verbose --split_dir chimera_3_5_2_same_1_each_3_unbalanced_0.8_0.2_nocd --num_rounds 40 --folds 5 --seed 2 --no_phases --max_epochs 3 --augmentations 0=Aug0_brightness_460 1=features_1536_fixed 2=Aug0_blur_470 --num_stages 2  --method_local --proto_adaptation_rate_client 0.2
+# python federated_train.py --gpus 1 --num_clients 3 --exp_code ML_02_sp3 --no_verbose --split_dir chimera_3_5_2_same_1_each_3_unbalanced_0.8_0.2_nocd --num_rounds 40 --folds 5 --seed 3 --no_phases --max_epochs 3 --augmentations 0=Aug0_brightness_460 1=features_1536_fixed 2=Aug0_blur_470 --num_stages 2  --method_local --proto_adaptation_rate_client 0.2
+
+# python federated_train.py --gpus 1 --num_clients 3 --exp_code ML_02_sp4 --no_verbose --split_dir chimera_3_5_2_same_1_each_4_unbalanced_0.8_0.2_nocd --num_rounds 40 --folds 5 --seed 1 --no_phases --max_epochs 3 --augmentations 0=Aug0_brightness_460 1=features_1536_fixed 2=Aug0_blur_470 --num_stages 2  --method_local --proto_adaptation_rate_client 0.2
+# python federated_train.py --gpus 1 --num_clients 3 --exp_code ML_02_sp4 --no_verbose --split_dir chimera_3_5_2_same_1_each_4_unbalanced_0.8_0.2_nocd --num_rounds 40 --folds 5 --seed 2 --no_phases --max_epochs 3 --augmentations 0=Aug0_brightness_460 1=features_1536_fixed 2=Aug0_blur_470 --num_stages 2  --method_local --proto_adaptation_rate_client 0.2
+# python federated_train.py --gpus 1 --num_clients 3 --exp_code ML_02_sp4 --no_verbose --split_dir chimera_3_5_2_same_1_each_4_unbalanced_0.8_0.2_nocd --num_rounds 40 --folds 5 --seed 3 --no_phases --max_epochs 3 --augmentations 0=Aug0_brightness_460 1=features_1536_fixed 2=Aug0_blur_470 --num_stages 2  --method_local --proto_adaptation_rate_client 0.2
+
+# python federated_train.py --gpus 1 --num_clients 3 --exp_code ML_02_sp5 --no_verbose --split_dir chimera_3_5_2_same_1_each_5_unbalanced_0.8_0.2_nocd --num_rounds 40 --folds 5 --seed 1 --no_phases --max_epochs 3 --augmentations 0=Aug0_brightness_460 1=features_1536_fixed 2=Aug0_blur_470 --num_stages 2  --method_local --proto_adaptation_rate_client 0.2
+# python federated_train.py --gpus 1 --num_clients 3 --exp_code ML_02_sp5 --no_verbose --split_dir chimera_3_5_2_same_1_each_5_unbalanced_0.8_0.2_nocd --num_rounds 40 --folds 5 --seed 2 --no_phases --max_epochs 3 --augmentations 0=Aug0_brightness_460 1=features_1536_fixed 2=Aug0_blur_470 --num_stages 2  --method_local --proto_adaptation_rate_client 0.2
+# python federated_train.py --gpus 1 --num_clients 3 --exp_code ML_02_sp5 --no_verbose --split_dir chimera_3_5_2_same_1_each_5_unbalanced_0.8_0.2_nocd --num_rounds 40 --folds 5 --seed 3 --no_phases --max_epochs 3 --augmentations 0=Aug0_brightness_460 1=features_1536_fixed 2=Aug0_blur_470 --num_stages 2  --method_local --proto_adaptation_rate_client 0.2
+
+
+
+
+
+
+
+
+
+
+# python federated_train.py --gpus 1 --num_clients 3 --exp_code ML_05 --no_verbose --split_dir chimera_3_5_2_same_1_each_1_unbalanced_0.8_0.2_nocd --num_rounds 40 --folds 5 --seed 1 --no_phases --max_epochs 3 --augmentations 0=Aug0_brightness_460 1=features_1536_fixed 2=Aug0_blur_470 --num_stages 2  --method_local --proto_adaptation_rate_client 0.5
+# python federated_train.py --gpus 1 --num_clients 3 --exp_code ML_05 --no_verbose --split_dir chimera_3_5_2_same_1_each_1_unbalanced_0.8_0.2_nocd --num_rounds 40 --folds 5 --seed 2 --no_phases --max_epochs 3 --augmentations 0=Aug0_brightness_460 1=features_1536_fixed 2=Aug0_blur_470 --num_stages 2  --method_local --proto_adaptation_rate_client 0.5
+# python federated_train.py --gpus 1 --num_clients 3 --exp_code ML_05 --no_verbose --split_dir chimera_3_5_2_same_1_each_1_unbalanced_0.8_0.2_nocd --num_rounds 40 --folds 5 --seed 3 --no_phases --max_epochs 3 --augmentations 0=Aug0_brightness_460 1=features_1536_fixed 2=Aug0_blur_470 --num_stages 2  --method_local --proto_adaptation_rate_client 0.5
+
+# python federated_train.py --gpus 1 --num_clients 3 --exp_code ML_05_sp2 --no_verbose --split_dir chimera_3_5_2_same_1_each_2_unbalanced_0.8_0.2_nocd --num_rounds 40 --folds 5 --seed 1 --no_phases --max_epochs 3 --augmentations 0=Aug0_brightness_460 1=features_1536_fixed 2=Aug0_blur_470 --num_stages 2  --method_local --proto_adaptation_rate_client 0.5
+# python federated_train.py --gpus 1 --num_clients 3 --exp_code ML_05_sp2 --no_verbose --split_dir chimera_3_5_2_same_1_each_2_unbalanced_0.8_0.2_nocd --num_rounds 40 --folds 5 --seed 2 --no_phases --max_epochs 3 --augmentations 0=Aug0_brightness_460 1=features_1536_fixed 2=Aug0_blur_470 --num_stages 2  --method_local --proto_adaptation_rate_client 0.5
+# python federated_train.py --gpus 1 --num_clients 3 --exp_code ML_05_sp2 --no_verbose --split_dir chimera_3_5_2_same_1_each_2_unbalanced_0.8_0.2_nocd --num_rounds 40 --folds 5 --seed 3 --no_phases --max_epochs 3 --augmentations 0=Aug0_brightness_460 1=features_1536_fixed 2=Aug0_blur_470 --num_stages 2  --method_local --proto_adaptation_rate_client 0.5
+
+# python federated_train.py --gpus 1 --num_clients 3 --exp_code ML_05_sp3 --no_verbose --split_dir chimera_3_5_2_same_1_each_3_unbalanced_0.8_0.2_nocd --num_rounds 40 --folds 5 --seed 1 --no_phases --max_epochs 3 --augmentations 0=Aug0_brightness_460 1=features_1536_fixed 2=Aug0_blur_470 --num_stages 2  --method_local --proto_adaptation_rate_client 0.5
+# python federated_train.py --gpus 1 --num_clients 3 --exp_code ML_05_sp3 --no_verbose --split_dir chimera_3_5_2_same_1_each_3_unbalanced_0.8_0.2_nocd --num_rounds 40 --folds 5 --seed 2 --no_phases --max_epochs 3 --augmentations 0=Aug0_brightness_460 1=features_1536_fixed 2=Aug0_blur_470 --num_stages 2  --method_local --proto_adaptation_rate_client 0.5
+# python federated_train.py --gpus 1 --num_clients 3 --exp_code ML_05_sp3 --no_verbose --split_dir chimera_3_5_2_same_1_each_3_unbalanced_0.8_0.2_nocd --num_rounds 40 --folds 5 --seed 3 --no_phases --max_epochs 3 --augmentations 0=Aug0_brightness_460 1=features_1536_fixed 2=Aug0_blur_470 --num_stages 2  --method_local --proto_adaptation_rate_client 0.5
+
+# python federated_train.py --gpus 1 --num_clients 3 --exp_code ML_05_sp4 --no_verbose --split_dir chimera_3_5_2_same_1_each_4_unbalanced_0.8_0.2_nocd --num_rounds 40 --folds 5 --seed 1 --no_phases --max_epochs 3 --augmentations 0=Aug0_brightness_460 1=features_1536_fixed 2=Aug0_blur_470 --num_stages 2  --method_local --proto_adaptation_rate_client 0.5
+# python federated_train.py --gpus 1 --num_clients 3 --exp_code ML_05_sp4 --no_verbose --split_dir chimera_3_5_2_same_1_each_4_unbalanced_0.8_0.2_nocd --num_rounds 40 --folds 5 --seed 2 --no_phases --max_epochs 3 --augmentations 0=Aug0_brightness_460 1=features_1536_fixed 2=Aug0_blur_470 --num_stages 2  --method_local --proto_adaptation_rate_client 0.5
+# python federated_train.py --gpus 1 --num_clients 3 --exp_code ML_05_sp4 --no_verbose --split_dir chimera_3_5_2_same_1_each_4_unbalanced_0.8_0.2_nocd --num_rounds 40 --folds 5 --seed 3 --no_phases --max_epochs 3 --augmentations 0=Aug0_brightness_460 1=features_1536_fixed 2=Aug0_blur_470 --num_stages 2  --method_local --proto_adaptation_rate_client 0.5
+
+# python federated_train.py --gpus 1 --num_clients 3 --exp_code ML_05_sp5 --no_verbose --split_dir chimera_3_5_2_same_1_each_5_unbalanced_0.8_0.2_nocd --num_rounds 40 --folds 5 --seed 1 --no_phases --max_epochs 3 --augmentations 0=Aug0_brightness_460 1=features_1536_fixed 2=Aug0_blur_470 --num_stages 2  --method_local --proto_adaptation_rate_client 0.5
+# python federated_train.py --gpus 1 --num_clients 3 --exp_code ML_05_sp5 --no_verbose --split_dir chimera_3_5_2_same_1_each_5_unbalanced_0.8_0.2_nocd --num_rounds 40 --folds 5 --seed 2 --no_phases --max_epochs 3 --augmentations 0=Aug0_brightness_460 1=features_1536_fixed 2=Aug0_blur_470 --num_stages 2  --method_local --proto_adaptation_rate_client 0.5
+# python federated_train.py --gpus 1 --num_clients 3 --exp_code ML_05_sp5 --no_verbose --split_dir chimera_3_5_2_same_1_each_5_unbalanced_0.8_0.2_nocd --num_rounds 40 --folds 5 --seed 3 --no_phases --max_epochs 3 --augmentations 0=Aug0_brightness_460 1=features_1536_fixed 2=Aug0_blur_470 --num_stages 2  --method_local --proto_adaptation_rate_client 0.5
+
+
+
+
+
+
+# python federated_train.py --gpus 1 --num_clients 3 --exp_code ML_08 --no_verbose --split_dir chimera_3_5_2_same_1_each_1_unbalanced_0.8_0.2_nocd --num_rounds 40 --folds 5 --seed 1 --no_phases --max_epochs 3 --augmentations 0=Aug0_brightness_460 1=features_1536_fixed 2=Aug0_blur_470 --num_stages 2  --method_local --proto_adaptation_rate_client 0.8
+# python federated_train.py --gpus 1 --num_clients 3 --exp_code ML_08 --no_verbose --split_dir chimera_3_5_2_same_1_each_1_unbalanced_0.8_0.2_nocd --num_rounds 40 --folds 5 --seed 2 --no_phases --max_epochs 3 --augmentations 0=Aug0_brightness_460 1=features_1536_fixed 2=Aug0_blur_470 --num_stages 2  --method_local --proto_adaptation_rate_client 0.8
+# python federated_train.py --gpus 1 --num_clients 3 --exp_code ML_08 --no_verbose --split_dir chimera_3_5_2_same_1_each_1_unbalanced_0.8_0.2_nocd --num_rounds 40 --folds 5 --seed 3 --no_phases --max_epochs 3 --augmentations 0=Aug0_brightness_460 1=features_1536_fixed 2=Aug0_blur_470 --num_stages 2  --method_local --proto_adaptation_rate_client 0.8
+
+# python federated_train.py --gpus 1 --num_clients 3 --exp_code ML_08_sp2 --no_verbose --split_dir chimera_3_5_2_same_1_each_2_unbalanced_0.8_0.2_nocd --num_rounds 40 --folds 5 --seed 1 --no_phases --max_epochs 3 --augmentations 0=Aug0_brightness_460 1=features_1536_fixed 2=Aug0_blur_470 --num_stages 2  --method_local --proto_adaptation_rate_client 0.8
+# python federated_train.py --gpus 1 --num_clients 3 --exp_code ML_08_sp2 --no_verbose --split_dir chimera_3_5_2_same_1_each_2_unbalanced_0.8_0.2_nocd --num_rounds 40 --folds 5 --seed 2 --no_phases --max_epochs 3 --augmentations 0=Aug0_brightness_460 1=features_1536_fixed 2=Aug0_blur_470 --num_stages 2  --method_local --proto_adaptation_rate_client 0.8
+# python federated_train.py --gpus 1 --num_clients 3 --exp_code ML_08_sp2 --no_verbose --split_dir chimera_3_5_2_same_1_each_2_unbalanced_0.8_0.2_nocd --num_rounds 40 --folds 5 --seed 3 --no_phases --max_epochs 3 --augmentations 0=Aug0_brightness_460 1=features_1536_fixed 2=Aug0_blur_470 --num_stages 2  --method_local --proto_adaptation_rate_client 0.8
+
+# python federated_train.py --gpus 1 --num_clients 3 --exp_code ML_08_sp3 --no_verbose --split_dir chimera_3_5_2_same_1_each_3_unbalanced_0.8_0.2_nocd --num_rounds 40 --folds 5 --seed 1 --no_phases --max_epochs 3 --augmentations 0=Aug0_brightness_460 1=features_1536_fixed 2=Aug0_blur_470 --num_stages 2  --method_local --proto_adaptation_rate_client 0.8
+# python federated_train.py --gpus 1 --num_clients 3 --exp_code ML_08_sp3 --no_verbose --split_dir chimera_3_5_2_same_1_each_3_unbalanced_0.8_0.2_nocd --num_rounds 40 --folds 5 --seed 2 --no_phases --max_epochs 3 --augmentations 0=Aug0_brightness_460 1=features_1536_fixed 2=Aug0_blur_470 --num_stages 2  --method_local --proto_adaptation_rate_client 0.8
+# python federated_train.py --gpus 1 --num_clients 3 --exp_code ML_08_sp3 --no_verbose --split_dir chimera_3_5_2_same_1_each_3_unbalanced_0.8_0.2_nocd --num_rounds 40 --folds 5 --seed 3 --no_phases --max_epochs 3 --augmentations 0=Aug0_brightness_460 1=features_1536_fixed 2=Aug0_blur_470 --num_stages 2  --method_local --proto_adaptation_rate_client 0.8
+
+# python federated_train.py --gpus 1 --num_clients 3 --exp_code ML_08_sp4 --no_verbose --split_dir chimera_3_5_2_same_1_each_4_unbalanced_0.8_0.2_nocd --num_rounds 40 --folds 5 --seed 1 --no_phases --max_epochs 3 --augmentations 0=Aug0_brightness_460 1=features_1536_fixed 2=Aug0_blur_470 --num_stages 2  --method_local --proto_adaptation_rate_client 0.8
+# python federated_train.py --gpus 1 --num_clients 3 --exp_code ML_08_sp4 --no_verbose --split_dir chimera_3_5_2_same_1_each_4_unbalanced_0.8_0.2_nocd --num_rounds 40 --folds 5 --seed 2 --no_phases --max_epochs 3 --augmentations 0=Aug0_brightness_460 1=features_1536_fixed 2=Aug0_blur_470 --num_stages 2  --method_local --proto_adaptation_rate_client 0.8
+# python federated_train.py --gpus 1 --num_clients 3 --exp_code ML_08_sp4 --no_verbose --split_dir chimera_3_5_2_same_1_each_4_unbalanced_0.8_0.2_nocd --num_rounds 40 --folds 5 --seed 3 --no_phases --max_epochs 3 --augmentations 0=Aug0_brightness_460 1=features_1536_fixed 2=Aug0_blur_470 --num_stages 2  --method_local --proto_adaptation_rate_client 0.8
+
+# python federated_train.py --gpus 1 --num_clients 3 --exp_code ML_08_sp5 --no_verbose --split_dir chimera_3_5_2_same_1_each_5_unbalanced_0.8_0.2_nocd --num_rounds 40 --folds 5 --seed 1 --no_phases --max_epochs 3 --augmentations 0=Aug0_brightness_460 1=features_1536_fixed 2=Aug0_blur_470 --num_stages 2  --method_local --proto_adaptation_rate_client 0.8
+# python federated_train.py --gpus 1 --num_clients 3 --exp_code ML_08_sp5 --no_verbose --split_dir chimera_3_5_2_same_1_each_5_unbalanced_0.8_0.2_nocd --num_rounds 40 --folds 5 --seed 2 --no_phases --max_epochs 3 --augmentations 0=Aug0_brightness_460 1=features_1536_fixed 2=Aug0_blur_470 --num_stages 2  --method_local --proto_adaptation_rate_client 0.8
+# python federated_train.py --gpus 1 --num_clients 3 --exp_code ML_08_sp5 --no_verbose --split_dir chimera_3_5_2_same_1_each_5_unbalanced_0.8_0.2_nocd --num_rounds 40 --folds 5 --seed 3 --no_phases --max_epochs 3 --augmentations 0=Aug0_brightness_460 1=features_1536_fixed 2=Aug0_blur_470 --num_stages 2  --method_local --proto_adaptation_rate_client 0.8
+
+
+
+
+# -------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# python federated_train.py --gpus 1 --num_clients 3 --exp_code MSam_311 --no_verbose --split_dir chimera_3_5_2_same_1_each_1_unbalanced_0.8_0.2_nocd --num_rounds 40 --folds 5 --seed 1 --no_phases --max_epochs 3 --augmentations 0=Aug0_brightness_460 1=features_1536_fixed 2=Aug0_blur_470 --num_stages 2 --num_sampled 3 --temperature 1 --variance_scale 1
+# python federated_train.py --gpus 1 --num_clients 3 --exp_code MSam_311 --no_verbose --split_dir chimera_3_5_2_same_1_each_1_unbalanced_0.8_0.2_nocd --num_rounds 40 --folds 5 --seed 2 --no_phases --max_epochs 3 --augmentations 0=Aug0_brightness_460 1=features_1536_fixed 2=Aug0_blur_470 --num_stages 2 --num_sampled 3 --temperature 1 --variance_scale 1
+# python federated_train.py --gpus 1 --num_clients 3 --exp_code MSam_311 --no_verbose --split_dir chimera_3_5_2_same_1_each_1_unbalanced_0.8_0.2_nocd --num_rounds 40 --folds 5 --seed 3 --no_phases --max_epochs 3 --augmentations 0=Aug0_brightness_460 1=features_1536_fixed 2=Aug0_blur_470 --num_stages 2 --num_sampled 3 --temperature 1 --variance_scale 1
+
+# python federated_train.py --gpus 1 --num_clients 3 --exp_code MSam_311_sp2 --no_verbose --split_dir chimera_3_5_2_same_1_each_2_unbalanced_0.8_0.2_nocd --num_rounds 40 --folds 5 --seed 1 --no_phases --max_epochs 3 --augmentations 0=Aug0_brightness_460 1=features_1536_fixed 2=Aug0_blur_470 --num_stages 2 --num_sampled 3 --temperature 1 --variance_scale 1
+# python federated_train.py --gpus 1 --num_clients 3 --exp_code MSam_311_sp2 --no_verbose --split_dir chimera_3_5_2_same_1_each_2_unbalanced_0.8_0.2_nocd --num_rounds 40 --folds 5 --seed 2 --no_phases --max_epochs 3 --augmentations 0=Aug0_brightness_460 1=features_1536_fixed 2=Aug0_blur_470 --num_stages 2 --num_sampled 3 --temperature 1 --variance_scale 1
+# python federated_train.py --gpus 1 --num_clients 3 --exp_code MSam_311_sp2 --no_verbose --split_dir chimera_3_5_2_same_1_each_2_unbalanced_0.8_0.2_nocd --num_rounds 40 --folds 5 --seed 3 --no_phases --max_epochs 3 --augmentations 0=Aug0_brightness_460 1=features_1536_fixed 2=Aug0_blur_470 --num_stages 2 --num_sampled 3 --temperature 1 --variance_scale 1
+
+python federated_train.py --gpus 1 --num_clients 3 --exp_code MSam_311_sp3 --no_verbose --split_dir chimera_3_5_2_same_1_each_3_unbalanced_0.8_0.2_nocd --num_rounds 40 --folds 5 --seed 1 --no_phases --max_epochs 3 --augmentations 0=Aug0_brightness_460 1=features_1536_fixed 2=Aug0_blur_470 --num_stages 2 --num_sampled 3 --temperature 1 --variance_scale 1
+python federated_train.py --gpus 1 --num_clients 3 --exp_code MSam_311_sp3 --no_verbose --split_dir chimera_3_5_2_same_1_each_3_unbalanced_0.8_0.2_nocd --num_rounds 40 --folds 5 --seed 2 --no_phases --max_epochs 3 --augmentations 0=Aug0_brightness_460 1=features_1536_fixed 2=Aug0_blur_470 --num_stages 2 --num_sampled 3 --temperature 1 --variance_scale 1
+python federated_train.py --gpus 1 --num_clients 3 --exp_code MSam_311_sp3 --no_verbose --split_dir chimera_3_5_2_same_1_each_3_unbalanced_0.8_0.2_nocd --num_rounds 40 --folds 5 --seed 3 --no_phases --max_epochs 3 --augmentations 0=Aug0_brightness_460 1=features_1536_fixed 2=Aug0_blur_470 --num_stages 2 --num_sampled 3 --temperature 1 --variance_scale 1
+
+python federated_train.py --gpus 1 --num_clients 3 --exp_code MSam_311_sp4 --no_verbose --split_dir chimera_3_5_2_same_1_each_4_unbalanced_0.8_0.2_nocd --num_rounds 40 --folds 5 --seed 1 --no_phases --max_epochs 3 --augmentations 0=Aug0_brightness_460 1=features_1536_fixed 2=Aug0_blur_470 --num_stages 2 --num_sampled 3 --temperature 1 --variance_scale 1
+python federated_train.py --gpus 1 --num_clients 3 --exp_code MSam_311_sp4 --no_verbose --split_dir chimera_3_5_2_same_1_each_4_unbalanced_0.8_0.2_nocd --num_rounds 40 --folds 5 --seed 2 --no_phases --max_epochs 3 --augmentations 0=Aug0_brightness_460 1=features_1536_fixed 2=Aug0_blur_470 --num_stages 2 --num_sampled 3 --temperature 1 --variance_scale 1
+python federated_train.py --gpus 1 --num_clients 3 --exp_code MSam_311_sp4 --no_verbose --split_dir chimera_3_5_2_same_1_each_4_unbalanced_0.8_0.2_nocd --num_rounds 40 --folds 5 --seed 3 --no_phases --max_epochs 3 --augmentations 0=Aug0_brightness_460 1=features_1536_fixed 2=Aug0_blur_470 --num_stages 2 --num_sampled 3 --temperature 1 --variance_scale 1
+
+python federated_train.py --gpus 1 --num_clients 3 --exp_code MSam_311_sp5 --no_verbose --split_dir chimera_3_5_2_same_1_each_5_unbalanced_0.8_0.2_nocd --num_rounds 40 --folds 5 --seed 1 --no_phases --max_epochs 3 --augmentations 0=Aug0_brightness_460 1=features_1536_fixed 2=Aug0_blur_470 --num_stages 2 --num_sampled 3 --temperature 1 --variance_scale 1
+python federated_train.py --gpus 1 --num_clients 3 --exp_code MSam_311_sp5 --no_verbose --split_dir chimera_3_5_2_same_1_each_5_unbalanced_0.8_0.2_nocd --num_rounds 40 --folds 5 --seed 2 --no_phases --max_epochs 3 --augmentations 0=Aug0_brightness_460 1=features_1536_fixed 2=Aug0_blur_470 --num_stages 2 --num_sampled 3 --temperature 1 --variance_scale 1
+python federated_train.py --gpus 1 --num_clients 3 --exp_code MSam_311_sp5 --no_verbose --split_dir chimera_3_5_2_same_1_each_5_unbalanced_0.8_0.2_nocd --num_rounds 40 --folds 5 --seed 3 --no_phases --max_epochs 3 --augmentations 0=Aug0_brightness_460 1=features_1536_fixed 2=Aug0_blur_470 --num_stages 2 --num_sampled 3 --temperature 1 --variance_scale 1
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+python federated_train.py --gpus 1 --num_clients 3 --exp_code MSam_3031 --no_verbose --split_dir chimera_3_5_2_same_1_each_1_unbalanced_0.8_0.2_nocd --num_rounds 40 --folds 5 --seed 1 --no_phases --max_epochs 3 --augmentations 0=Aug0_brightness_460 1=features_1536_fixed 2=Aug0_blur_470 --num_stages 2 --num_sampled 3 --temperature 0.3 --variance_scale 1
+python federated_train.py --gpus 1 --num_clients 3 --exp_code MSam_3031 --no_verbose --split_dir chimera_3_5_2_same_1_each_1_unbalanced_0.8_0.2_nocd --num_rounds 40 --folds 5 --seed 2 --no_phases --max_epochs 3 --augmentations 0=Aug0_brightness_460 1=features_1536_fixed 2=Aug0_blur_470 --num_stages 2 --num_sampled 3 --temperature 0.3 --variance_scale 1
+python federated_train.py --gpus 1 --num_clients 3 --exp_code MSam_3031 --no_verbose --split_dir chimera_3_5_2_same_1_each_1_unbalanced_0.8_0.2_nocd --num_rounds 40 --folds 5 --seed 3 --no_phases --max_epochs 3 --augmentations 0=Aug0_brightness_460 1=features_1536_fixed 2=Aug0_blur_470 --num_stages 2 --num_sampled 3 --temperature 0.3 --variance_scale 1
+
+python federated_train.py --gpus 1 --num_clients 3 --exp_code MSam_3031_sp2 --no_verbose --split_dir chimera_3_5_2_same_1_each_2_unbalanced_0.8_0.2_nocd --num_rounds 40 --folds 5 --seed 1 --no_phases --max_epochs 3 --augmentations 0=Aug0_brightness_460 1=features_1536_fixed 2=Aug0_blur_470 --num_stages 2 --num_sampled 3 --temperature 0.3 --variance_scale 1
+python federated_train.py --gpus 1 --num_clients 3 --exp_code MSam_3031_sp2 --no_verbose --split_dir chimera_3_5_2_same_1_each_2_unbalanced_0.8_0.2_nocd --num_rounds 40 --folds 5 --seed 2 --no_phases --max_epochs 3 --augmentations 0=Aug0_brightness_460 1=features_1536_fixed 2=Aug0_blur_470 --num_stages 2 --num_sampled 3 --temperature 0.3 --variance_scale 1
+python federated_train.py --gpus 1 --num_clients 3 --exp_code MSam_3031_sp2 --no_verbose --split_dir chimera_3_5_2_same_1_each_2_unbalanced_0.8_0.2_nocd --num_rounds 40 --folds 5 --seed 3 --no_phases --max_epochs 3 --augmentations 0=Aug0_brightness_460 1=features_1536_fixed 2=Aug0_blur_470 --num_stages 2 --num_sampled 3 --temperature 0.3 --variance_scale 1
+
+python federated_train.py --gpus 1 --num_clients 3 --exp_code MSam_3031_sp3 --no_verbose --split_dir chimera_3_5_2_same_1_each_3_unbalanced_0.8_0.2_nocd --num_rounds 40 --folds 5 --seed 1 --no_phases --max_epochs 3 --augmentations 0=Aug0_brightness_460 1=features_1536_fixed 2=Aug0_blur_470 --num_stages 2 --num_sampled 3 --temperature 0.3 --variance_scale 1
+python federated_train.py --gpus 1 --num_clients 3 --exp_code MSam_3031_sp3 --no_verbose --split_dir chimera_3_5_2_same_1_each_3_unbalanced_0.8_0.2_nocd --num_rounds 40 --folds 5 --seed 2 --no_phases --max_epochs 3 --augmentations 0=Aug0_brightness_460 1=features_1536_fixed 2=Aug0_blur_470 --num_stages 2 --num_sampled 3 --temperature 0.3 --variance_scale 1
+python federated_train.py --gpus 1 --num_clients 3 --exp_code MSam_3031_sp3 --no_verbose --split_dir chimera_3_5_2_same_1_each_3_unbalanced_0.8_0.2_nocd --num_rounds 40 --folds 5 --seed 3 --no_phases --max_epochs 3 --augmentations 0=Aug0_brightness_460 1=features_1536_fixed 2=Aug0_blur_470 --num_stages 2 --num_sampled 3 --temperature 0.3 --variance_scale 1
+
+python federated_train.py --gpus 1 --num_clients 3 --exp_code MSam_3031_sp4 --no_verbose --split_dir chimera_3_5_2_same_1_each_4_unbalanced_0.8_0.2_nocd --num_rounds 40 --folds 5 --seed 1 --no_phases --max_epochs 3 --augmentations 0=Aug0_brightness_460 1=features_1536_fixed 2=Aug0_blur_470 --num_stages 2 --num_sampled 3 --temperature 0.3 --variance_scale 1
+python federated_train.py --gpus 1 --num_clients 3 --exp_code MSam_3031_sp4 --no_verbose --split_dir chimera_3_5_2_same_1_each_4_unbalanced_0.8_0.2_nocd --num_rounds 40 --folds 5 --seed 2 --no_phases --max_epochs 3 --augmentations 0=Aug0_brightness_460 1=features_1536_fixed 2=Aug0_blur_470 --num_stages 2 --num_sampled 3 --temperature 0.3 --variance_scale 1
+python federated_train.py --gpus 1 --num_clients 3 --exp_code MSam_3031_sp4 --no_verbose --split_dir chimera_3_5_2_same_1_each_4_unbalanced_0.8_0.2_nocd --num_rounds 40 --folds 5 --seed 3 --no_phases --max_epochs 3 --augmentations 0=Aug0_brightness_460 1=features_1536_fixed 2=Aug0_blur_470 --num_stages 2 --num_sampled 3 --temperature 0.3 --variance_scale 1
+
+python federated_train.py --gpus 1 --num_clients 3 --exp_code MSam_3031_sp5 --no_verbose --split_dir chimera_3_5_2_same_1_each_5_unbalanced_0.8_0.2_nocd --num_rounds 40 --folds 5 --seed 1 --no_phases --max_epochs 3 --augmentations 0=Aug0_brightness_460 1=features_1536_fixed 2=Aug0_blur_470 --num_stages 2 --num_sampled 3 --temperature 0.3 --variance_scale 1
+python federated_train.py --gpus 1 --num_clients 3 --exp_code MSam_3031_sp5 --no_verbose --split_dir chimera_3_5_2_same_1_each_5_unbalanced_0.8_0.2_nocd --num_rounds 40 --folds 5 --seed 2 --no_phases --max_epochs 3 --augmentations 0=Aug0_brightness_460 1=features_1536_fixed 2=Aug0_blur_470 --num_stages 2 --num_sampled 3 --temperature 0.3 --variance_scale 1
+python federated_train.py --gpus 1 --num_clients 3 --exp_code MSam_3031_sp5 --no_verbose --split_dir chimera_3_5_2_same_1_each_5_unbalanced_0.8_0.2_nocd --num_rounds 40 --folds 5 --seed 3 --no_phases --max_epochs 3 --augmentations 0=Aug0_brightness_460 1=features_1536_fixed 2=Aug0_blur_470 --num_stages 2 --num_sampled 3 --temperature 0.3 --variance_scale 1
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+python federated_train.py --gpus 1 --num_clients 3 --exp_code MSam_3105 --no_verbose --split_dir chimera_3_5_2_same_1_each_1_unbalanced_0.8_0.2_nocd --num_rounds 40 --folds 5 --seed 1 --no_phases --max_epochs 3 --augmentations 0=Aug0_brightness_460 1=features_1536_fixed 2=Aug0_blur_470 --num_stages 2 --num_sampled 3 --temperature 1 --variance_scale 0.5
+python federated_train.py --gpus 1 --num_clients 3 --exp_code MSam_3105 --no_verbose --split_dir chimera_3_5_2_same_1_each_1_unbalanced_0.8_0.2_nocd --num_rounds 40 --folds 5 --seed 2 --no_phases --max_epochs 3 --augmentations 0=Aug0_brightness_460 1=features_1536_fixed 2=Aug0_blur_470 --num_stages 2 --num_sampled 3 --temperature 1 --variance_scale 0.5
+python federated_train.py --gpus 1 --num_clients 3 --exp_code MSam_3105 --no_verbose --split_dir chimera_3_5_2_same_1_each_1_unbalanced_0.8_0.2_nocd --num_rounds 40 --folds 5 --seed 3 --no_phases --max_epochs 3 --augmentations 0=Aug0_brightness_460 1=features_1536_fixed 2=Aug0_blur_470 --num_stages 2 --num_sampled 3 --temperature 1 --variance_scale 0.5
+
+python federated_train.py --gpus 1 --num_clients 3 --exp_code MSam_3105_sp2 --no_verbose --split_dir chimera_3_5_2_same_1_each_2_unbalanced_0.8_0.2_nocd --num_rounds 40 --folds 5 --seed 1 --no_phases --max_epochs 3 --augmentations 0=Aug0_brightness_460 1=features_1536_fixed 2=Aug0_blur_470 --num_stages 2 --num_sampled 3 --temperature 1 --variance_scale 0.5
+python federated_train.py --gpus 1 --num_clients 3 --exp_code MSam_3105_sp2 --no_verbose --split_dir chimera_3_5_2_same_1_each_2_unbalanced_0.8_0.2_nocd --num_rounds 40 --folds 5 --seed 2 --no_phases --max_epochs 3 --augmentations 0=Aug0_brightness_460 1=features_1536_fixed 2=Aug0_blur_470 --num_stages 2 --num_sampled 3 --temperature 1 --variance_scale 0.5
+python federated_train.py --gpus 1 --num_clients 3 --exp_code MSam_3105_sp2 --no_verbose --split_dir chimera_3_5_2_same_1_each_2_unbalanced_0.8_0.2_nocd --num_rounds 40 --folds 5 --seed 3 --no_phases --max_epochs 3 --augmentations 0=Aug0_brightness_460 1=features_1536_fixed 2=Aug0_blur_470 --num_stages 2 --num_sampled 3 --temperature 1 --variance_scale 0.5
+
+python federated_train.py --gpus 1 --num_clients 3 --exp_code MSam_3105_sp3 --no_verbose --split_dir chimera_3_5_2_same_1_each_3_unbalanced_0.8_0.2_nocd --num_rounds 40 --folds 5 --seed 1 --no_phases --max_epochs 3 --augmentations 0=Aug0_brightness_460 1=features_1536_fixed 2=Aug0_blur_470 --num_stages 2 --num_sampled 3 --temperature 1 --variance_scale 0.5
+python federated_train.py --gpus 1 --num_clients 3 --exp_code MSam_3105_sp3 --no_verbose --split_dir chimera_3_5_2_same_1_each_3_unbalanced_0.8_0.2_nocd --num_rounds 40 --folds 5 --seed 2 --no_phases --max_epochs 3 --augmentations 0=Aug0_brightness_460 1=features_1536_fixed 2=Aug0_blur_470 --num_stages 2 --num_sampled 3 --temperature 1 --variance_scale 0.5
+python federated_train.py --gpus 1 --num_clients 3 --exp_code MSam_3105_sp3 --no_verbose --split_dir chimera_3_5_2_same_1_each_3_unbalanced_0.8_0.2_nocd --num_rounds 40 --folds 5 --seed 3 --no_phases --max_epochs 3 --augmentations 0=Aug0_brightness_460 1=features_1536_fixed 2=Aug0_blur_470 --num_stages 2 --num_sampled 3 --temperature 1 --variance_scale 0.5
+
+python federated_train.py --gpus 1 --num_clients 3 --exp_code MSam_3105_sp4 --no_verbose --split_dir chimera_3_5_2_same_1_each_4_unbalanced_0.8_0.2_nocd --num_rounds 40 --folds 5 --seed 1 --no_phases --max_epochs 3 --augmentations 0=Aug0_brightness_460 1=features_1536_fixed 2=Aug0_blur_470 --num_stages 2 --num_sampled 3 --temperature 1 --variance_scale 0.5
+python federated_train.py --gpus 1 --num_clients 3 --exp_code MSam_3105_sp4 --no_verbose --split_dir chimera_3_5_2_same_1_each_4_unbalanced_0.8_0.2_nocd --num_rounds 40 --folds 5 --seed 2 --no_phases --max_epochs 3 --augmentations 0=Aug0_brightness_460 1=features_1536_fixed 2=Aug0_blur_470 --num_stages 2 --num_sampled 3 --temperature 1 --variance_scale 0.5
+python federated_train.py --gpus 1 --num_clients 3 --exp_code MSam_3105_sp4 --no_verbose --split_dir chimera_3_5_2_same_1_each_4_unbalanced_0.8_0.2_nocd --num_rounds 40 --folds 5 --seed 3 --no_phases --max_epochs 3 --augmentations 0=Aug0_brightness_460 1=features_1536_fixed 2=Aug0_blur_470 --num_stages 2 --num_sampled 3 --temperature 1 --variance_scale 0.5
+
+python federated_train.py --gpus 1 --num_clients 3 --exp_code MSam_3105_sp5 --no_verbose --split_dir chimera_3_5_2_same_1_each_5_unbalanced_0.8_0.2_nocd --num_rounds 40 --folds 5 --seed 1 --no_phases --max_epochs 3 --augmentations 0=Aug0_brightness_460 1=features_1536_fixed 2=Aug0_blur_470 --num_stages 2 --num_sampled 3 --temperature 1 --variance_scale 0.5
+python federated_train.py --gpus 1 --num_clients 3 --exp_code MSam_3105_sp5 --no_verbose --split_dir chimera_3_5_2_same_1_each_5_unbalanced_0.8_0.2_nocd --num_rounds 40 --folds 5 --seed 2 --no_phases --max_epochs 3 --augmentations 0=Aug0_brightness_460 1=features_1536_fixed 2=Aug0_blur_470 --num_stages 2 --num_sampled 3 --temperature 1 --variance_scale 0.5
+python federated_train.py --gpus 1 --num_clients 3 --exp_code MSam_3105_sp5 --no_verbose --split_dir chimera_3_5_2_same_1_each_5_unbalanced_0.8_0.2_nocd --num_rounds 40 --folds 5 --seed 3 --no_phases --max_epochs 3 --augmentations 0=Aug0_brightness_460 1=features_1536_fixed 2=Aug0_blur_470 --num_stages 2 --num_sampled 3 --temperature 1 --variance_scale 0.5
