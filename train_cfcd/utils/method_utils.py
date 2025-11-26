@@ -69,7 +69,8 @@ class Prototype:
     def distance_prototype(self, other_prototype):
         # KL divergence between two Gaussians maybe not a good idea as it is not a metric (not symmetric)
         # Wasserstein distance between two Gaussians?!
-        squared_distances = np.sum(self.mean - other_prototype.mean) ** 2# TODO + np.sum(self.var + other_prototype.var - 2 * np.sqrt(self.var * other_prototype.var))
+        squared_distances = np.sum(self.mean - other_prototype.mean) ** 2 + np.sum(self.var + other_prototype.var - 2 * np.sqrt(self.var * other_prototype.var))
+        # np.sum(self.mean - other_prototype.mean) ** 2# TODO + np.sum(self.var + other_prototype.var - 2 * np.sqrt(self.var * other_prototype.var))
         distances = np.sqrt(squared_distances)
         return np.mean(distances)
         

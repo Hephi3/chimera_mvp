@@ -8,8 +8,29 @@ import matplotlib.pyplot as plt
 import tensorflow as tf
 from collections import defaultdict
 
-ROOT_RESULTS = "/gris/gris-f/homelv/phempel/masterthesis/MM_flower/train_cfcd/results"
-OLD_DATA_ROOT_RESULTS = "/gris/gris-f/homelv/phempel/masterthesis/MM_flower/train_cfcd/results_old_data"
+# ROOT_RESULTS = "/gris/gris-f/homelv/phempel/masterthesis/MM_flower/train_cfcd/results"
+# OLD_DATA_ROOT_RESULTS = "/gris/gris-f/homelv/phempel/masterthesis/MM_flower/train_cfcd/results_old_data"
+
+ROOT_RESULTS = "/home/phempel/tmp_filerworkaround_phempel_nov_2025/train_cfcd/results"
+OLD_DATA_ROOT_RESULTS = "/home/phempel/tmp_filerworkaround_phempel_nov_2025/train_cfcd/results_old"
+
+
+def calculate_avg_f1_metric(f1_s1test_s1, f1_s1test_s2, f1_s2test_s1, f1_s2test_s2, plasticity_weight=0.5):
+    '''
+    Calculate the avg_f1 metric for continual learning evaluation.
+    
+    Parameters:
+        - f1_s1test_s1: F1 Score of the stage 1 testset at the end of stage 1
+        - f1_s1test_s2: F1 Score of the stage 1 testset at stage 2
+        - f1_s2test_s1: F1 Score of the stage 2 testset at the end of stage 1
+        - f1_s2test_s2: F1 Score of the stage 2 testset at stage 2
+        
+    Measures plasticity and performance retention of CF setups:
+        - Plasticity: Improvement on stage 2 testset from stage 1 to stage 2
+        - Retention: Change on stage 1 testset from stage 1 to stage 2
+    '''
+    retention_weight = 1.0 - plasticity_weight
+    return retention_weight * f1_s1test_s2 + plasticity_weight * f1_s2test_s2 - (retention_weight * f1_s1test_s1 + plasticity_weight * f1_s2test_s1)
 
 
 def calculate_avg_f1_metric(f1_s1test_s1, f1_s1test_s2, f1_s2test_s1, f1_s2test_s2, plasticity_weight=0.5):
@@ -1527,4 +1548,18 @@ if __name__ == "__main__":
 # python plot/plot_crossfold_group_comparison.py --groups '{"CFCDID": ["CFCDID_s1", "CFCDID_s2", "CFCDID_s3", "CFCDID_sp2_s1", "CFCDID_sp2_s2", "CFCDID_sp2_s3", "CFCDID_sp3_s1","CFCDID_sp3_s2","CFCDID_sp3_s3","CFCDID_sp4_s1","CFCDID_sp4_s2","CFCDID_sp4_s3","CFCDID_sp5_s1","CFCDID_sp5_s2","CFCDID_sp5_s3"],"CFCD": ["CFCD_s1", "CFCD_s2", "CFCD_s3", "CFCD_sp2_s1", "CFCD_sp2_s2", "CFCD_sp2_s3", "CFCD_sp3_s1","CFCD_sp3_s2","CFCD_sp3_s3","CFCD_sp4_s1","CFCD_sp4_s2","CFCD_sp4_s3","CFCD_sp5_s1","CFCD_sp5_s2","CFCD_sp5_s3"], "MLG 08 08": ["MLG_08_08_s1", "MLG_08_08_s2", "MLG_08_08_s3", "MLG_08_08_sp2_s1", "MLG_08_08_sp2_s2", "MLG_08_08_sp2_s3", "MLG_08_08_sp3_s1","MLG_08_08_sp3_s2","MLG_08_08_sp3_s3","MLG_08_08_sp4_s1","MLG_08_08_sp4_s2","MLG_08_08_sp4_s3","MLG_08_08_sp5_s1","MLG_08_08_sp5_s2","MLG_08_08_sp5_s3"], "MLG 08 08 01t": ["MLG_01t_s1", "MLG_01t_s2", "MLG_01t_s3", "MLG_01t_sp2_s1", "MLG_01t_sp2_s2", "MLG_01t_sp2_s3", "MLG_01t_sp3_s1","MLG_01t_sp3_s2","MLG_01t_sp3_s3","MLG_01t_sp4_s1","MLG_01t_sp4_s2","MLG_01t_sp4_s3","MLG_01t_sp5_s1","MLG_01t_sp5_s2","MLG_01t_sp5_s3"]}' --submodel MM --metric_filter all --show_full_training --smooth_window 5 --show_std --name MLG_temps
 
 
-# python plot/plot_crossfold_group_comparison.py --groups '{"CFCDID": ["CFCDIDnew_same_1_each_s1", "CFCDIDnew_same_1_each_s2", "CFCDIDnew_same_1_each_s3", "CFCDIDnew_same_1_each_sp2_s1", "CFCDIDnew_same_1_each_sp2_s2", "CFCDIDnew_same_1_each_sp2_s3", "CFCDIDnew_same_1_each_sp3_s1","CFCDIDnew_same_1_each_sp3_s2","CFCDIDnew_same_1_each_sp3_s3","CFCDIDnew_same_1_each_sp4_s1","CFCDIDnew_same_1_each_sp4_s2","CFCDIDnew_same_1_each_sp4_s3","CFCDIDnew_same_1_each_sp5_s1","CFCDIDnew_same_1_each_sp5_s2","CFCDIDnew_same_1_each_sp5_s3"],"CFCD": ["CFCDnew_swap_same_1_each_fullaug_s1", "CFCDnew_swap_same_1_each_fullaug_s2", "CFCDnew_swap_same_1_each_fullaug_s3", "CFCDnew_swap_same_1_each_fullaug_sp2_s1", "CFCDnew_swap_same_1_each_fullaug_sp2_s2", "CFCDnew_swap_same_1_each_fullaug_sp2_s3", "CFCDnew_swap_same_1_each_fullaug_sp3_s1","CFCDnew_swap_same_1_each_fullaug_sp3_s2","CFCDnew_swap_same_1_each_fullaug_sp3_s3","CFCDnew_swap_same_1_each_fullaug_sp4_s1","CFCDnew_swap_same_1_each_fullaug_sp4_s2","CFCDnew_swap_same_1_each_fullaug_sp4_s3","CFCDnew_swap_same_1_each_fullaug_sp5_s1","CFCDnew_swap_same_1_each_fullaug_sp5_s2","CFCDnew_swap_same_1_each_fullaug_sp5_s3"], "MG 08": ["MG_08_s1", "MG_08_s2", "MG_08_s3", "MG_08_sp2_s1", "MG_08_sp2_s2", "MG_08_sp2_s3", "MG_08_sp3_s1","MG_08_sp3_s2","MG_08_sp3_s3","MG_08_sp4_s1","MG_08_sp4_s2","MG_08_sp4_s3","MG_08_sp5_s1","MG_08_sp5_s2","MG_08_sp5_s3"], "MLG 08 08": ["MLG_08_08_s1", "MLG_08_08_s2", "MLG_08_08_s3", "MLG_08_08_sp2_s1", "MLG_08_08_sp2_s2", "MLG_08_08_sp2_s3", "MLG_08_08_sp3_s1","MLG_08_08_sp3_s2","MLG_08_08_sp3_s3","MLG_08_08_sp4_s1","MLG_08_08_sp4_s2","MLG_08_08_sp4_s3","MLG_08_08_sp5_s1","MLG_08_08_sp5_s2","MLG_08_08_sp5_s3"], "MG 08 01t": ["MG_01t_s1", "MG_01t_s2", "MG_01t_s3", "MG_01t_sp2_s1", "MG_01t_sp2_s2", "MG_01t_sp2_s3", "MG_01t_sp3_s1","MG_01t_sp3_s2","MG_01t_sp3_s3","MG_01t_sp4_s1","MG_01t_sp4_s2","MG_01t_sp4_s3","MG_01t_sp5_s1","MG_01t_sp5_s2","MG_01t_sp5_s3"], "MLG 08 08 01t": ["MLG_01t_s1", "MLG_01t_s2", "MLG_01t_s3", "MLG_01t_sp2_s1", "MLG_01t_sp2_s2", "MLG_01t_sp2_s3", "MLG_01t_sp3_s1","MLG_01t_sp3_s2","MLG_01t_sp3_s3","MLG_01t_sp4_s1","MLG_01t_sp4_s2","MLG_01t_sp4_s3","MLG_01t_sp5_s1","MLG_01t_sp5_s2","MLG_01t_sp5_s3"]}' --submodel MM --metric_filter all --show_full_training --smooth_window 5 --show_std --name MLG_temps_redo
+# python plot/plot_crossfold_group_comparison.py --groups '{"CFCDID": ["CFCDID_s1", "CFCDID_s2", "CFCDID_s3", "CFCDID_sp2_s1", "CFCDID_sp2_s2", "CFCDID_sp2_s3", "CFCDID_sp3_s1","CFCDID_sp3_s2","CFCDID_sp3_s3","CFCDID_sp4_s1","CFCDID_sp4_s2","CFCDID_sp4_s3","CFCDID_sp5_s1","CFCDID_sp5_s2","CFCDID_sp5_s3"],"CFCD": ["CFCD_s1", "CFCD_s2", "CFCD_s3", "CFCD_sp2_s1", "CFCD_sp2_s2", "CFCD_sp2_s3", "CFCD_sp3_s1","CFCD_sp3_s2","CFCD_sp3_s3","CFCD_sp4_s1","CFCD_sp4_s2","CFCD_sp4_s3","CFCD_sp5_s1","CFCD_sp5_s2","CFCD_sp5_s3"],"CFCD 0.2 Test": ["CFCD_0.2_s1", "CFCD_0.2_s2", "CFCD_0.2_s3", "CFCD_0.2_sp2_s1", "CFCD_0.2_sp2_s2", "CFCD_0.2_sp2_s3", "CFCD_0.2_sp3_s1","CFCD_0.2_sp3_s2","CFCD_0.2_sp3_s3","CFCD_0.2_sp4_s1","CFCD_0.2_sp4_s2","CFCD_0.2_sp4_s3","CFCD_0.2_sp5_s1","CFCD_0.2_sp5_s2","CFCD_0.2_sp5_s3"],"CFCDID 0.2 Test": ["CFCDID_0.2_s1", "CFCDID_0.2_s2", "CFCDID_0.2_s3", "CFCDID_0.2_sp2_s1", "CFCDID_0.2_sp2_s2", "CFCDID_0.2_sp2_s3", "CFCDID_0.2_sp3_s1","CFCDID_0.2_sp3_s2","CFCDID_0.2_sp3_s3","CFCDID_0.2_sp4_s1","CFCDID_0.2_sp4_s2","CFCDID_0.2_sp4_s3","CFCDID_0.2_sp5_s1","CFCDID_0.2_sp5_s2","CFCDID_0.2_sp5_s3"],"CFCD 0.2 7:3": ["CFCD_0.2_73_sp1_s1", "CFCD_0.2_73_sp1_s2", "CFCD_0.2_73_sp1_s3", "CFCD_0.2_73_sp2_s1", "CFCD_0.2_73_sp2_s2", "CFCD_0.2_73_sp2_s3", "CFCD_0.2_73_sp3_s1","CFCD_0.2_73_sp3_s2","CFCD_0.2_73_sp3_s3","CFCD_0.2_73_sp4_s1","CFCD_0.2_73_sp4_s2","CFCD_0.2_73_sp4_s3","CFCD_0.2_73_sp5_s1","CFCD_0.2_73_sp5_s2","CFCD_0.2_73_sp5_s3"]}' --submodel MM --metric_filter all --show_full_training --smooth_window 5 --show_std --name CFCDID0.273Test
+
+# python plot/plot_crossfold_group_comparison.py --groups '{"CFCD 0.2 7:3 sp1": ["CFCD_0.2_73_sp1_s1", "CFCD_0.2_73_sp1_s2", "CFCD_0.2_73_sp1_s3"], "CFCD 0.2 7:3 sp2": ["CFCD_0.2_73_sp2_s1", "CFCD_0.2_73_sp2_s2", "CFCD_0.2_73_sp2_s3"], "CFCD 0.2 7:3 sp3": ["CFCD_0.2_73_sp3_s1", "CFCD_0.2_73_sp3_s2", "CFCD_0.2_73_sp3_s3"], "CFCD 0.2 7:3 sp4": ["CFCD_0.2_73_sp4_s1", "CFCD_0.2_73_sp4_s2", "CFCD_0.2_73_sp4_s3"], "CFCD 0.2 7:3 sp5": ["CFCD_0.2_73_sp5_s1", "CFCD_0.2_73_sp5_s2", "CFCD_0.2_73_sp5_s3"]}' --submodel MM --metric_filter all --show_full_training --smooth_window 5 --show_std --name CFCDID0.273Splits
+
+# python plot/plot_crossfold_group_comparison.py --groups '{"CFCDID 0.2 7:3 sp1": ["CFCDID_0.2_sp1_s1", "CFCDID_0.2_sp1_s2", "CFCDID_0.2_sp1_s3"], "CFCDID 0.2 7:3 sp2": ["CFCDID_0.2_sp2_s1", "CFCDID_0.2_sp2_s2", "CFCDID_0.2_sp2_s3"], "CFCDID 0.2 7:3 sp3": ["CFCDID_0.2_sp3_s1", "CFCDID_0.2_sp3_s2", "CFCDID_0.2_sp3_s3"], "CFCDID 0.2 7:3 sp4": ["CFCDID_0.2_sp4_s1", "CFCDID_0.2_sp4_s2", "CFCDID_0.2_sp4_s3"], "CFCDID 0.2 7:3 sp5": ["CFCDID_0.2_sp5_s1", "CFCDID_0.2_sp5_s2", "CFCDID_0.2_sp5_s3"]}' --submodel MM --metric_filter all --show_full_training --smooth_window 5 --show_std --name CFCDID0.2Splits
+
+# python plot/plot_crossfold_group_comparison.py --groups '{"CFCDID 0.2 sp1": ["CFCDID_0.2_s1"], "CFCDID 0.2 sp1 reversed": ["CFCDID_0.2_reversed_sp1_s1"], "Redo": ["CFCDID_0.2_reversed_redo_sp1_s1"], "RedoRedo": ["CFCDID_0.2_reversed_redo2_sp1_s1"]}' --submodel MM --metric_filter all --show_full_training --smooth_window 5 --show_std --name CFCDIDReversed0.2SplitsRedo2fold1 --folds 1
+
+# python plot/plot_crossfold_group_comparison.py --groups '{"CFCDID 0.2 7:3 sp1": ["CFCDID_0.2_s1"], "CFCDID 0.2 7:3 sp2": ["CFCDID_0.2_sp2_s1"], "CFCDID 0.2 7:3 sp3": ["CFCDID_0.2_sp3_s1"], "CFCDID 0.2 7:3 sp4": ["CFCDID_0.2_sp4_s1"], "CFCDID 0.2 7:3 sp5": ["CFCDID_0.2_sp5_s1"]}' --submodel MM --metric_filter all --show_full_training --smooth_window 5 --show_std --name CFCDID0.2SplitsFolds --folds 1
+
+# python plot/plot_crossfold_group_comparison.py --groups '{"CFCDID": ["CFCDID_s1", "CFCDID_s2", "CFCDID_s3", "CFCDID_sp2_s1", "CFCDID_sp2_s2", "CFCDID_sp2_s3", "CFCDID_sp3_s1","CFCDID_sp3_s2","CFCDID_sp3_s3","CFCDID_sp4_s1","CFCDID_sp4_s2","CFCDID_sp4_s3","CFCDID_sp5_s1","CFCDID_sp5_s2","CFCDID_sp5_s3"]}' --submodel MM --metric_filter all --show_full_training --smooth_window 5 --show_std --name CFCDIDOnly
+
+# python plot/plot_crossfold_group_comparison.py --groups '{"CFCDID": ["CFCDID_s1"],"CFCDID Redo": ["CFCDID_redo_sp1_s1"], "CFCDID Redo 2": ["CFCDID_redo2_s1"]}' --submodel MM --metric_filter all --show_full_training --smooth_window 5 --show_std --name del
+
+# python plot/plot_crossfold_group_comparison.py --groups '{"CFCDID": ["CFCDIDnew_same_1_each_s1"],"CFCD": ["CFCDnew_swap_same_1_each_fullaug_s1"], "CFCDID REDO": ["CFCDID_s1"]}' --submodel MM --metric_filter all --show_full_training --smooth_window 5 --show_std --name del

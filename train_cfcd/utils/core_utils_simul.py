@@ -91,11 +91,13 @@ def log_metrics(writer, epoch, loss, all_labels, all_preds, all_probs, kind:str,
     if np.any(np.isnan(probs_for_auc)):
         print(f"WARNING: NaN values detected in {kind}/{submodel} probabilities. Replacing with 0.5")
         probs_for_auc = np.nan_to_num(probs_for_auc, nan=0.5)
+        raise ValueError("NaN values detected in probabilities for AUC calculation:", probs_for_auc)
     
     # Check if we have enough variety in labels for ROC AUC
     if len(np.unique(binary_labels)) < 2:
         print(f"WARNING: Only one class present in {kind}/{submodel}. Skipping ROC AUC calculation")
         roc_auc = 0.5  # Default value when ROC AUC cannot be computed
+        raise ValueError("Only one class present in: ", binary_labels)
     else:
         roc_auc = roc_auc_score(binary_labels, probs_for_auc)
         
@@ -422,8 +424,7 @@ def train_loop_clam(epoch, model, loader, optimizer, bag_weight, writer = None, 
              # METHOD: apply prototype weighting if prototype is given
              #TODO: Only weighs not sampled points
             if prototype is not None:
-                weight = local_weight_weight * prototype.weight_point(result_dict['concat_features'].cpu().detach().numpy()) 
-                # print("LOSS OLD:", total_loss.item(), " LOSS NEW:", (total_loss * weight), " WEIGHT:", weight)
+                weight = local_weight_weight * prototype.weight_point(result_dict['concat_features'].cpu().detach().numpy())
                 total_loss = total_loss * weight
         
         all_labels.append(label.item())

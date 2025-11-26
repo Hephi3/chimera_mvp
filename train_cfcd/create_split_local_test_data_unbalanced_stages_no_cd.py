@@ -69,12 +69,12 @@ def create_k_clients_cross_fold_splits_stages(num_clients: int, test_p: float = 
             client_ids = [stage_ids[j] for j in train_data_idx]
             client_labels = [labels[j] for j in client_ids]
             print(f"  Client {i+1}/{num_clients}: {len(client_ids)} samples, label distribution: {np.unique([labels[j] for j in client_ids], return_counts=True)}, e.g., {client_ids[0], client_labels[0]}")
-            test_id_brs3 = [id for id in client_ids if labels[id] == label_to_int["BRS3"]][0]
-            test_id_brs2 = [id for id in client_ids if labels[id] == label_to_int["BRS2"]][0]
-            test_id_brs1 = [id for id in client_ids if labels[id] == label_to_int["BRS1"]][0]
-            test_ids = [test_id_brs3, test_id_brs2, test_id_brs1]
-            train_val_ids = [id for id in client_ids if id not in test_ids]
-            # train_val_ids, test_ids = train_test_split(client_ids, test_size=test_p, random_state=seed+i, stratify=client_labels)
+            # test_id_brs3 = [id for id in client_ids if labels[id] == label_to_int["BRS3"]][0]
+            # test_id_brs2 = [id for id in client_ids if labels[id] == label_to_int["BRS2"]][0]
+            # test_id_brs1 = [id for id in client_ids if labels[id] == label_to_int["BRS1"]][0]
+            # test_ids = [test_id_brs3, test_id_brs2, test_id_brs1]
+            # train_val_ids = [id for id in client_ids if id not in test_ids]
+            train_val_ids, test_ids = train_test_split(client_ids, test_size=test_p, random_state=seed+i, stratify=client_labels)
             
             skf_cross_fold = StratifiedKFold(n_splits=folds, shuffle=True, random_state=seed+i)
             
@@ -143,17 +143,17 @@ def create_csv_split(clients: List[Tuple[List[int], List[int], List[int]]], num_
  
 if __name__ == "__main__":
     num_clients = 3
-    test_p = 0.1
+    test_p = 0.2
     balance = True
-    seed = 1
+    seed = 10
     folds = 5
     stages = 2
-    brs3_balances =  [0.8, 0.2]
+    brs3_balances =  [0.5, 0.5]
     assert sum(brs3_balances) == 1.0, "Balances must sum to 1.0"
     output_dir = "splits/"
 
     splits_generator = create_k_clients_cross_fold_splits_stages(num_clients=num_clients, test_p=test_p, folds=folds, stages=stages, brs3_balances=brs3_balances, seed=seed, verbose=True, as_filename=True)
     
     splits = list(splits_generator)
-    create_csv_split(splits, name=f"chimera_{num_clients}_{folds}_{stages}_1_each_{seed}_unbalanced_{brs3_balances[0]}_{brs3_balances[1]}_nocd", num_clients=num_clients, num_folds=folds, num_stages=stages, outputs_dir=output_dir)
+    create_csv_split(splits, name=f"chimera_{num_clients}_{folds}_{stages}_{test_p}_{brs3_balances[0]}_{brs3_balances[1]}_{seed}", num_clients=num_clients, num_folds=folds, num_stages=stages, outputs_dir=output_dir)
 

@@ -6,7 +6,8 @@ from collections import defaultdict
 import argparse
 import numpy as np
 
-ROOT_RESULTS = "/gris/gris-f/homelv/phempel/masterthesis/MM_flower/train/results"
+# ROOT_RESULTS = "/gris/gris-f/homelv/phempel/masterthesis/MM_flower/train/results"
+ROOT_RESULTS = "/tmp_filerworkaround_phempel_nov_2025/train_cfcd/results"
 
 def smooth_client_data(client_data, window_size=5):
     """
