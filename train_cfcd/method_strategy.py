@@ -102,6 +102,12 @@ class CustomFedAvg(FedAvg):
         
         print("WEIGHTS FOR AGGREGATION: ", normed_weights)
         
+        # Log aggregation weights to file
+        weights_file = f"{self.hyps.results_dir}/aggregation_weights.txt"
+        with open(weights_file, 'a') as f:
+            weights_str = ','.join([f"{w:.6f}" for w in normed_weights])
+            f.write(f"{weights_str}\n")
+        
         parameters_per_client = [parameters_to_ndarrays(fit_res.parameters) for _, fit_res in results]
         
         # weighted_weights = [

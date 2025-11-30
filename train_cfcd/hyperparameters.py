@@ -8,25 +8,31 @@ def get_hyperparameters():
                     help='Client augmentation for all clients for the 2nd stage, e.g. features_1536_fixed_aug2_2_420')
     parser.add_argument('--no_cd_aug', action='store_true', default=False,
                     help='Remove clinical data for augmented data')
-    parser.add_argument('--augmentations', nargs='*', default=None,
+    parser.add_argument('--augmentations', nargs='*', default=["0=features_1536_fixed", "1=features_1536_fixed", "2=features_1536_fixed"],
                     help='Client augmentation mappings as key=value pairs, e.g., --augmentations 1=features_1536_fixed_aug2_2_420 2=features_1536_fixed_aug3_3_430')
-    parser.add_argument('--num_stages', type=int, default=1, help='number of stages (default: 2)')
+    parser.add_argument('--num_stages', type=int, default=2, help='number of stages (default: 2)')
     
     parser.add_argument('--method_global', action='store_true', default=False, help='enable prototype-based federated learning method')
     parser.add_argument('--method_local', action='store_true', default=False, help='enable prototype-based federated learning method')
     parser.add_argument('--local_weight_weight', type=float, default=1.0, help='weight for local prototype weighting (default: 1.0)')
+    
     parser.add_argument('--debug', action='store_true', default=False, help='enable debug mode')
     # parser.add_argument('--method_sample', action='store_true', default=False, help='enable prototype-based federated learning method')
     parser.add_argument('--proto_adaptation_rate_client', type=float, default=0.5, help='prototype adaptation rate for clients (default: 0.5)')
+    parser.add_argument('--strictness', type=float, default=1.0, help='strictness for how strongly prototypes influence weighting (default: 1.0)')
+    # Strictness = 0 -> all weights = 1, higher strictness -> stronger influence of prototypes; strictness = inf -> weights are 0 despite distance = 0
+    
     parser.add_argument('--proto_adaptation_rate_server', type=float, default=0.5, help='prototype adaptation rate for server (default: 0.5)')
+    
+    
     parser.add_argument('--num_sampled', type=int, default=0,  help='number of sampled datapoints per client')
     parser.add_argument('--temperature', type=float, default=1.0, help='temperature for prototype-based methods (default: 1.0)')
     parser.add_argument('--variance_scale', type=float, default=1.0, help='variance scale for prototype sampling (default: 1.0)')
     
     parser.add_argument('--num_clients', type=int, default=3, help='number of clients (default: 3)')
-    parser.add_argument('--num_rounds', type=int, default=3, help='number of federated learning rounds (default: 3)')
+    parser.add_argument('--num_rounds', type=int, default=40, help='number of federated learning rounds (default: 40)')
     parser.add_argument('--use_split_k', type=int, default=0, help='If less clients than splits are used, which split to use (default: +0)')
-    parser.add_argument('--no_phases', action='store_true', default=False, help='disable phase training also for the first round')
+    parser.add_argument('--no_phases', action='store_true', default=True, help='disable phase training also for the first round')
     # parser.add_argument('--no_phases_but_first', action='store_true', default=False, help='disable phase training and early stopping for all but the first round')
     parser.add_argument('--phases_always', action='store_true', default=False, help='enable phase training for all rounds')
     parser.add_argument('--phase_length', type=int, default=7, help='number of epochs per phase (default: 7)')
@@ -38,7 +44,7 @@ def get_hyperparameters():
     parser.add_argument('--multi_seed', type=int, nargs='+', help='list of seeds for experiments with multiple runs per client number')
     parser.add_argument('--embed_dim', type=int, default=1536)
     parser.add_argument('--n_classes', type=int, default=3)
-    parser.add_argument('--max_epochs', type=int, default=150,
+    parser.add_argument('--max_epochs', type=int, default=3,
                         help='maximum number of epochs to train (default: 150)')
     # parser.add_argument('--max_epochs_steps', type=str, default=None, 
     #                     help='maximum number of epochs to train for each phase, format: phase1_epochs:phase2_epochs:...,default: 2:10,5:3,2 means 10 epochs for phase 1, 3 epochs for phase 2 and 2 epochs for all remaining phases')    
@@ -53,7 +59,7 @@ def get_hyperparameters():
     parser.add_argument('--k', type=int, default=10, help='number of folds (default: 10)')
     parser.add_argument('--results_dir', default='./results', help='results directory (default: ./results)')
     parser.add_argument('--split_dir', type=str, 
-                        default='chimera_3_0.1', 
+                        default='chimera_3_5_2_same_1_each_balanced_0.5_0.5_nocd', 
                         help='manually specify the set of splits to use')
     parser.add_argument('--log_data', action='store_true', default=True, help='log data using tensorboard')
     parser.add_argument('--early_stopping', action='store_true', default=False, help='enable early stopping')

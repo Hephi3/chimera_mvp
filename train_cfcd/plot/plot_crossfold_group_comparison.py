@@ -11,8 +11,8 @@ from collections import defaultdict
 # ROOT_RESULTS = "/gris/gris-f/homelv/phempel/masterthesis/MM_flower/train_cfcd/results"
 # OLD_DATA_ROOT_RESULTS = "/gris/gris-f/homelv/phempel/masterthesis/MM_flower/train_cfcd/results_old_data"
 
-ROOT_RESULTS = "/home/phempel/tmp_filerworkaround_phempel_nov_2025/train_cfcd/results"
-OLD_DATA_ROOT_RESULTS = "/home/phempel/tmp_filerworkaround_phempel_nov_2025/train_cfcd/results_old"
+ROOT_RESULTS = "/home/phempel/tmp_filerworkaround_phempel_nov_2025/train_cfcd/train_cfcd/results"
+OLD_DATA_ROOT_RESULTS = "/home/phempel/tmp_filerworkaround_phempel_nov_2025/train_cfcd/train_cfcd/results_old"
 
 
 def calculate_avg_f1_metric(f1_s1test_s1, f1_s1test_s2, f1_s2test_s1, f1_s2test_s2, plasticity_weight=0.5):
@@ -1563,3 +1563,36 @@ if __name__ == "__main__":
 # python plot/plot_crossfold_group_comparison.py --groups '{"CFCDID": ["CFCDID_s1"],"CFCDID Redo": ["CFCDID_redo_sp1_s1"], "CFCDID Redo 2": ["CFCDID_redo2_s1"]}' --submodel MM --metric_filter all --show_full_training --smooth_window 5 --show_std --name del
 
 # python plot/plot_crossfold_group_comparison.py --groups '{"CFCDID": ["CFCDIDnew_same_1_each_s1"],"CFCD": ["CFCDnew_swap_same_1_each_fullaug_s1"], "CFCDID REDO": ["CFCDID_s1"]}' --submodel MM --metric_filter all --show_full_training --smooth_window 5 --show_std --name del
+
+# python plot/plot_crossfold_group_comparison.py --groups '{"CFCDID": ["CFCDID_s1", "CFCDID_s2", "CFCDID_s3", "CFCDID_sp2_s1", "CFCDID_sp2_s2", "CFCDID_sp2_s3", "CFCDID_sp3_s1","CFCDID_sp3_s2","CFCDID_sp3_s3","CFCDID_sp4_s1","CFCDID_sp4_s2","CFCDID_sp4_s3","CFCDID_sp5_s1","CFCDID_sp5_s2","CFCDID_sp5_s3"],"CFCDID": ["CFCDID_redo_sp1_s1", "CFCDID_redo_sp1_s2", "CFCDID_redo_sp1_s3", "CFCDID_redo_sp2_s1", "CFCDID_redo_sp2_s2", "CFCDID_redo_sp2_s3", "CFCDID_redo_sp3_s1","CFCDID_redo_sp3_s2","CFCDID_redo_sp3_s3","CFCDID_redo_sp4_s1","CFCDID_redo_sp4_s2","CFCDID_redo_sp4_s3","CFCDID_redo_sp5_s1","CFCDID_redo_sp5_s2","CFCDID_redo_sp5_s3"]}' --submodel MM --metric_filter all --show_full_training --smooth_window 5 --show_std --name CFCDIDNew
+
+# Final Framework (is not same as old, but also good): python federated_train.py --gpus 0 --num_clients 3 --exp_code CFCDID_redo5 --no_verbose --split_dir chimera_3_5_2_same_1_each_balanced_0.5_0.5_nocd --num_rounds 40 --folds 5 --seed 1 --no_phases --max_epochs 3 --augmentations 0=features_1536_fixed 1=features_1536_fixed 2=features_1536_fixed --num_stages 2
+
+# -> Now default -> python federated_train.py --gpus 0 --exp_code CFCDID_redo5 --no_verbose
+
+
+# python plot/plot_crossfold_group_comparison.py --groups '{"CFCDID Seed 3": ["CFCDID_redo_sp1_s3", "CFCDID_redo_sp2_s3","CFCDID_redo_sp3_s3","CFCDID_redo_sp4_s3","CFCDID_redo_sp5_s3"],"MLG": ["MLG_08_08_sp1_s3","MLG_08_08_sp2_s3","MLG_08_08_sp3_s3","MLG_08_08_sp4_s3","MLG_08_08_sp5_s3"]}' --submodel MM --metric_filter all --show_full_training --smooth_window 5 --show_std --name MLG
+
+# python plot/plot_crossfold_group_comparison.py --groups '{"CFCDID Seed 3": ["CFCDID_redo_sp1_s3", "CFCDID_redo_sp2_s3","CFCDID_redo_sp3_s3","CFCDID_redo_sp4_s3","CFCDID_redo_sp5_s3"],"ML": ["ML_08_sp1_s3","ML_08_sp2_s3","ML_08_sp3_s3","ML_08_sp4_s3","ML_08_sp5_s3"]}' --submodel MM --metric_filter all --show_full_training --smooth_window 5 --show_std --name ML
+
+# python plot/plot_crossfold_group_comparison.py --groups '{"CFCDID Seed 3": ["CFCDID_redo_sp1_s3", "CFCDID_redo_sp2_s3","CFCDID_redo_sp3_s3","CFCDID_redo_sp4_s3","CFCDID_redo_sp5_s3"],"MG": ["MG_08_sp1_s3","MG_08_sp2_s3","MG_08_sp3_s3","MG_08_sp4_s3","MG_08_sp5_s3"]}' --submodel MM --metric_filter all --show_full_training --smooth_window 5 --show_std --name MG
+
+# python plot/plot_crossfold_group_comparison.py --groups '{"CFCDID": ["CFCDID_redo_sp1_s1", "CFCDID_redo_sp1_s2", "CFCDID_redo_sp1_s3", "CFCDID_redo_sp2_s1", "CFCDID_redo_sp2_s2", "CFCDID_redo_sp2_s3", "CFCDID_redo_sp3_s1","CFCDID_redo_sp3_s2","CFCDID_redo_sp3_s3","CFCDID_redo_sp4_s1","CFCDID_redo_sp4_s2","CFCDID_redo_sp4_s3","CFCDID_redo_sp5_s1","CFCDID_redo_sp5_s2","CFCDID_redo_sp5_s3"]}' --submodel MM --metric_filter all --show_full_training --smooth_window 5 --show_std --name CFCDIDNew
+
+# python plot/plot_crossfold_group_comparison.py --groups '{"CFCDID": ["CFCDID_redo_sp1_s1", "CFCDID_redo_sp1_s2", "CFCDID_redo_sp1_s3", "CFCDID_redo_sp2_s1", "CFCDID_redo_sp2_s2", "CFCDID_redo_sp2_s3", "CFCDID_redo_sp3_s1","CFCDID_redo_sp3_s2","CFCDID_redo_sp3_s3","CFCDID_redo_sp4_s1","CFCDID_redo_sp4_s2","CFCDID_redo_sp4_s3","CFCDID_redo_sp5_s1","CFCDID_redo_sp5_s2","CFCDID_redo_sp5_s3"]}' --submodel MM --metric_filter all --show_full_training --smooth_window 5 --show_std --name CFCDIDCentralized
+
+# python plot/plot_crossfold_group_comparison.py --groups '{"CFCDID": ["CFCDID_redo_sp1_s3", "CFCDID_redo_sp2_s3","CFCDID_redo_sp3_s3", "CFCDID_redo_sp4_s3","CFCDID_redo_sp5_s3"], "ML 02 str10": ["ML_02_str10_sp1_s3", "ML_02_str10_sp2_s3","ML_02_str10_sp3_s3", "ML_02_str10_sp4_s3","ML_02_str10_sp5_s3"]}' --submodel MM --metric_filter all --show_full_training --smooth_window 5 --show_std --name ML02str10
+
+# python plot/plot_crossfold_group_comparison.py --groups '{"CFCDID Seed 3": ["CFCDID_redo_sp1_s3", "CFCDID_redo_sp2_s3","CFCDID_redo_sp3_s3","CFCDID_redo_sp4_s3","CFCDID_redo_sp5_s3"],"MG 02 t03": ["MG_02_t03_sp1_s3","MG_02_t03_sp2_s3","MG_02_t03_sp3_s3","MG_02_t03_sp4_s3","MG_02_t03_sp5_s3"]}' --submodel MM --metric_filter all --show_full_training --smooth_window 5 --show_std --name MG02_t03
+
+# python plot/plot_crossfold_group_comparison.py --groups '{"CFCDID Seed 3": ["CFCDID_redo_sp1_s3", "CFCDID_redo_sp2_s3","CFCDID_redo_sp3_s3","CFCDID_redo_sp4_s3","CFCDID_redo_sp5_s3"],"MG 02 t03": ["MG_02_t03_sp1_s3","MG_02_t03_sp2_s3","MG_02_t03_sp3_s3","MG_02_t03_sp4_s3","MG_02_t03_sp5_s3"]}' --submodel MM --metric_filter all --show_full_training --smooth_window 5 --show_std --name MG02_t03
+
+# python plot/plot_crossfold_group_comparison.py --groups '{"CFCDID": ["CFCDID_redo_sp1_s3", "CFCDID_redo_sp2_s3","CFCDID_redo_sp3_s3", "CFCDID_redo_sp4_s3","CFCDID_redo_sp5_s3"], "ML 02 str10": ["ML_02_str10_sp1_s3", "ML_02_str10_sp2_s3","ML_02_str10_sp3_s3", "ML_02_str10_sp4_s3","ML_02_str10_sp5_s3"], "ML 08 str3": ["ML_08_str3_sp1_s3", "ML_08_str3_sp2_s3", "ML_08_str3_sp3_s3", "ML_08_str3_sp4_s3", "ML_08_str3_sp5_s3"], "ML 08": ["ML_08_sp1_s3","ML_08_sp2_s3","ML_08_sp3_s3","ML_08_sp4_s3","ML_08_sp5_s3"], "ML 01": ["ML_01_sp1_s3","ML_01_sp2_s3","ML_01_sp3_s3","ML_01_sp4_s3","ML_01_sp5_s3"], "ML_01_3str": ["ML_01_3str_sp1_s3","ML_01_3str_sp2_s3","ML_01_3str_sp3_s3","ML_01_3str_sp4_s3","ML_01_3str_sp5_s3"]}' --submodel MM --metric_filter all --show_full_training --smooth_window 5 --show_std --name ML01-3str
+
+# python plot/plot_crossfold_group_comparison.py --groups '{"CFCDID": ["CFCDID_redo_sp1_s3", "CFCDID_redo_sp2_s3","CFCDID_redo_sp3_s3", "CFCDID_redo_sp4_s3","CFCDID_redo_sp5_s3"],"ML 08": ["ML_08_sp1_s3","ML_08_sp2_s3","ML_08_sp3_s3","ML_08_sp4_s3","ML_08_sp5_s3"], "ML 01": ["ML_01_sp1_s3","ML_01_sp2_s3","ML_01_sp3_s3","ML_01_sp4_s3","ML_01_sp5_s3"],"ML 00": ["ML_00_sp1_s3","ML_00_sp2_s3","ML_00_sp3_s3","ML_00_sp4_s3","ML_00_sp5_s3"] }' --submodel MM --metric_filter all --show_full_training --smooth_window 5 --show_std --name ML00
+
+# python plot/plot_crossfold_group_comparison.py --groups '{"CFCDID": ["CFCDID_redo_sp1_s3", "CFCDID_redo_sp2_s3","CFCDID_redo_sp3_s3", "CFCDID_redo_sp4_s3","CFCDID_redo_sp5_s3"], "Centralized 1 stage": ["Centralized_1stage_sp1_s3", "Centralized_1stage_sp2_s3","Centralized_1stage_sp3_s3","Centralized_1stage_sp4_s3","Centralized_1stage_sp5_s3"]}' --submodel MM --metric_filter all --show_full_training --smooth_window 5 --show_std --name Centralized_1stage
+
+# 
+
+# python plot/plot_crossfold_group_comparison.py --groups '{"CFCDID Seed 3": ["CFCDID_redo_sp1_s3", "CFCDID_redo_sp2_s3","CFCDID_redo_sp3_s3","CFCDID_redo_sp4_s3","CFCDID_redo_sp5_s3"],"MG 08": ["MG_08_sp1_s3", "MG_08_sp2_s3", "MG_08_sp3_s3", "MG_08_sp4_s3","MG_08_sp5_s3"],"MG 00": ["MG_00_sp1_s3", "MG_00_sp2_s3", "MG_00_sp3_s3", "MG_00_sp4_s3","MG_00_sp5_s3"]}' --submodel MM --metric_filter all --show_full_training --smooth_window 5 --show_std --name MG00

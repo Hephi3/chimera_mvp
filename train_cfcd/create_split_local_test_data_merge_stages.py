@@ -37,14 +37,14 @@ def merge_stages_columnwise(input_csv_stage0, input_csv_stage1, output_csv):
 
 if __name__ == "__main__":
     seed = 5
-    source_dir = f"/gris/gris-f/homelv/phempel/masterthesis/MM_flower/train_cfcd/splits/chimera_3_5_2_0.1_{seed}_balanced_0.33333_0.33333_0.33334"
-    dest_dir = f"/gris/gris-f/homelv/phempel/masterthesis/MM_flower/train_cfcd/splits/chimera_3_5_0.1_{seed}_merged"
+    source_dir = f"/home/phempel/tmp_filerworkaround_phempel_nov_2025/train_cfcd/train_cfcd/splits/chimera_3_5_2_same_1_each_balanced_0.5_0.5_nocd_merged_{seed}"
+    dest_dir = f"/home/phempel/tmp_filerworkaround_phempel_nov_2025/train_cfcd/train_cfcd/splits/chimera_3_5_2_same_1_each_balanced_0.5_0.5_nocd_merged_merged_{seed}"
     
     os.makedirs(dest_dir, exist_ok=True)
     
-    for client in range(3):
-        for fold in range(5):
-            input_csv_stage0 = os.path.join(source_dir, f"splits_{client}_{fold}_0.csv")
-            input_csv_stage1 = os.path.join(source_dir, f"splits_{client}_{fold}_1.csv")
-            output_csv = os.path.join(dest_dir, f"splits_{client}_{fold}.csv")
-            merge_stages_columnwise(input_csv_stage0, input_csv_stage1, output_csv)
+    # for client in range(3):
+    for fold in range(5):
+        input_csv_stage0 = os.path.join(source_dir, f"splits_0_{fold}_0.csv")
+        input_csv_stage1 = os.path.join(source_dir, f"splits_0_{fold}_1.csv")
+        output_csv = os.path.join(dest_dir, f"splits_0_{fold}.csv")
+        merge_stages_columnwise(input_csv_stage0, input_csv_stage1, output_csv)

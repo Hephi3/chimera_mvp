@@ -43,7 +43,7 @@ def load_data(partition_id, args):
         args.augmentations = {i: "features_1536_fixed" for i in range(args.num_clients)}
     
     client_dataset = MM_Multi_Scale_Dataset(
-        csv_path = '/home/phempel/tmp_filerworkaround_phempel_nov_2025/train_cfcd/data/chimera_new.csv',
+        csv_path = '/home/phempel/tmp_filerworkaround_phempel_nov_2025/train_cfcd/train_cfcd/data/chimera_new.csv',
         # csv_path = '/gris/gris-f/homelv/phempel/masterthesis/MMFL/data/chimera_new.csv',
         return_coords = args.return_coords,
         data_dir = f"/local/scratch/phempel/chimera/{args.augmentations[partition_id]}",

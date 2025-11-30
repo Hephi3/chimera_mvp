@@ -135,14 +135,16 @@ if __name__ == "__main__":
             run_experiment(args)
     else:
         import time
-        pairs = [(i + 1, s + 1) for i in range(5) for s in range(3)]
+        # pairs = [(i + 1, s + 1) for i in range(5) for s in range(3)]
+        # pairs = [(i + 1, s + 1) for s in range(2,-1,-1) for i in range(5)]
+        pairs = [(i + 1, 3) for i in range(5)]
         # for i in range(5):
             # split = i+1
             # for s in range(3):
                 # seed = s+1
         # 0 -> all, 3 -> From Split 2, 6 -> From Split 3, 9 -> From Split 4, 12 -> From Split 5
         import copy
-        for split, seed in pairs[3:]:
+        for split, seed in pairs:#[3:]:#[3:]:
             start_time = time.time()
             print("Split {}, seed {}".format(split, seed))
             args = copy.deepcopy(orig_args)

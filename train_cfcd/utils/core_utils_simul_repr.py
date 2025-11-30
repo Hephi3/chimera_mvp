@@ -1,7 +1,7 @@
 from random import random
 import numpy as np
 import torch
-from utils.method_utils import Prototype
+from utils.method_repr_utils import PrototypeRepr
 from utils.clam_utils import get_split_loader, get_optim, print_network, calculate_error
 import os
 from dataset.clam_dataset.dataset_generic import save_splits
@@ -202,7 +202,7 @@ def train(model, train_split, val_split, args, cur, device, round_num=None, use_
         #     if hasattr(model, 'fusion_net'):
         #         model.fusion_net.requires_grad_(phase == 'fusion')
         #         model.classifier.requires_grad_(phase == 'fusion')
-        train_loss, f1, features_list, labels_list = train_loop_clam(epoch, model, train_loader, optimizer,args.bag_weight, writer, loss_fn, verbose=verbose, phase=phase, device=device, prototype=prototype, brs_samples=brs_samples, no_training=no_training, strictness=args.strictness, args=args)
+        train_loss, f1, repr_list, labels_list = train_loop_clam(epoch, model, train_loader, optimizer,args.bag_weight, writer, loss_fn, verbose=verbose, phase=phase, device=device, prototype=prototype, brs_samples=brs_samples, no_training=no_training, strictness=args.strictness, args=args)
         stop = validate_clam(cur=cur, epoch=epoch, model=model, loader=val_loader, n_classes=args.n_classes, 
             early_stopping=early_stopping, writer=writer, results_dir=args.results_dir, verbose=verbose, scheduler=scheduler, phase=phase, device=device, loss_fn=loss_fn)
 
@@ -214,7 +214,7 @@ def train(model, train_split, val_split, args, cur, device, round_num=None, use_
         writer.flush()
         writer.close()  # Properly close the writer to ensure data persistence
         
-    return train_loss, f1, features_list, labels_list
+    return train_loss, f1, repr_list, labels_list
 
 def apply_model(loader_data, model, testing=False, plot_coords = False, device=None):
     data, label, coords, clinical_data, slide_id = loader_data
@@ -238,7 +238,7 @@ def apply_model(loader_data, model, testing=False, plot_coords = False, device=N
 
     return results, label
 
-def train_loop_clam(epoch, model, loader, optimizer, bag_weight, writer = None, loss_fn = None, verbose = True, phase = None, device=None, prototype:Prototype=None, brs_samples:list[list]=None, no_training=False, strictness=1.0, args=None):
+def train_loop_clam(epoch, model, loader, optimizer, bag_weight, writer = None, loss_fn = None, verbose = True, phase = None, device=None, prototype:PrototypeRepr=None, brs_samples:list[list]=None, no_training=False, strictness=1.0, args=None):
     # print information about loader data to compare with other experiment:
     # data, label, coords, clinical_data, slide_id = next(iter(loader))
     # print(f"Data batch shapes: {[d.shape for d in data]}, Labels: {label}, Coords: {[c.shape for c in coords]}, Clinical data: {clinical_data.shape}, Slide IDs: {slide_id}")
@@ -266,7 +266,7 @@ def train_loop_clam(epoch, model, loader, optimizer, bag_weight, writer = None, 
     
     loss_cd = 0.
     
-    features_list = []
+    repr_list = [[],[],[],[]]  # Clinical, scale 0, scale 1, scale 2
 
     if verbose: print('\n')
     
@@ -304,7 +304,7 @@ def train_loop_clam(epoch, model, loader, optimizer, bag_weight, writer = None, 
         
             result_dict, label = apply_model(loader_data, model, plot_coords = False, device=device)
 
-            features_list.append(result_dict["concat_features"])
+            # features_list.append(result_dict["concat_features"])
 
             logits, Y_prob, Y_hat, _, _ = result_dict['MM']
 
@@ -379,8 +379,15 @@ def train_loop_clam(epoch, model, loader, optimizer, bag_weight, writer = None, 
              # METHOD: apply prototype weighting if prototype is given
              #TODO: Only weighs not sampled points
             if prototype is not None:
-                weight = prototype.weight_point(result_dict['concat_features'].cpu().detach().numpy(), strictness=strictness) 
-                # print("LOSS OLD:", total_loss.item(), " LOSS NEW:", (total_loss * weight), " WEIGHT:", weight)
+                data, _, _, clinical_data, _ = loader_data
+                
+                repr_list[0].append(clinical_data.cpu().detach().numpy())
+                for i in range(3):
+                    repr_list[i+1].append(data[i].cpu().detach().numpy())
+                
+                weight = prototype.weight_point(repr_list[0][-1], repr_list[1][-1], repr_list[2][-1], repr_list[3][-1], strictness=strictness)
+               
+                print("LOSS OLD:", total_loss.item(), " LOSS NEW:", (total_loss * weight), " WEIGHT:", weight)
                 
                 # Log weight to file
                 weights_log_path = os.path.join(args.results_dir, "prototype_weights.txt")
@@ -411,7 +418,9 @@ def train_loop_clam(epoch, model, loader, optimizer, bag_weight, writer = None, 
         if verbose: print('\n')
 
     if verbose: print('Epoch: {}, train_loss_mm: {:.4f}, train_clustering_loss:  {:.4f}, train_error: {:.4f}'.format(epoch, train_loss_mm, train_inst_loss,  train_error))
-    return train_loss_mm, f1, features_list, all_labels
+    return train_loss_mm, f1, repr_list, all_labels
+
+
 def validate(model, val_split, args, cur, device, round_num=None):
     if args.bag_loss == 'svm':
         from topk.svm import SmoothTop1SVM

@@ -5,7 +5,7 @@ import json
 import math
 import os
 
-class Prototype:    
+class PrototypeRepr:    
     def __init__(self, cd_mean, cd_var, wsi_l3_mean, wsi_l3_var, wsi_l2_mean, wsi_l2_var, wsi_l1_mean, wsi_l1_var, num_l3_patches, num_l2_patches, num_l1_patches, label=None):
         self.cd_mean = cd_mean
         self.cd_var = cd_var
@@ -104,21 +104,33 @@ class Prototype:
         self.num_l2_patches = int((1 - adaptation_rate) * self.num_l2_patches + adaptation_rate * other_prototype.num_l2_patches)
         self.num_l1_patches = int((1 - adaptation_rate) * self.num_l1_patches + adaptation_rate * other_prototype.num_l1_patches)
 
-    def distance_point(self, data_point):
-        means = [self.cd_mean, self.wsi_l3_mean, self.wsi_l2_mean, self.wsi_l1_mean]
-        vars = [self.cd_var, self.wsi_l3_var, self.wsi_l2_var, self.wsi_l1_var]
+    def distance_point(self, dp_cd, dp_wsi_l3, dp_wsi_l2, dp_wsi_l1):
         distances = []
-        for mean, var in zip(means, vars):
-             # Use z-score
-            z_scores = (data_point - mean) / np.sqrt(var + 1e-12)
-            # return np.linalg.norm(z_scores)
-            mean_distance = np.mean(np.abs(z_scores))
-            distances.append(mean_distance)
-        return np.mean(distances)
+        
+        z_score_cds = (dp_cd - self.cd_mean) / np.sqrt(self.cd_var + 1e-12)
+        z_score_l3 = (dp_wsi_l3 - self.wsi_l3_mean) / np.sqrt(self.wsi_l3_var + 1e-12)
+        z_score_l2 = (dp_wsi_l2 - self.wsi_l2_mean) / np.sqrt(self.wsi_l2_var + 1e-12)
+        z_score_l1 = (dp_wsi_l1 - self.wsi_l1_mean) / np.sqrt(self.wsi_l1_var + 1e-12)
+        
+        distances.append(np.mean(np.abs(z_score_cds)))
+        distances.append(np.mean(np.abs(z_score_l3)))
+        distances.append(np.mean(np.abs(z_score_l2)))
+        distances.append(np.mean(np.abs(z_score_l1)))
+        
+        # means = [self.cd_mean, self.wsi_l3_mean, self.wsi_l2_mean, self.wsi_l1_mean]
+        # vars = [self.cd_var, self.wsi_l3_var, self.wsi_l2_var, self.wsi_l1_var]
+        # distances = []
+        # for mean, var in zip(means, vars):
+        #      # Use z-score
+        #     z_scores = (data_point - mean) / np.sqrt(var + 1e-12)
+        #     # return np.linalg.norm(z_scores)
+        #     mean_distance = np.mean(np.abs(z_scores))
+        #     distances.append(mean_distance)
+        return np.mean(distances) #TODO: Could be weighted. Does l3 have more information or less then l1?
     
-    def weight_point(self, data_point):
-        distance = self.distance_point(data_point)
-        weight = math.exp(-distance**2)  # Example: exponential decay based on distance
+    def weight_point(self, dp_cd, dp_wsi_l3, dp_wsi_l2, dp_wsi_l1, strictness=1.0):
+        distance = self.distance_point(dp_cd, dp_wsi_l3, dp_wsi_l2, dp_wsi_l1)
+        weight = math.exp(strictness* -distance**2)  # Example: exponential decay based on distance
         return weight
     
     def distance_prototype(self, other_prototype):

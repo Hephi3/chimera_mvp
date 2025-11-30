@@ -24,6 +24,10 @@ def get_evaluate_fn(model, args, device):
         loss, f1 = test(model, test_splits[0], args, device, results_dir=args.results_dir, client_nr="server", round_nr=server_round, stage=0)
         if len(test_splits) > 1:
             _, _ = test(model, test_splits[1], args, device, results_dir=args.results_dir, client_nr="server2", round_nr=server_round, stage=1)
+        
+        # if server_round == args.num_rounds:
+        #     ckpt_name = f"{args.results_dir}/checkpoints/server_round_{server_round}.pt"
+        #     torch.save(model.state_dict(), ckpt_name)
 
         # # Evaluate the model on the test set
         # loss, f1 = test(model, test_split, args, device, results_dir=args.results_dir, client_nr="server", round_nr=server_round)

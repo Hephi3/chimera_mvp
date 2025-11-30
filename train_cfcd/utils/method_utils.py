@@ -61,9 +61,9 @@ class Prototype:
         # print("Mean z-score distance:", mean)
         return mean
     
-    def weight_point(self, data_point):
+    def weight_point(self, data_point, strictness=1.0):
         distance = self.distance_point(data_point)
-        weight = math.exp(-distance**2)  # Example: exponential decay based on distance
+        weight = math.exp(strictness * -distance**2)  # Example: exponential decay based on distance
         return weight
     
     def distance_prototype(self, other_prototype):
