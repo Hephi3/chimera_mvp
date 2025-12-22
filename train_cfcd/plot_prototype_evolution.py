@@ -33,7 +33,7 @@ def plot_prototype_evolution(samples_per_round, num_clients=3, client_colors=Non
     pca.fit(all_data)
     
     # Create figure
-    fig, ax = plt.subplots(figsize=(16, 10))
+    fig, ax = plt.subplots(figsize=(12, 8))
     
     # Alpha values decrease for older rounds (most recent = 1.0, oldest = 0.2)
     alphas = np.linspace(0.2, 1.0, num_rounds)
@@ -68,8 +68,22 @@ def plot_prototype_evolution(samples_per_round, num_clients=3, client_colors=Non
         global_proto_2d = pca.transform(global_proto.mean.reshape(1, -1))
         
         # Plot global prototype for this round (smaller, less prominent)
-        ax.scatter(global_proto_2d[:, 0], global_proto_2d[:, 1], c='black', 
-                  marker='X', s=150, alpha=alpha*0.3, edgecolors='red', linewidths=1, zorder=1)
+        global_label = 'Global Prototype' if round_idx == num_rounds - 1 else None
+        ax.scatter(global_proto_2d[:, 0], global_proto_2d[:, 1], c='red', 
+                  marker='X', s=100, alpha=alpha, edgecolors='black', linewidths=0.5, zorder=1, label=global_label)
+        
+        # Plot variance ellipse for global prototype
+        global_cov_128 = np.diag(global_proto.var)
+        global_cov_2d = pca.components_ @ global_cov_128 @ pca.components_.T
+        global_vals, global_vecs = np.linalg.eigh(global_cov_2d)
+        global_order = global_vals.argsort()[::-1]
+        global_vals = global_vals[global_order]
+        global_vecs = global_vecs[:, global_order]
+        global_theta = np.degrees(np.arctan2(*global_vecs[:, 0][::-1]))
+        global_width, global_height = 2 * 2 * np.sqrt(global_vals)  # 2 stddev
+        global_ellipse = Ellipse(xy=global_proto_2d[0], width=global_width, height=global_height, angle=global_theta,
+                        edgecolor='red', fc='None', lw=1, alpha=alpha*0.3, zorder=1)
+        ax.add_patch(global_ellipse)
         
         # Plot each client
         for client_idx in range(num_clients):
@@ -77,7 +91,7 @@ def plot_prototype_evolution(samples_per_round, num_clients=3, client_colors=Non
             client_proto_positions[client_idx].append(proto_2d[0])
             
             # Plot prototype mean
-            label = f'Client {client_idx}' if round_idx == num_rounds - 1 else None
+            label = f'Client {client_idx + 1}' if round_idx == num_rounds - 1 else None
             ax.scatter(proto_2d[:, 0], proto_2d[:, 1], c=client_colors[client_idx], 
                       marker='o', s=100, alpha=alpha, label=label, edgecolors='black', linewidths=1, zorder=2)
             
@@ -99,8 +113,8 @@ def plot_prototype_evolution(samples_per_round, num_clients=3, client_colors=Non
         if len(client_proto_positions[client_idx]) > 1:
             positions = np.array(client_proto_positions[client_idx])
             ax.plot(positions[:, 0], positions[:, 1], 
-                   color=client_colors[client_idx], linestyle='--', alpha=0.6, linewidth=2, 
-                   label=f'Client {client_idx} Trajectory', zorder=1)
+                   color=client_colors[client_idx], linestyle='--', alpha=0.6, linewidth=2,) 
+                #    label=f'Client {client_idx} Trajectory', zorder=1)
             
             # Add arrows to show direction
             for i in range(len(positions) - 1):
@@ -111,13 +125,17 @@ def plot_prototype_evolution(samples_per_round, num_clients=3, client_colors=Non
                         fc=client_colors[client_idx], ec=client_colors[client_idx], 
                         alpha=0.4, zorder=1)
     
-    ax.set_title(f"Prototype Evolution Over {num_rounds-1} Rounds", fontsize=16)
-    ax.set_xlabel("PC1", fontsize=14)
-    ax.set_ylabel("PC2", fontsize=14)
-    ax.legend(loc='upper right', fontsize='small', bbox_to_anchor=(1.25, 1))
+    # ax.set_title(f"Prototype Evolution Over {num_rounds-1} Rounds", fontsize=16)
+    ax.set_xlabel("PC 1", fontsize=18)
+    ax.set_ylabel("PC 2", fontsize=18)
+    ax.legend(loc='upper right', fontsize=18, bbox_to_anchor=(1, 1))
     ax.grid(True, alpha=0.3)
     plt.tight_layout()
-    plt.show()
+    # plt.show()
+    # Instead store and print in console where it has been stored
+    
+    plt.savefig("prototype_evolution.png")
+    print("Plot saved as prototype_evolution.png")
 
 
 def load_features_from_rounds(base_dir, num_clients=3, rounds=None):
@@ -203,9 +221,12 @@ if __name__ == "__main__":
     # Example 2: Load real data from files
     # Uncomment and adjust the path as needed
     # base_dir = "/gris/gris-f/homelv/phempel/masterthesis/MM_flower/train_cfcd/results/CD_trajectory_del_s1/Fold0"
-    base_dir = "/gris/gris-f/homelv/phempel/masterthesis/MM_flower/train_cfcd/results/del_s1/Fold0/"
-    # base_dir = "/gris/gris-f/homelv/phempel/masterthesis/MM_flower/train_cfcd/results/CDID_gradient_del_s1/Fold0"
-    rounds_to_plot = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+    # base_dir = "/gris/gris-f/homelv/phempel/masterthesis/MM_flower/train_cfcd/results/art_CFCD_sp1_s3/Fold0"
+    # base_dir = "/gris/gris-f/homelv/phempel/masterthesis/MM_flower/train_cfcd/results/art_CFCDID_sp1_s3/Fold0"
+    # base_dir = "/gris/gris-f/homelv/phempel/masterthesis/MM_flower/train_cfcd/results/MG_08_sp1_s3/Fold0"
+    # base_dir = "/gris/gris-f/homelv/phempel/masterthesis/MM_flower/train_cfcd/results/art_CFCD_no_weighted_training_7_3_sp1_s3/Fold1"
+    base_dir = "/gris/gris-f/homelv/phempel/masterthesis/MM_flower/train_cfcd/results/art_CFCDID_no_weighted_training_sp1_s3/Fold1"
+    rounds_to_plot = list(range(1, 41))  # Rounds 1-10
     samples_per_round = load_features_from_rounds(base_dir, num_clients=3, rounds=rounds_to_plot)
     if len(samples_per_round) > 0:
         print(f"Loaded {len(samples_per_round)} rounds")

@@ -1,5 +1,5 @@
 results*/
 data/features/
-splits/
+splits*/
 data/pytorch_model.bin
 command_logs/

@@ -79,11 +79,9 @@ class SimplePieChartAnalyzer:
     
     def plot_client_totals(self, save_path=None):
         """Plot pie charts showing total data distribution for each client (train+val pool from fold 0)."""
-        fig, axes = plt.subplots(1, self.num_clients, figsize=(6 * self.num_clients, 6))
+        fig, axes = plt.subplots(1, self.num_clients, figsize=(5 * self.num_clients, 7))
         if self.num_clients == 1:
             axes = [axes]
-        
-        fig.suptitle('Total Data Pool Distribution per Client (Train + Val Pool)', fontsize=16, fontweight='bold')
         
         for client_id in range(self.num_clients):
             ax = axes[client_id]
@@ -122,27 +120,27 @@ class SimplePieChartAnalyzer:
             
             if train_val_total > 0:
                 wedges, texts, autotexts = ax.pie(sizes, labels=labels, colors=self.colors, 
-                                                 autopct='%1.1f%%', startangle=90)
+                                                 autopct='%1.1f%%', startangle=90, textprops={'fontsize': 16})
                 
                 # Make percentage text bold and larger
                 for autotext in autotexts:
                     autotext.set_color('white')
                     autotext.set_fontweight('bold')
-                    autotext.set_fontsize(12)
+                    autotext.set_fontsize(16)
                 
-                ax.set_title(f'Client {client_id}\nTrain+Val Pool Distribution\nTotal Samples: {total_client_samples} ({train_val_total} train+val, {test_total} test)', 
-                           fontweight='bold', fontsize=12)
+                ax.set_title(f'Client {client_id + 1}\nTotal Samples: {total_client_samples} ({train_val_total} train+val, {test_total} test)', 
+                           fontweight='bold', fontsize=16)
                 
                 # Add detailed counts as text below the pie chart
                 info_text = f"Train+Val Pool: BRS1={train_val_pool_counts['BRS1']}, BRS2={train_val_pool_counts['BRS2']}, BRS3={train_val_pool_counts['BRS3']}\n"
                 info_text += f"Test Set: BRS1={test_counts['BRS1']}, BRS2={test_counts['BRS2']}, BRS3={test_counts['BRS3']}"
                 
-                ax.text(0, -1.5, info_text, ha='center', va='top', fontsize=10, 
+                ax.text(0, -1.25, info_text, ha='center', va='top', fontsize=14, 
                        bbox=dict(boxstyle="round,pad=0.3", facecolor="lightgray", alpha=0.8))
             else:
                 ax.text(0.5, 0.5, 'No Data', ha='center', va='center', 
-                       transform=ax.transAxes, fontsize=12)
-                ax.set_title(f'Client {client_id}')
+                       transform=ax.transAxes, fontsize=16)
+                ax.set_title(f'Client {client_id}', fontsize=16)
         
         plt.tight_layout()
         if save_path:
@@ -247,7 +245,8 @@ class SimplePieChartAnalyzer:
 
 def main():
     """Main function to run the simple analysis."""
-    splits_dir = "/gris/gris-f/homelv/phempel/masterthesis/MM_flower/train_cdcf/splits/chimera_3_5_0.1_1_unbalanced_0.2_0.3_0.5"
+    # splits_dir = "/gris/gris-f/homelv/phempel/masterthesis/MM_flower/train_cdcf/splits/chimera_3_5_0.1_1_unbalanced_0.2_0.3_0.5"
+    splits_dir = "/gris/gris-f/homelv/phempel/masterthesis/MM_flower/train_cdcf/splits/chimera_3_5_2_0.1_1_unbalanced_0.1_0.2_0.7"
     
     if not os.path.exists(splits_dir):
         print(f"Error: Splits directory not found: {splits_dir}")

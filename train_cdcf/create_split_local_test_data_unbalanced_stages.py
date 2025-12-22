@@ -146,12 +146,12 @@ def create_csv_split(clients: List[Tuple[List[int], List[int], List[int]]], num_
  
 if __name__ == "__main__":
     num_clients = 3
-    test_p = 0.1
+    test_p = 0.2
     balance = True
     seed = 5
     folds = 5
     stages = 2
-    brs3_balances = [0.1, 0.2, 0.7]#[0.33333, 0.33333, 0.33334]
+    brs3_balances = [0.2, 0.3, 0.5]#[0.33333, 0.33333, 0.33334]
     brs1_balances = None#[0.5, 0.25, 0.25]
     assert sum(brs3_balances) == 1.0, "Balances must sum to 1.0"
     assert not brs1_balances or sum(brs1_balances) == 1.0, "Balances must sum to 1.0"

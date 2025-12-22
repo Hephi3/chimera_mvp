@@ -48,7 +48,7 @@ class FlowerClient(NumPyClient):
         if self.args.method_global or self.args.method_local or self.args.num_sampled > 0:
             proto_path = f"{self.args.results_dir}/prototypes/prototype_client_{self.partition_id}.json"
             if round_num == 1:
-                _, _, features_list, labels_list = train(
+                _, _, features_list, labels_list, _ = train(
                     self.net,
                     train_data,
                     val_data,
@@ -59,11 +59,12 @@ class FlowerClient(NumPyClient):
                     use_phases= False,# self.args.phases_always or (not self.args.no_phases and round_num < 2),
                     no_training=True
                 )
-                if self.args.debug:
-                    features_arr = np.stack([f.detach().cpu().numpy() if isinstance(f, torch.Tensor) else np.array(f) for f in features_list])
-                    labels_arr = np.array(labels_list)
-                    np.savez(f"{self.args.results_dir}/debug_features_client_{self.partition_id}_round_0.npz",
-                            features=features_arr, labels=labels_arr)
+                # if self.args.debug:
+                #     features_arr = np.stack([f.detach().cpu().numpy() if isinstance(f, torch.Tensor) else np.array(f) for f in features_list])
+                #     labels_arr = np.array(labels_list)
+                #     slide_ids_arr = np.array(slide_ids_list)
+                #     np.savez(f"{self.args.results_dir}/debug_features_client_{self.partition_id}_round_0.npz",
+                #             features=features_arr, labels=labels_arr, slide_ids=slide_ids_arr)
                 self.prototype = Prototype.from_data(features_list)#, plot=True)
                 if self.args.num_sampled > 0:
                     
@@ -91,7 +92,7 @@ class FlowerClient(NumPyClient):
                         
                 
                 
-        train_loss, f1, features_list, labels_list = train(
+        train_loss, f1, features_list, labels_list, _ = train(
             self.net,
             train_data,
             val_data,
@@ -108,11 +109,12 @@ class FlowerClient(NumPyClient):
         print("LEGNTH FEATURES LIST:", len(features_list), " LENGTH LABELS LIST:", len(labels_list))
         
         
-        if self.args.debug:
-            features_arr = np.stack([f.detach().cpu().numpy() if isinstance(f, torch.Tensor) else np.array(f) for f in features_list])
-            labels_arr = np.array(labels_list)
-            np.savez(f"{self.args.results_dir}/debug_features_client_{self.partition_id}_round_{round_num}.npz",
-                    features=features_arr, labels=labels_arr)
+        # if self.args.debug:
+        #     features_arr = np.stack([f.detach().cpu().numpy() if isinstance(f, torch.Tensor) else np.array(f) for f in features_list])
+        #     labels_arr = np.array(labels_list)
+        #     slide_ids_arr = np.array(slide_ids)
+        #     np.savez(f"{self.args.results_dir}/debug_features_client_{self.partition_id}_round_{round_num}.npz",
+        #             features=features_arr, labels=labels_arr, slide_ids=slide_ids_arr)
 
         test(self.net,  self.test_splits[0], self.args, self.device, results_dir=self.args.results_dir, client_nr=self.partition_id, round_nr=round_num, stage=0)
         if stage == 1:

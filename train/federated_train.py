@@ -142,4 +142,17 @@ if __name__ == "__main__":
     
     
     
-# python federated_train.py --gpus 1 --num_clients 3 --exp_code 3_clients --no_verbose --split_dir chimera_3_0.1 --num_rounds 3 --seed 1
+# python federated_train.py --gpus 3 --num_clients 1 --exp_code FL_1_clients --no_verbose --split_dir chimera_3_10_0.1_merged --seed 1 --folds 10 --num_clients 1 --num_rounds 1 --phase_length 15 --early_stopping --es_patience 5 --es_stop_epoch 40
+
+# python federated_train.py --gpus 3 --num_clients 3 --exp_code FL_3_clients --no_verbose --split_dir chimera_3_10_0.1 --seed 1 --folds 10 --num_rounds 1 --phase_length 15 --early_stopping --es_patience 5 --es_stop_epoch 40
+
+# CUDA_VISIBLE_DEVICES=2 python train.py --data_root_dir "/local/scratch/phempel/chimera/features_1536_fixed" --split_dir chimera_3_10_0.1_merged --no_verbose --exp_code FL_centralized
+
+
+# To change directly: num clients, num folds, num rounds, --> num epochs per round, phases, ...
+
+
+# python federated_train.py --gpus 3 --num_clients 1 --exp_code FL_1_clients --no_verbose --split_dir chimera_3_10_0.1_merged --seed 1 --num_rounds 1 --phase_length 15 --early_stopping --es_patience 5 --es_stop_epoch 40 --num_stages 1 --max_epochs 150
+# no_phases, weighted sampling
+
+# python federated_train.py --gpus 2 --num_clients 3 --exp_code FL_baseline_no_paramtuning --no_verbose --split_dir chimera_3_5_2_0.2_0.5_0.5_1_stage --augmentations 0=features_1536_fixed 1=features_1536_fixed 2=Aug0_brightness_460 --num_rounds 40 --phase_length 15 --early_stopping --es_patience 5 --es_stop_epoch 40 --num_stages 1 --max_epochs 150

@@ -202,7 +202,7 @@ def train(model, train_split, val_split, args, cur, device, round_num=None, use_
         #     if hasattr(model, 'fusion_net'):
         #         model.fusion_net.requires_grad_(phase == 'fusion')
         #         model.classifier.requires_grad_(phase == 'fusion')
-        train_loss, f1, features_list, labels_list = train_loop_clam(epoch, model, train_loader, optimizer,args.bag_weight, writer, loss_fn, verbose=verbose, phase=phase, device=device, prototype=prototype, brs_samples=brs_samples, no_training=no_training, strictness=args.strictness, args=args)
+        train_loss, f1, features_list, labels_list, slide_ids = train_loop_clam(epoch, model, train_loader, optimizer,args.bag_weight, writer, loss_fn, verbose=verbose, phase=phase, device=device, prototype=prototype, brs_samples=brs_samples, no_training=no_training, strictness=args.strictness, args=args)
         stop = validate_clam(cur=cur, epoch=epoch, model=model, loader=val_loader, n_classes=args.n_classes, 
             early_stopping=early_stopping, writer=writer, results_dir=args.results_dir, verbose=verbose, scheduler=scheduler, phase=phase, device=device, loss_fn=loss_fn)
 
@@ -214,7 +214,7 @@ def train(model, train_split, val_split, args, cur, device, round_num=None, use_
         writer.flush()
         writer.close()  # Properly close the writer to ensure data persistence
         
-    return train_loss, f1, features_list, labels_list
+    return train_loss, f1, features_list, labels_list, slide_ids
 
 def apply_model(loader_data, model, testing=False, plot_coords = False, device=None):
     data, label, coords, clinical_data, slide_id = loader_data
@@ -236,7 +236,7 @@ def apply_model(loader_data, model, testing=False, plot_coords = False, device=N
     else:
         results = model(data, label=label, coords=coords, clinical_features=clinical_data, instance_eval=True, slide_id=slide_id, plot_coords=plot_coords)
 
-    return results, label
+    return results, label, slide_id
 
 def train_loop_clam(epoch, model, loader, optimizer, bag_weight, writer = None, loss_fn = None, verbose = True, phase = None, device=None, prototype:Prototype=None, brs_samples:list[list]=None, no_training=False, strictness=1.0, args=None):
     # print information about loader data to compare with other experiment:
@@ -252,6 +252,7 @@ def train_loop_clam(epoch, model, loader, optimizer, bag_weight, writer = None, 
     train_inst_loss = 0.
     inst_count = 0
     
+    all_slide_ids = []
     all_labels = []
     all_probs = []
     all_preds = []
@@ -302,13 +303,14 @@ def train_loop_clam(epoch, model, loader, optimizer, bag_weight, writer = None, 
         else:
             loader_data = next(loader_iter)
         
-            result_dict, label = apply_model(loader_data, model, plot_coords = False, device=device)
+            result_dict, label, slide_id = apply_model(loader_data, model, plot_coords = False, device=device)
 
             features_list.append(result_dict["concat_features"])
 
             logits, Y_prob, Y_hat, _, _ = result_dict['MM']
 
             all_labels.append(label.item())
+            all_slide_ids.append(slide_id)
             
             # MM
             if isinstance(loss_fn, nn.NLLLoss):
@@ -356,6 +358,12 @@ def train_loop_clam(epoch, model, loader, optimizer, bag_weight, writer = None, 
             w_mm = torch.exp(model.loss_weight_mm)
             w_clam = torch.exp(model.loss_weight_clam)
             w_cd = torch.exp(model.loss_weight_cd) if logits_cd is not None else 0.0
+            
+            # Add loss weights to txt file for logging
+            loss_weights_log_path = os.path.join(args.results_dir, "loss_weights.txt")
+            os.makedirs(os.path.dirname(loss_weights_log_path), exist_ok=True)
+            with open(loss_weights_log_path, 'a') as f:
+                f.write(f"{slide_id}: {model.loss_weight_mm}, {model.loss_weight_clam}, {model.loss_weight_cd}\n")
 
             
             # # redo:            
@@ -385,7 +393,7 @@ def train_loop_clam(epoch, model, loader, optimizer, bag_weight, writer = None, 
                 # Log weight to file
                 weights_log_path = os.path.join(args.results_dir, "prototype_weights.txt")
                 with open(weights_log_path, 'a') as f:
-                    f.write(f"{weight:.6f}, ")
+                    f.write(f"{slide_id}:{weight:.6f}\n")
                 
                 total_loss = total_loss * weight
        
@@ -394,6 +402,10 @@ def train_loop_clam(epoch, model, loader, optimizer, bag_weight, writer = None, 
         optimizer.zero_grad()
         total_loss.backward()
         optimizer.step()
+        
+    # print("All labels:", all_labels)
+    # print("Label distribution:", {l: all_labels.count(l) for l in set(all_labels)})
+    # print("All splid ids:", all_slide_ids)
         
 
     # calculate loss and error for epoch
@@ -411,7 +423,8 @@ def train_loop_clam(epoch, model, loader, optimizer, bag_weight, writer = None, 
         if verbose: print('\n')
 
     if verbose: print('Epoch: {}, train_loss_mm: {:.4f}, train_clustering_loss:  {:.4f}, train_error: {:.4f}'.format(epoch, train_loss_mm, train_inst_loss,  train_error))
-    return train_loss_mm, f1, features_list, all_labels
+    return train_loss_mm, f1, features_list, all_labels, all_slide_ids
+
 def validate(model, val_split, args, cur, device, round_num=None):
     if args.bag_loss == 'svm':
         from topk.svm import SmoothTop1SVM
@@ -454,7 +467,7 @@ def validate_clam(cur, epoch, model, loader, n_classes, early_stopping = None, w
     labels = np.zeros(len(loader))
     with torch.inference_mode():
         for batch_idx, loader_data in enumerate(loader):
-            result_dict, label = apply_model(loader_data, model, device=device)
+            result_dict, label, _ = apply_model(loader_data, model, device=device)
         
             logits, Y_prob, Y_hat, _, _ = result_dict['MM']
             
@@ -588,7 +601,7 @@ def test_clam(model, loader, device, args, results_dir=None, client_nr=None, n_c
     with torch.inference_mode():
         for batch_idx, loader_data in enumerate(loader):
 
-            result_dict, label = apply_model(loader_data, model, device=device, testing=True)
+            result_dict, label, _ = apply_model(loader_data, model, device=device, testing=True)
             logits, Y_prob, Y_hat, _, _ = result_dict['MM']
             
             if isinstance(loss_fn, nn.NLLLoss):

@@ -85,7 +85,7 @@ class SimpleStagesPieChartAnalyzer:
     def plot_stages_client_totals(self, save_path=None):
         """Plot pie charts showing train+val pool distribution for each client and stage (using fold 0 as representative)."""
         fig, axes = plt.subplots(self.num_stages, self.num_clients, 
-                               figsize=(6 * self.num_clients, 6 * self.num_stages))
+                               figsize=(4 * self.num_clients, 4.5 * self.num_stages))
         
         if self.num_stages == 1:
             axes = axes.reshape(1, -1)
@@ -141,19 +141,19 @@ class SimpleStagesPieChartAnalyzer:
                         autotext.set_fontweight('bold')
                         autotext.set_fontsize(12)
                     
-                    ax.set_title(f'Stage {stage_id}, Client {client_id}\nTrain+Val Pool Distribution\nTotal Samples: {total_client_samples} ({train_val_total} train+val, {test_total} test)', 
+                    ax.set_title(f'Stage {stage_id + 1}, Client {client_id + 1}\nTotal Samples: {total_client_samples} ({train_val_total} train+val, {test_total} test)', 
                                fontweight='bold', fontsize=12)
                     
                     # Add detailed counts as text below the pie chart
                     info_text = f"Train+Val Pool: BRS1={train_val_pool_counts['BRS1']}, BRS2={train_val_pool_counts['BRS2']}, BRS3={train_val_pool_counts['BRS3']}\n"
                     info_text += f"Test Set: BRS1={test_counts['BRS1']}, BRS2={test_counts['BRS2']}, BRS3={test_counts['BRS3']}"
                     
-                    ax.text(0, -1.5, info_text, ha='center', va='top', fontsize=10, 
+                    ax.text(0, -1.2, info_text, ha='center', va='top', fontsize=10, 
                            bbox=dict(boxstyle="round,pad=0.3", facecolor="lightgray", alpha=0.8))
                 else:
                     ax.text(0.5, 0.5, 'No Data', ha='center', va='center', 
                            transform=ax.transAxes, fontsize=12)
-                    ax.set_title(f'Stage {stage_id}, Client {client_id}')
+                    ax.set_title(f'Stage {stage_id + 1}, Client {client_id + 1}')
         
         plt.tight_layout()
         if save_path:
@@ -373,7 +373,9 @@ def main():
     # splits_dir = "/gris/gris-f/homelv/phempel/masterthesis/MM_flower/train_cfcd/splits/chimera_3_5_2_1_each_1_unbalanced_0.8_0.2_nocd_0.2"
     # splits_dir = "/gris/gris-f/homelv/phempel/masterthesis/MM_flower/train_cfcd/splits/chimera_3_5_2_0.2_1_0.5_0.5"
     # splits_dir = "/home/phempel/tmp_filerworkaround_phempel_nov_2025/train_cfcd/splits/chimera_3_5_2_0.2_0.8_0.2_1"
-    splits_dir = "/home/phempel/tmp_filerworkaround_phempel_nov_2025/train_cfcd/splits/chimera_3_5_2_0.2_0.7_0.3_1"
+    # splits_dir = "/gris/gris-f/homelv/phempel/masterthesis/MM_flower/train_cfcd/splits/chimera_3_5_2_0.2_0.7_0.3_1"
+    # splits_dir = "/gris/gris-f/homelv/phempel/masterthesis/MM_flower/train_cfcd/splits/chimera_3_5_2_0.1_5_unbalanced_0.2_0.3_0.5"
+    splits_dir = "/gris/gris-f/homelv/phempel/masterthesis/MM_flower/train_cfcd/splits/chimera_3_5_2_0.1_1_unbalanced_0.1_0.2_0.7"
     
     if not os.path.exists(splits_dir):
         print(f"Error: Splits directory not found: {splits_dir}")

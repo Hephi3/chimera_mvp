@@ -137,7 +137,7 @@ class CustomFedAvg(FedAvg):
             # log(WARNING, "No fit_metrics_aggregation_fn provided")
         
         
-        new_global_prototype = Prototype.from_prototypes(prototypes, weights=normed_weights, plot=True)
+        new_global_prototype = Prototype.from_prototypes(prototypes, weights=normed_weights, plot=False)
         # Adapt the global prototype towards the new global prototype
         if self.prototype_adaptation > 0:
             self.global_prototype.adapt_towards(new_global_prototype, self.prototype_adaptation)

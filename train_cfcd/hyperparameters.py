@@ -1,8 +1,10 @@
 import argparse
 
+manuel_execution = False
+
 def get_hyperparameters():
     parser = argparse.ArgumentParser(description='Configurations for WSI Training')
-    parser.add_argument('--gpus', type=int, nargs='+', required=True, help='gpu id(s) to use, e.g. --gpus 0 1 for multiple GPUs')
+    parser.add_argument('--gpus', type=int, nargs='+', required=manuel_execution, help='gpu id(s) to use, e.g. --gpus 0 1 for multiple GPUs')
     parser.add_argument('--folds', type=int, default=5, help='number of folds (default: 5)')
     parser.add_argument('--augmentation', type=str, default=None,
                     help='Client augmentation for all clients for the 2nd stage, e.g. features_1536_fixed_aug2_2_420')
@@ -11,6 +13,16 @@ def get_hyperparameters():
     parser.add_argument('--augmentations', nargs='*', default=["0=features_1536_fixed", "1=features_1536_fixed", "2=features_1536_fixed"],
                     help='Client augmentation mappings as key=value pairs, e.g., --augmentations 1=features_1536_fixed_aug2_2_420 2=features_1536_fixed_aug3_3_430')
     parser.add_argument('--num_stages', type=int, default=2, help='number of stages (default: 2)')
+    
+    parser.add_argument('--fedprox', action='store_true', default=False, help='use FedProx strategy instead of FedAvg')
+    parser.add_argument('--fedprox001', action='store_true', default=False, help='use FedProx strategy instead of FedAvg')
+    parser.add_argument('--fedprox005', action='store_true', default=False, help='use FedProx strategy instead of FedAvg')
+    parser.add_argument('--fedprox01', action='store_true', default=False, help='use FedProx strategy instead of FedAvg')
+    parser.add_argument('--fedprox10', action='store_true', default=False, help='use FedProx strategy instead of FedAvg')
+    parser.add_argument('--fedavgm', action='store_true', default=False, help='use FedAvgM strategy instead of FedAvg')
+    parser.add_argument('--fedavgm0105', action='store_true', default=False, help='use FedAvgM strategy instead of FedAvg')
+    parser.add_argument('--fedavgm0509', action='store_true', default=False, help='use FedAvgM strategy instead of FedAvg')
+    parser.add_argument('--fedavgm00105', action='store_true', default=False, help='use FedAvgM strategy instead of FedAvg')
     
     parser.add_argument('--method_global', action='store_true', default=False, help='enable prototype-based federated learning method')
     parser.add_argument('--method_local', action='store_true', default=False, help='enable prototype-based federated learning method')
@@ -67,8 +79,8 @@ def get_hyperparameters():
     parser.add_argument('--drop_out', type=float, default=0.5, help='dropout')
     parser.add_argument('--bag_loss', type=str, choices=['svm', 'ce'], default='ce',
                         help='slide-level classification loss function (default: ce)')
-    parser.add_argument('--exp_code', type=str, required=True, help='experiment name for saving results')
-    parser.add_argument('--weighted_sample', action='store_true', default=True, help='enable weighted sampling')
+    parser.add_argument('--exp_code', type=str, required=manuel_execution, help='experiment name for saving results')
+    parser.add_argument('--weighted_sample', action='store_true', default=False, help='enable weighted sampling') #TODO: Was true initially!
     parser.add_argument('--model_size', type=str, choices=['small', 'big', 'tiny'], default='tiny', help='size of model, does not affect mil')
     ### CLAM specific options
     parser.add_argument('--inst_loss', type=str, choices=['svm', 'ce', None], default='svm',

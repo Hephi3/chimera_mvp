@@ -92,9 +92,6 @@ class SimpleStagesPieChartAnalyzer:
         if self.num_clients == 1:
             axes = axes.reshape(-1, 1)
         
-        fig.suptitle('Train+Val Pool Distribution per Stage and Client', 
-                    fontsize=16, fontweight='bold')
-        
         for stage_id in range(self.num_stages):
             for client_id in range(self.num_clients):
                 ax = axes[stage_id, client_id]
@@ -368,6 +365,7 @@ def main():
     """Main function to run the stages analysis."""
     # Path to the stages splits directory - update this to your actual path
     splits_dir = "/gris/gris-f/homelv/phempel/masterthesis/MM_flower/train_cdcf/splits/chimera_3_5_2_0.1_1_unbalanced_0.1_0.2_0.7"
+    # splits_dir = "/gris/gris-f/homelv/phempel/masterthesis/MM_flower/train_cdcf/splits/chimera_3_5_2_0.2_5_unbalanced_0.2_0.3_0.5"
     
     if not os.path.exists(splits_dir):
         print(f"Error: Splits directory not found: {splits_dir}")

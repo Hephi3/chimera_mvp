@@ -3,7 +3,7 @@
 from flwr.client import NumPyClient
 from flwr.common import Context
 import torch
-from train_cfcd2.train_cfcd.utils.clam_utils import get_split_loader
+from utils.clam_utils import get_split_loader
 from utils.fl_utils import get_parameters, get_stage, load_data, set_parameters, get_model
 from utils.core_utils_simul_repr import test, train, validate
 from utils.method_repr_utils import PrototypeRepr
@@ -50,36 +50,53 @@ class FlowerClient(NumPyClient):
             proto_path = f"{self.args.results_dir}/prototypes/prototype_client_{self.partition_id}.json"
             if round_num == 1:
                 cd_data, wsi_l3_data, wsi_l2_data, wsi_l1_data = [], [], [], []
-                train_loader = get_split_loader(train_data, training=True, weighted = self.args.weighted_sample, device='cpu', args=self.args)
+                labels_list = []
+                train_loader = get_split_loader(train_data, training=True, weighted = self.args.weighted_sample, device=self.device, args=self.args)
                 loader_iter = iter(train_loader)
                 for i in range(len(train_loader)):
                     loader_data = next(loader_iter)
-                    data, _, _, clinical_data, _ = loader_data
+                    data, label, _, clinical_data, _ = loader_data
                     cd_data.append(clinical_data)
+                    labels_list.append(label)
                     # Extract WSI level features
                     wsi_l3_data.append(data[0])
                     wsi_l2_data.append(data[1])
                     wsi_l1_data.append(data[2])
                     
-                    print("Lenghts of data entries:", len(cd_data[-1]), len(wsi_l3_data[-1]), len(wsi_l2_data[-1]), len(wsi_l1_data[-1]))
                 
-                # if self.args.debug:
-                #     features_arr = np.stack([f.detach().cpu().numpy() if isinstance(f, torch.Tensor) else np.array(f) for f in features_list])
-                #     labels_arr = np.array(labels_list)
-                #     np.savez(f"{self.args.results_dir}/debug_features_client_{self.partition_id}_round_0.npz",
-                #             features=features_arr, labels=labels_arr)
-                self.prototype = PrototypeRepr.from_data(cd_data, wsi_l3_data, wsi_l2_data, wsi_l1_data)#, plot=True)
-                # if self.args.num_sampled > 0:
+                if self.args.debug:
+                    features_list = [clinical_data, data[0], data[1], data[2]]
+                    features_arr = np.stack([f.detach().cpu().numpy() if isinstance(f, torch.Tensor) else np.array(f) for f in features_list])
+                    labels_arr = np.array(labels_list)
+                    np.savez(f"{self.args.results_dir}/debug_features_client_{self.partition_id}_round_0.npz",
+                            features=features_arr, labels=labels_arr)
                     
-                #     features_arr = np.array([f.detach().cpu().numpy() if isinstance(f, torch.Tensor) else np.array(f) for f in features_list])
-                #     labels_arr = np.array(labels_list)
-                #     print("Prototypes based on number of samples per class:", len(features_arr[labels_arr==0]), len(features_arr[labels_arr==1]), len(features_arr[labels_arr==2]))
-                #     prototypes_brs1 = Prototype.from_data(features_arr[labels_arr==0])
-                #     prototypes_brs2 = Prototype.from_data(features_arr[labels_arr==1])
-                #     prototypes_brs3 = Prototype.from_data(features_arr[labels_arr==2])
-                #     prototypes_brs1.save(f"{self.args.results_dir}/prototypes/prototype_client_{self.partition_id}_brs1.json")
-                #     prototypes_brs2.save(f"{self.args.results_dir}/prototypes/prototype_client_{self.partition_id}_brs2.json")
-                #     prototypes_brs3.save(f"{self.args.results_dir}/prototypes/prototype_client_{self.partition_id}_brs3.json")
+                self.prototype = PrototypeRepr.from_data(cd_data, wsi_l3_data, wsi_l2_data, wsi_l1_data)#, plot=True)
+                if self.args.num_sampled > 0:
+                    
+                    # Filter data by labels using list comprehension
+                    cd_brs1 = [cd for cd, lbl in zip(cd_data, labels_list) if lbl == 0]
+                    wsi_l3_brs1 = [wsi for wsi, lbl in zip(wsi_l3_data, labels_list) if lbl == 0]
+                    wsi_l2_brs1 = [wsi for wsi, lbl in zip(wsi_l2_data, labels_list) if lbl == 0]
+                    wsi_l1_brs1 = [wsi for wsi, lbl in zip(wsi_l1_data, labels_list) if lbl == 0]
+                    
+                    cd_brs2 = [cd for cd, lbl in zip(cd_data, labels_list) if lbl == 1]
+                    wsi_l3_brs2 = [wsi for wsi, lbl in zip(wsi_l3_data, labels_list) if lbl == 1]
+                    wsi_l2_brs2 = [wsi for wsi, lbl in zip(wsi_l2_data, labels_list) if lbl == 1]
+                    wsi_l1_brs2 = [wsi for wsi, lbl in zip(wsi_l1_data, labels_list) if lbl == 1]
+                    
+                    cd_brs3 = [cd for cd, lbl in zip(cd_data, labels_list) if lbl == 2]
+                    wsi_l3_brs3 = [wsi for wsi, lbl in zip(wsi_l3_data, labels_list) if lbl == 2]
+                    wsi_l2_brs3 = [wsi for wsi, lbl in zip(wsi_l2_data, labels_list) if lbl == 2]
+                    wsi_l1_brs3 = [wsi for wsi, lbl in zip(wsi_l1_data, labels_list) if lbl == 2]
+                    
+                    # print("Prototypes based on number of samples per class:", len(cd_brs1), len(cd_brs2), len(cd_brs3))
+                    prototypes_brs1 = PrototypeRepr.from_data(cd_brs1, wsi_l3_brs1, wsi_l2_brs1, wsi_l1_brs1, label=0)
+                    prototypes_brs2 = PrototypeRepr.from_data(cd_brs2, wsi_l3_brs2, wsi_l2_brs2, wsi_l1_brs2, label=1)
+                    prototypes_brs3 = PrototypeRepr.from_data(cd_brs3, wsi_l3_brs3, wsi_l2_brs3, wsi_l1_brs3, label=2)
+                    prototypes_brs1.save(f"{self.args.results_dir}/prototypes/prototype_client_{self.partition_id}_brs1.json")
+                    prototypes_brs2.save(f"{self.args.results_dir}/prototypes/prototype_client_{self.partition_id}_brs2.json")
+                    prototypes_brs3.save(f"{self.args.results_dir}/prototypes/prototype_client_{self.partition_id}_brs3.json")
             else:
                 if self.args.method_global or self.args.method_local:
                     self.prototype = PrototypeRepr.load(proto_path)
@@ -112,11 +129,11 @@ class FlowerClient(NumPyClient):
         print("LEGNTH FEATURES LIST:", len(repr_list), " LENGTH LABELS LIST:", len(labels_list))
         
         
-        # if self.args.debug:
-        #     repr_arr = np.stack([f if isinstance(f, torch.Tensor) else np.array(f) for f in repr_list])
-        #     labels_arr = np.array(labels_list)
-        #     np.savez(f"{self.args.results_dir}/debug_features_client_{self.partition_id}_round_{round_num}.npz",
-        #             features=repr_arr, labels=labels_arr)
+        if self.args.debug:
+            repr_arr = np.stack([f if isinstance(f, torch.Tensor) else np.array(f) for f in repr_list])
+            labels_arr = np.array(labels_list)
+            np.savez(f"{self.args.results_dir}/debug_features_client_{self.partition_id}_round_{round_num}.npz",
+                    features=repr_arr, labels=labels_arr)
 
         test(self.net,  self.test_splits[0], self.args, self.device, results_dir=self.args.results_dir, client_nr=self.partition_id, round_nr=round_num, stage=0)
         if stage == 1:
@@ -130,28 +147,44 @@ class FlowerClient(NumPyClient):
             self.prototype = new_prototype
             self.prototype.save(proto_path)
         
-        # if self.args.num_sampled > 0:
-        #     old_prototypes_brs1 = Prototype.load(f"{self.args.results_dir}/prototypes/prototype_client_{self.partition_id}_brs1.json")
-        #     old_prototypes_brs2 = Prototype.load(f"{self.args.results_dir}/prototypes/prototype_client_{self.partition_id}_brs2.json")
-        #     old_prototypes_brs3 = Prototype.load(f"{self.args.results_dir}/prototypes/prototype_client_{self.partition_id}_brs3.json")
+        if self.args.num_sampled > 0:
+            old_prototypes_brs1 = PrototypeRepr.load(f"{self.args.results_dir}/prototypes/prototype_client_{self.partition_id}_brs1.json")
+            old_prototypes_brs2 = PrototypeRepr.load(f"{self.args.results_dir}/prototypes/prototype_client_{self.partition_id}_brs2.json")
+            old_prototypes_brs3 = PrototypeRepr.load(f"{self.args.results_dir}/prototypes/prototype_client_{self.partition_id}_brs3.json")
             
-        #     prototypes_brs1 = Prototype.from_data(np.array([f.detach().cpu().numpy() if isinstance(f, torch.Tensor) else np.array(f) for f,l in zip(features_list, labels_list) if l==0]))
-        #     prototypes_brs2 = Prototype.from_data(np.array([f.detach().cpu().numpy() if isinstance(f, torch.Tensor) else np.array(f) for f,l in zip(features_list, labels_list) if l==1]))
-        #     prototypes_brs3 = Prototype.from_data(np.array([f.detach().cpu().numpy() if isinstance(f, torch.Tensor) else np.array(f) for f,l in zip(features_list, labels_list) if l==2]))
+            # Filter data by labels
+            cd_brs1 = [cd for cd, lbl in zip(repr_list[0], labels_list) if lbl == 0]
+            wsi_l3_brs1 = [wsi for wsi, lbl in zip(repr_list[1], labels_list) if lbl == 0]
+            wsi_l2_brs1 = [wsi for wsi, lbl in zip(repr_list[2], labels_list) if lbl == 0]
+            wsi_l1_brs1 = [wsi for wsi, lbl in zip(repr_list[3], labels_list) if lbl == 0]
             
-        #     prototypes_brs1.adapt_towards(old_prototypes_brs1, adaptation_rate=self.args.proto_adaptation_rate_client)
-        #     prototypes_brs2.adapt_towards(old_prototypes_brs2, adaptation_rate=self.args.proto_adaptation_rate_client)
-        #     prototypes_brs3.adapt_towards(old_prototypes_brs3, adaptation_rate=self.args.proto_adaptation_rate_client)
+            cd_brs2 = [cd for cd, lbl in zip(repr_list[0], labels_list) if lbl == 1]
+            wsi_l3_brs2 = [wsi for wsi, lbl in zip(repr_list[1], labels_list) if lbl == 1]
+            wsi_l2_brs2 = [wsi for wsi, lbl in zip(repr_list[2], labels_list) if lbl == 1]
+            wsi_l1_brs2 = [wsi for wsi, lbl in zip(repr_list[3], labels_list) if lbl == 1]
             
-        #     prototypes_brs1.save(f"{self.args.results_dir}/prototypes/prototype_client_{self.partition_id}_brs1.json")
-        #     prototypes_brs2.save(f"{self.args.results_dir}/prototypes/prototype_client_{self.partition_id}_brs2.json")
-        #     prototypes_brs3.save(f"{self.args.results_dir}/prototypes/prototype_client_{self.partition_id}_brs3.json")
+            cd_brs3 = [cd for cd, lbl in zip(repr_list[0], labels_list) if lbl == 2]
+            wsi_l3_brs3 = [wsi for wsi, lbl in zip(repr_list[1], labels_list) if lbl == 2]
+            wsi_l2_brs3 = [wsi for wsi, lbl in zip(repr_list[2], labels_list) if lbl == 2]
+            wsi_l1_brs3 = [wsi for wsi, lbl in zip(repr_list[3], labels_list) if lbl == 2]
+            
+            prototypes_brs1 = PrototypeRepr.from_data(cd_brs1, wsi_l3_brs1, wsi_l2_brs1, wsi_l1_brs1, label=0)
+            prototypes_brs2 = PrototypeRepr.from_data(cd_brs2, wsi_l3_brs2, wsi_l2_brs2, wsi_l1_brs2, label=1)
+            prototypes_brs3 = PrototypeRepr.from_data(cd_brs3, wsi_l3_brs3, wsi_l2_brs3, wsi_l1_brs3, label=2)
+            
+            prototypes_brs1.adapt_towards(old_prototypes_brs1, adaptation_rate=self.args.proto_adaptation_rate_client)
+            prototypes_brs2.adapt_towards(old_prototypes_brs2, adaptation_rate=self.args.proto_adaptation_rate_client)
+            prototypes_brs3.adapt_towards(old_prototypes_brs3, adaptation_rate=self.args.proto_adaptation_rate_client)
+            
+            prototypes_brs1.save(f"{self.args.results_dir}/prototypes/prototype_client_{self.partition_id}_brs1.json")
+            prototypes_brs2.save(f"{self.args.results_dir}/prototypes/prototype_client_{self.partition_id}_brs2.json")
+            prototypes_brs3.save(f"{self.args.results_dir}/prototypes/prototype_client_{self.partition_id}_brs3.json")
             
 
         metrics = {"train_loss": train_loss, "f1": f1, "partition_id": self.partition_id}
         
-        # if self.args.num_sampled > 0:
-        #     metrics.update({"prototype_brs1": prototypes_brs1.serialize(), "prototype_brs2": prototypes_brs2.serialize(), "prototype_brs3": prototypes_brs3.serialize()})
+        if self.args.num_sampled > 0:
+            metrics.update({"prototype_brs1": prototypes_brs1.serialize(), "prototype_brs2": prototypes_brs2.serialize(), "prototype_brs3": prototypes_brs3.serialize()})
         if self.args.method_global:
             metrics.update({"prototype": self.prototype.serialize()})
         

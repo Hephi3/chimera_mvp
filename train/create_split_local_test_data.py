@@ -110,8 +110,8 @@ if __name__ == "__main__":
     num_clients = 3
     test_p = 0.1
     balance = True
-    seed = 4
-    folds = 5
+    seed = 1
+    folds = 10
     output_dir = "splits/"
 
     splits_generator = create_k_clients_cross_fold_splits(num_clients=num_clients, test_p=test_p, folds=folds, balance=balance, seed=seed, verbose=True, as_filename=True)

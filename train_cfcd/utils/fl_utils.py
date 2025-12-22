@@ -43,8 +43,8 @@ def load_data(partition_id, args):
         args.augmentations = {i: "features_1536_fixed" for i in range(args.num_clients)}
     
     client_dataset = MM_Multi_Scale_Dataset(
-        csv_path = '/home/phempel/tmp_filerworkaround_phempel_nov_2025/train_cfcd/train_cfcd/data/chimera_new.csv',
-        # csv_path = '/gris/gris-f/homelv/phempel/masterthesis/MMFL/data/chimera_new.csv',
+        # csv_path = '/home/phempel/tmp_filerworkaround_phempel_nov_2025/train_cfcd/train_cfcd/data/chimera_new.csv',
+        csv_path = '/gris/gris-f/homelv/phempel/masterthesis/MMFL/data/chimera_new.csv',
         return_coords = args.return_coords,
         data_dir = f"/local/scratch/phempel/chimera/{args.augmentations[partition_id]}",
         # default="/local/scratch/phempel/chimera/features_1536",
@@ -72,7 +72,10 @@ def load_data(partition_id, args):
     if args.num_stages == 2:# args.folds > 1 and
         train_dataset, val_dataset, test_dataset = client_dataset.return_splits(csv_path = '{}/splits_{}_{}_{}.csv'.format(args.split_dir, partition_id + args.use_split_k, args.fold, 0))
     else:#elif args.folds > 1:
-        train_dataset, val_dataset, test_dataset = client_dataset.return_splits(csv_path = '{}/splits_{}_{}.csv'.format(args.split_dir, partition_id + args.use_split_k, args.fold))
+        if args.num_clients > 1:
+            train_dataset, val_dataset, test_dataset = client_dataset.return_splits(csv_path = '{}/splits_{}_{}.csv'.format(args.split_dir, partition_id + args.use_split_k, args.fold))
+        else:
+            train_dataset, val_dataset, test_dataset = client_dataset.return_splits(csv_path = '{}/splits_{}.csv'.format(args.split_dir, args.fold))
     # elif args.num_stages == 2:
     #     train_dataset, val_dataset, test_dataset = client_dataset.return_splits(csv_path = '{}/splits_{}_{}.csv'.format(args.split_dir, partition_id + args.use_split_k, 0))
     # else:

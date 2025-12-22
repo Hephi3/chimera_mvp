@@ -1,7 +1,10 @@
 import argparse
 
+
+
 def get_hyperparameters():
     parser = argparse.ArgumentParser(description='Configurations for WSI Training')
+    
     parser.add_argument('--gpus', type=int, nargs='+', required=True, help='gpu id(s) to use, e.g. --gpus 0 1 for multiple GPUs')
     parser.add_argument('--folds', type=int, default=5, help='number of folds (default: 5)')
     parser.add_argument('--augmentations', nargs='*', default=None,
@@ -17,7 +20,7 @@ def get_hyperparameters():
     parser.add_argument('--es_patience', type=int, default=4, help='early stopping patience (default: 4)')
     parser.add_argument('--es_stop_epoch', type=int, default=2, help='minimum number of epochs before early stopping can occur (default: 2)')
     parser.add_argument('--data_root_dir', type=str, 
-                        default="/local/scratch/phempel/chimera/features_1536",
+                        default="/local/scratch/phempel/chimera/features_1536_fixed",
                         help='data directory')
     parser.add_argument('--multi_seed', type=int, nargs='+', help='list of seeds for experiments with multiple runs per client number')
     parser.add_argument('--embed_dim', type=int, default=1536)

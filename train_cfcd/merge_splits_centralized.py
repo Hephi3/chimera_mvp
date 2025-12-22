@@ -83,7 +83,7 @@ def merge_splits_to_centralized(input_dir, output_dir, num_clients=3, num_folds=
             })
             
             # Save centralized split
-            output_file = os.path.join(output_dir, f"splits_0_{fold_id}_{stage}.csv")
+            output_file = os.path.join(output_dir, f"splits_{fold_id}_{stage}.csv")
             centralized_df.to_csv(output_file)
             
             print(f"  Saved centralized fold {fold_id}: {len(all_train)} train, {len(all_val)} val, {len(all_test)} test samples")
@@ -94,10 +94,10 @@ def merge_splits_to_centralized(input_dir, output_dir, num_clients=3, num_folds=
 
 def main():
     # Define paths
-    base_dir = "/home/phempel/tmp_filerworkaround_phempel_nov_2025/train_cfcd/train_cfcd/splits"
+    base_dir = "/gris/gris-f/homelv/phempel/masterthesis/MM_flower/train_cfcd/splits"
     for i in range(1, 6):
-        input_dir = os.path.join(base_dir, f"chimera_3_5_2_same_1_each_balanced_0.5_0.5_nocd_{i}")
-        output_dir = os.path.join(base_dir, f"chimera_3_5_2_same_1_each_balanced_0.5_0.5_nocd_merged_{i}")
+        input_dir = os.path.join(base_dir, f"chimera_3_5_2_0.2_0.5_0.5_{i}")
+        output_dir = os.path.join(base_dir, f"chimera_3_5_2_0.2_0.5_0.5_merged_{i}")
         
         # Check if input directory exists
         if not os.path.exists(input_dir):

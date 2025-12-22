@@ -110,7 +110,7 @@ def main():
                 print(f"  {file}")
         
         # Merge splits
-        merge_splits_to_centralized(input_dir, output_dir)
+        merge_splits_to_centralized(input_dir, output_dir, num_clients=3, num_folds=5)
         
         # Verify output
         print(f"\nVerification - Files created in output directory:")

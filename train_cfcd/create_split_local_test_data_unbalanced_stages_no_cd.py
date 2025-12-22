@@ -145,10 +145,10 @@ if __name__ == "__main__":
     num_clients = 3
     test_p = 0.2
     balance = True
-    seed = 10
+    seed = 5
     folds = 5
     stages = 2
-    brs3_balances =  [0.5, 0.5]
+    brs3_balances =  [0.75, 0.25]
     assert sum(brs3_balances) == 1.0, "Balances must sum to 1.0"
     output_dir = "splits/"
 

@@ -25,23 +25,35 @@ class PrototypeRepr:
     
     @classmethod
     def from_data(cls, cd_data, wsi_l3_data, wsi_l2_data, wsi_l1_data, label=None):#, plot=False):
-        datas = [cd_data, wsi_l3_data, wsi_l2_data, wsi_l1_data]
+        # Calculate patch counts
         lens_l3 = [len(d) for d in wsi_l3_data]
         lens_l2 = [len(d) for d in wsi_l2_data]
         lens_l1 = [len(d) for d in wsi_l1_data]
         num_l3_patches = sum(lens_l3)//len(lens_l3) if len(lens_l3) > 0 else 0
         num_l2_patches = sum(lens_l2)//len(lens_l2) if len(lens_l2) > 0 else 0
         num_l1_patches = sum(lens_l1)//len(lens_l1) if len(lens_l1) > 0 else 0
-        means = []
-        vars = []
-        for data in datas:
-            data_np = np.stack([x.cpu().detach().numpy().reshape(-1) if isinstance(x, torch.Tensor) else x for x in data])
-            mean = np.mean(data_np, axis=0).reshape(-1)
-            var = np.var(data_np, axis=0, ddof=1).reshape(-1)
-            means.append(mean)
-            vars.append(var)
-        cd_mean, wsi_l3_mean, wsi_l2_mean, wsi_l1_mean = means
-        cd_var, wsi_l3_var, wsi_l2_var, wsi_l1_var = vars
+        
+        # Process CD data (each entry is a single vector)
+        cd_data_np = np.stack([x.cpu().detach().numpy() if isinstance(x, torch.Tensor) else x for x in cd_data])
+        cd_mean = np.mean(cd_data_np, axis=0).reshape(-1)
+        cd_var = np.var(cd_data_np, axis=0, ddof=1).reshape(-1)
+        
+        # Process WSI data (each entry is a list of patches, flatten all patches together)
+        wsi_l3_flat = [patch.cpu().detach().numpy() if isinstance(patch, torch.Tensor) else patch for sample in wsi_l3_data for patch in sample]
+        wsi_l2_flat = [patch.cpu().detach().numpy() if isinstance(patch, torch.Tensor) else patch for sample in wsi_l2_data for patch in sample]
+        wsi_l1_flat = [patch.cpu().detach().numpy() if isinstance(patch, torch.Tensor) else patch for sample in wsi_l1_data for patch in sample]
+        
+        wsi_l3_np = np.stack(wsi_l3_flat)
+        wsi_l2_np = np.stack(wsi_l2_flat)
+        wsi_l1_np = np.stack(wsi_l1_flat)
+        
+        wsi_l3_mean = np.mean(wsi_l3_np, axis=0).reshape(-1)
+        wsi_l3_var = np.var(wsi_l3_np, axis=0, ddof=1).reshape(-1)
+        wsi_l2_mean = np.mean(wsi_l2_np, axis=0).reshape(-1)
+        wsi_l2_var = np.var(wsi_l2_np, axis=0, ddof=1).reshape(-1)
+        wsi_l1_mean = np.mean(wsi_l1_np, axis=0).reshape(-1)
+        wsi_l1_var = np.var(wsi_l1_np, axis=0, ddof=1).reshape(-1)
+        
         return cls(cd_mean, cd_var, wsi_l3_mean, wsi_l3_var, wsi_l2_mean, wsi_l2_var, wsi_l1_mean, wsi_l1_var, num_l3_patches, num_l2_patches, num_l1_patches, label=label)
 
 
@@ -80,9 +92,9 @@ class PrototypeRepr:
         wsi_l2_var = np.average(wsi_l2_vars, axis=0, weights=weights).reshape(-1)
         wsi_l1_mean = np.average(wsi_l1_means, axis=0, weights=weights).reshape(-1)
         wsi_l1_var = np.average(wsi_l1_vars, axis=0, weights=weights).reshape(-1)
-        num_l3_patches = np.average(num_l3_patches, axis=0, weights=weights).reshape(-1)
-        num_l2_patches = np.average(num_l2_patches, axis=0, weights=weights).reshape(-1)
-        num_l1_patches = np.average(num_l1_patches, axis=0, weights=weights).reshape(-1)
+        num_l3_patches = int(np.average(num_l3_patches, axis=0, weights=weights))
+        num_l2_patches = int(np.average(num_l2_patches, axis=0, weights=weights))
+        num_l1_patches = int(np.average(num_l1_patches, axis=0, weights=weights))
 
         label = labels[0] if all(l == labels[0] for l in labels) else None
         

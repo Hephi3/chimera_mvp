@@ -211,6 +211,7 @@ def plot_global_prototype_and_prototypes(global_prototype, prototypes):
     plt.ylabel("PC2")
     plt.tight_layout()
     plt.show()
+    plt.close()  # Close the figure to free memory
     
 
 # def generate_prototype_of_prototypes():

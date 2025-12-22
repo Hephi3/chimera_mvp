@@ -5,7 +5,7 @@ import os
 
 # internal imports
 
-from federated_train import main
+# from federated_train import main
 
 # pytorch imports
 import torch

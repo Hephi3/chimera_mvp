@@ -831,6 +831,7 @@ def plot_crossfold_group_comparison(experiment_groups: dict, submodel: str = 'MM
         if folds is None:
             # Use the first experiment to determine available folds
             available_folds = get_available_folds(experiment_list[0])
+            print("AVAILABLE FOLDS", available_folds)
             if not available_folds:
                 print(f"Warning: No folds found for experiments in group {group_name}")
                 continue
@@ -899,6 +900,7 @@ def plot_crossfold_group_comparison(experiment_groups: dict, submodel: str = 'MM
             for fold_num in group_data['folds']:
                 try:
                     client_data, server_data = tensorboard_to_datadict_federated(exp_name, fold_num)
+                    print("Server DATA:", server_data)
                     for client_id in client_data.keys():
                         global_all_rounds.update(client_data[client_id].keys())
                         for round_num in client_data[client_id].keys():
@@ -999,7 +1001,7 @@ def plot_crossfold_group_comparison(experiment_groups: dict, submodel: str = 'MM
     
     suffix = "_".join(suffix_parts)
     group_names_clean = "_vs_".join([name.replace("_", "-") for name in all_group_data.keys()])
-    plot_path = os.path.join(ROOT_RESULTS, f"crossfold_group_comparison.png")
+    plot_path = os.path.join(ROOT_RESULTS, args.name if hasattr(args, 'name') and args.name else f"crossfold_group_comparison.png")
     plt.savefig(plot_path, dpi=300, bbox_inches='tight')
     print(f"Cross-fold group comparison plot saved to {plot_path}")
     plt.show()
@@ -1025,6 +1027,8 @@ if __name__ == "__main__":
                        help='Do not show standard deviation (overrides --show_std)')
     parser.add_argument('--folds', nargs='+', type=int,
                        help='Specific fold numbers to include (default: use all available)')
+    parser.add_argument('--name', type=str,
+                       help='Name for the output plot file (optional)')
     
     args = parser.parse_args()
     
@@ -1085,3 +1089,5 @@ if __name__ == "__main__":
 # python plot_crossfold_group_comparison.py --groups '{"No Phases": ["nda_no_phases_s1", "nda_no_phases_s2", "nda_no_phases_s3", "nda_no_phases_sp2_s1", "nda_no_phases_sp2_s2", "nda_no_phases_sp2_s3", "nda_no_phases_sp3_s1", "nda_no_phases_sp3_s2", "nda_no_phases_sp3_s3", "nda_no_phases_sp4_s1", "nda_no_phases_sp4_s2", "nda_no_phases_sp4_s3", "nda_no_phases_sp5_s1", "nda_no_phases_sp5_s2", "nda_no_phases_sp5_s3"],"Random": ["Random_s1","Random_s2","Random_s3", "Random_sp2_s1", "Random_sp2_s2", "Random_sp2_s3", "Random_sp3_s1","Random_sp3_s2","Random_sp3_s3", "Random_sp4_s1","Random_sp4_s2","Random_sp4_s3", "Random_sp5_s1","Random_sp5_s2","Random_sp5_s3"]}' --submodel MM --metric_filter all --show_full_training --smooth_window 5 --show_std
 
 # python plot_crossfold_group_comparison.py --groups '{"No Phases": ["nda_no_phases_s1", "nda_no_phases_s2", "nda_no_phases_s3"], "No Phases Long": ["nda_no_phases_3ep_s1", "nda_no_phases_3ep_s2", "nda_no_phases_3ep_s3"], "No Phases 2 Epochs": ["nda_no_phases_2ep_s1", "nda_no_phases_2ep_s2", "nda_no_phases_2ep_s3"], "2:10, 5:3, 2": ["nda_no_phases_epsteps2:10_5:3_2_s1", "nda_no_phases_epsteps2:10_5:3_2_s2", "nda_no_phases_epsteps2:10_5:3_2_s3"], "1:10, 2:5, 3": ["nda_no_phases_epsteps1:10_2:5_3_s1", "nda_no_phases_epsteps1:10_2:5_3_s2", "nda_no_phases_epsteps1:10_2:5_3_s3"], "No Phases 1 Epoch": ["nda_no_phases_1ep_s1", "nda_no_phases_1ep_s2", "nda_no_phases_1ep_s3"]}' --submodel MM --metric_filter all --show_full_training --smooth_window 5 --show_std --show_individual_clients
+
+# python plot_crossfold_group_comparison.py --groups '{"FL Centralized (new setup)": ["FL_1_clients_s1"], "FL 3 clients (new setup)": ["FL_3_clients_s1"]}' --submodel MM --metric_filter all --show_full_training --smooth_window 5 --show_std --show_individual_clients --name "FL_Centralized_NewSetup"

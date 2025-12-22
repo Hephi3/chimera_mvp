@@ -10,18 +10,23 @@ from pathlib import Path
 
 def parse_weights_file(filepath):
     """Parse the prototype_weights.txt file."""
+    slide_ids = []
     weights = []
     
     with open(filepath, 'r') as f:
-        content = f.read().strip()
-        # Split by comma and convert to floats
-        weight_values = [float(x.strip()) for x in content.split(',') if x.strip()]
-        weights = weight_values
+        for line in f:
+            line = line.strip()
+            if line and ':' in line:
+                # Parse slide_id:weight format
+                slide_id, weight = line.split(':', 1)
+                slide_ids.append(slide_id.strip())
+                weights.append(float(weight.strip()))
     
     # Create synthetic epoch/batch/label data since the file only contains weights
     num_weights = len(weights)
     
     return {
+        'slide_ids': slide_ids,
         'epoch': np.zeros(num_weights, dtype=int),  # All same epoch
         'batch': np.arange(num_weights),  # Sequential batches
         'label': np.zeros(num_weights, dtype=int),  # Unknown labels

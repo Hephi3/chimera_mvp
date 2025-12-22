@@ -110,7 +110,10 @@ def run_experiment(args):
     args.augmentations = augmentations
 
     for i in tqdm(range(args.folds), desc='Folds'):
-    # for i in [2,3,4]:
+    # for i in [0,2,3,4]:
+        # if args.fedprox and args.seed == 3 and i < 4 and "sp1" in args.exp_code:
+        #     print("Skipping fold {} for FedProx with seed 3 to reduce runtime".format(i))
+        #     continue  # Skip certain combinations for FedProx and seed 3 to reduce runtime
         args.fold = i
     
         init_experiment(device=DEVICE, args=args)
@@ -137,7 +140,10 @@ if __name__ == "__main__":
         import time
         # pairs = [(i + 1, s + 1) for i in range(5) for s in range(3)]
         # pairs = [(i + 1, s + 1) for s in range(2,-1,-1) for i in range(5)]
-        pairs = [(i + 1, 3) for i in range(5)]
+        # pairs = [(i + 1, 3) for i in range(5)]
+        # pairs = [(3, 3)]
+        pairs = [(i + 1, s) for s in [3, 2, 1] for i in range(5)]
+        # pairs = [(i + 1, s) for s in [2, 1] for i in range(5)]
         # for i in range(5):
             # split = i+1
             # for s in range(3):
@@ -165,7 +171,12 @@ if __name__ == "__main__":
     
 # python federated_train.py --gpus 1 --num_clients 3 --exp_code 3_clients --no_verbose --split_dir chimera_3_0.1 --num_rounds 3 --seed 1
 
+# vs 04.12.
+# python federated_train.py --gpus 1 --num_clients 1 --exp_code 1_client --no_verbose --split_dir chimera_1_10_0.1 --num_rounds 3 --seed 1
+
 # Domain shift only (2 stages as default):
 # python federated_train.py --gpus 2 --num_clients 3 --exp_code CF --no_verbose --split_dir chimera_3_5_2_0.1_1 --num_rounds 3 --seed 1 --augmentation 'features_1536_fixed_aug3_3_430' --num_rounds 20
 
-# For CD use adapted split
+
+
+# python federated_train.py --gpus 2 --num_clients 3 --exp_code art_CFCDID_no_weighted_training --no_verbose --split_dir chimera_3_5_2_0.2_0.5_0.5  --augmentations 0=features_1536_fixed 1=features_1536_fixed 2=features_1536_fixed --debug

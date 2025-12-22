@@ -289,15 +289,26 @@ def train_loop_clam(epoch, model, loader, optimizer, bag_weight, writer = None, 
     # for batch_idx, loader_data in enumerate(loader):
         if batch_idx in brs_indices:
             print("Using BRS sampled data for this step.")
-            data, label = shuffled_brs_samples.pop(0)
-            data = torch.tensor(data, dtype=torch.float32).to(device)
-            label = torch.tensor([label], dtype=torch.long).to(device)
+            sample_dict, label = shuffled_brs_samples.pop(0)
             
-            results = model.forward_sample(data)
+            # Extract components from sample dict and convert to tensors
+            cd_sample = torch.tensor(sample_dict["cd"], dtype=torch.float32).to(device).unsqueeze(0)  # Add batch dim
+            wsi_l3_sample = torch.tensor(sample_dict["wsi_l3"], dtype=torch.float32).to(device)
+            wsi_l2_sample = torch.tensor(sample_dict["wsi_l2"], dtype=torch.float32).to(device)
+            wsi_l1_sample = torch.tensor(sample_dict["wsi_l1"], dtype=torch.float32).to(device)
+            
+            # Create data list in the format expected by the model
+            data_list = [wsi_l3_sample, wsi_l2_sample, wsi_l1_sample]
+            label_tensor = torch.tensor([label], dtype=torch.long).to(device)
+            
+            # Create dummy coords (zeros with same number of patches as data)
+            coords_list = [torch.zeros((d.shape[0], 2), dtype=torch.long, device=device) for d in data_list]
+            
+            # Forward through model normally (not forward_sample, since we have raw data)
+            results = model(data_list, coords=coords_list, clinical_features=cd_sample, label=label_tensor, instance_eval=True)
             logits, Y_prob, Y_hat, _, _ = results['MM']
-            logits = logits.unsqueeze(0)
-            # print("!!!LABEL:", label, " LOGITS:", logits)
-            total_loss = loss_fn(logits, label)
+            # print("!!!LABEL:", label_tensor, " LOGITS:", logits)
+            total_loss = loss_fn(logits, label_tensor)
             
         else:
             loader_data = next(loader_iter)
@@ -378,13 +389,12 @@ def train_loop_clam(epoch, model, loader, optimizer, bag_weight, writer = None, 
         
              # METHOD: apply prototype weighting if prototype is given
              #TODO: Only weighs not sampled points
+            data, _, _, clinical_data, _ = loader_data
+            
+            repr_list[0].append(clinical_data.cpu().detach().numpy())
+            for i in range(3):
+                repr_list[i+1].append(data[i].cpu().detach().numpy())
             if prototype is not None:
-                data, _, _, clinical_data, _ = loader_data
-                
-                repr_list[0].append(clinical_data.cpu().detach().numpy())
-                for i in range(3):
-                    repr_list[i+1].append(data[i].cpu().detach().numpy())
-                
                 weight = prototype.weight_point(repr_list[0][-1], repr_list[1][-1], repr_list[2][-1], repr_list[3][-1], strictness=strictness)
                
                 print("LOSS OLD:", total_loss.item(), " LOSS NEW:", (total_loss * weight), " WEIGHT:", weight)
