@@ -4,7 +4,8 @@ from flwr.common import Context
 from flwr.server import ServerAppComponents, ServerConfig
 from flwr.server.strategy import FedAvg
 from utils.core_utils_simul import test
-from utils.fl_utils import set_parameters, load_data, get_model
+# from utils.core_utils_random import test
+from utils.fl_utils import set_parameters, load_global_test_data, get_model
 import torch
 from typing import List, Tuple, Dict, Any
 
@@ -14,11 +15,11 @@ def get_evaluate_fn(model, args, device):
         set_parameters(model, parameters)
 
         # Load test data
-        test_split = load_data(0, args)[-1]
+        test_split = load_global_test_data(args)
         
 
         # Evaluate the model on the test set
-        loss, f1 = test(model, test_split, args, device, results_dir=args.results_dir, client_nr="server", round_nr=server_round)  # You need to implement this function
+        loss, f1 = test(model, test_split, args, device, results_dir=args.results_dir, client_nr="server", round_nr=server_round)
 
         # Return the evaluation result as a dictionary
         return float(loss), {"f1": float(f1)}

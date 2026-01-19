@@ -1,0 +1,19 @@
+python federated_train.py --gpus 2 --num_clients 3 --exp_code CF_brightness --no_verbose --split_dir chimera_3_5_2_0.1_1 --folds 5 --seed 1 --augmentation 'Aug0_brightness_460' --num_rounds 40 --no_phases --max_epochs 3 --num_stages 2
+python federated_train.py --gpus 2 --num_clients 3 --exp_code CF_brightness --no_verbose --split_dir chimera_3_5_2_0.1_1 --folds 5 --seed 2 --augmentation 'Aug0_brightness_460' --num_rounds 40 --no_phases --max_epochs 3 --num_stages 2
+python federated_train.py --gpus 2 --num_clients 3 --exp_code CF_brightness --no_verbose --split_dir chimera_3_5_2_0.1_1 --folds 5 --seed 3 --augmentation 'Aug0_brightness_460' --num_rounds 40 --no_phases --max_epochs 3 --num_stages 2
+
+python federated_train.py --gpus 2 --num_clients 3 --exp_code CF_brightness_sp2 --no_verbose --split_dir chimera_3_5_2_0.1_2 --folds 5 --seed 1 --augmentation 'Aug0_brightness_460' --num_rounds 40 --no_phases --max_epochs 3 --num_stages 2
+python federated_train.py --gpus 2 --num_clients 3 --exp_code CF_brightness_sp2 --no_verbose --split_dir chimera_3_5_2_0.1_2 --folds 5 --seed 2 --augmentation 'Aug0_brightness_460' --num_rounds 40 --no_phases --max_epochs 3 --num_stages 2
+python federated_train.py --gpus 2 --num_clients 3 --exp_code CF_brightness_sp2 --no_verbose --split_dir chimera_3_5_2_0.1_2 --folds 5 --seed 3 --augmentation 'Aug0_brightness_460' --num_rounds 40 --no_phases --max_epochs 3 --num_stages 2
+
+python federated_train.py --gpus 2 --num_clients 3 --exp_code CF_brightness_sp3 --no_verbose --split_dir chimera_3_5_2_0.1_3 --folds 5 --seed 1 --augmentation 'Aug0_brightness_460' --num_rounds 40 --no_phases --max_epochs 3 --num_stages 2
+python federated_train.py --gpus 2 --num_clients 3 --exp_code CF_brightness_sp3 --no_verbose --split_dir chimera_3_5_2_0.1_3 --folds 5 --seed 2 --augmentation 'Aug0_brightness_460' --num_rounds 40 --no_phases --max_epochs 3 --num_stages 2
+python federated_train.py --gpus 2 --num_clients 3 --exp_code CF_brightness_sp3 --no_verbose --split_dir chimera_3_5_2_0.1_3 --folds 5 --seed 3 --augmentation 'Aug0_brightness_460' --num_rounds 40 --no_phases --max_epochs 3 --num_stages 2
+
+python federated_train.py --gpus 2 --num_clients 3 --exp_code CF_brightness_sp4 --no_verbose --split_dir chimera_3_5_2_0.1_4 --folds 5 --seed 1 --augmentation 'Aug0_brightness_460' --num_rounds 40 --no_phases --max_epochs 3 --num_stages 2
+python federated_train.py --gpus 2 --num_clients 3 --exp_code CF_brightness_sp4 --no_verbose --split_dir chimera_3_5_2_0.1_4 --folds 5 --seed 2 --augmentation 'Aug0_brightness_460' --num_rounds 40 --no_phases --max_epochs 3 --num_stages 2
+python federated_train.py --gpus 2 --num_clients 3 --exp_code CF_brightness_sp4 --no_verbose --split_dir chimera_3_5_2_0.1_4 --folds 5 --seed 3 --augmentation 'Aug0_brightness_460' --num_rounds 40 --no_phases --max_epochs 3 --num_stages 2
+
+python federated_train.py --gpus 2 --num_clients 3 --exp_code CF_brightness_sp5 --no_verbose --split_dir chimera_3_5_2_0.1_5 --folds 5 --seed 1 --augmentation 'Aug0_brightness_460' --num_rounds 40 --no_phases --max_epochs 3 --num_stages 2
+python federated_train.py --gpus 2 --num_clients 3 --exp_code CF_brightness_sp5 --no_verbose --split_dir chimera_3_5_2_0.1_5 --folds 5 --seed 2 --augmentation 'Aug0_brightness_460' --num_rounds 40 --no_phases --max_epochs 3 --num_stages 2
+python federated_train.py --gpus 2 --num_clients 3 --exp_code CF_brightness_sp5 --no_verbose --split_dir chimera_3_5_2_0.1_5 --folds 5 --seed 3 --augmentation 'Aug0_brightness_460' --num_rounds 40 --no_phases --max_epochs 3 --num_stages 2

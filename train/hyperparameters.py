@@ -1,24 +1,34 @@
 import argparse
 
+
+
 def get_hyperparameters():
     parser = argparse.ArgumentParser(description='Configurations for WSI Training')
+    
     parser.add_argument('--gpus', type=int, nargs='+', required=True, help='gpu id(s) to use, e.g. --gpus 0 1 for multiple GPUs')
+    parser.add_argument('--folds', type=int, default=5, help='number of folds (default: 5)')
+    parser.add_argument('--augmentations', nargs='*', default=None,
+                    help='Client augmentation mappings as key=value pairs, e.g., --augmentations 1=features_1536_fixed_aug2_2_420 2=features_1536_fixed_aug3_3_430')
+    
     parser.add_argument('--num_clients', type=int, default=3, help='number of clients (default: 3)')
     parser.add_argument('--num_rounds', type=int, default=3, help='number of federated learning rounds (default: 3)')
     parser.add_argument('--use_split_k', type=int, default=0, help='If less clients than splits are used, which split to use (default: +0)')
     parser.add_argument('--no_phases', action='store_true', default=False, help='disable phase training also for the first round')
+    # parser.add_argument('--no_phases_but_first', action='store_true', default=False, help='disable phase training and early stopping for all but the first round')
     parser.add_argument('--phases_always', action='store_true', default=False, help='enable phase training for all rounds')
     parser.add_argument('--phase_length', type=int, default=7, help='number of epochs per phase (default: 7)')
     parser.add_argument('--es_patience', type=int, default=4, help='early stopping patience (default: 4)')
     parser.add_argument('--es_stop_epoch', type=int, default=2, help='minimum number of epochs before early stopping can occur (default: 2)')
     parser.add_argument('--data_root_dir', type=str, 
-                        default="/local/scratch/phempel/chimera/features_1536",
+                        default="/local/scratch/phempel/chimera/features_1536_fixed",
                         help='data directory')
     parser.add_argument('--multi_seed', type=int, nargs='+', help='list of seeds for experiments with multiple runs per client number')
     parser.add_argument('--embed_dim', type=int, default=1536)
     parser.add_argument('--n_classes', type=int, default=3)
     parser.add_argument('--max_epochs', type=int, default=150,
                         help='maximum number of epochs to train (default: 150)')
+    # parser.add_argument('--max_epochs_steps', type=str, default=None, 
+    #                     help='maximum number of epochs to train for each phase, format: phase1_epochs:phase2_epochs:...,default: 2:10,5:3,2 means 10 epochs for phase 1, 3 epochs for phase 2 and 2 epochs for all remaining phases')    
     parser.add_argument('--lr', type=float, default=1e-4,
                         help='learning rate (default: 0.0001)')
     parser.add_argument('--label_frac', type=float, default=1.0,

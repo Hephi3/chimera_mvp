@@ -1,0 +1,20 @@
+python federated_train.py --gpus 3 --exp_code ML_08 --no_verbose --split_dir chimera_3_5_2_0.2_0.7_0.3  --augmentations 0=features_1536_fixed 1=features_1536_fixed 2=Aug0_brightness_460 --method_local --proto_adaptation_rate_client 0.8 --strictness 1.0
+
+python federated_train.py --gpus 0 --exp_code MG_02_t03 --no_verbose --split_dir chimera_3_5_2_0.2_0.7_0.3  --augmentations 0=features_1536_fixed 1=features_1536_fixed 2=Aug0_brightness_460 --method_global --proto_adaptation_rate_server 0.2 --temperature 0.3
+
+python federated_train.py --gpus 0 --exp_code MS_3_1_08 --no_verbose --split_dir chimera_3_5_2_0.2_0.7_0.3  --augmentations 0=features_1536_fixed 1=features_1536_fixed 2=Aug0_brightness_460 --num_sampled 3 --temperature 1 --variance_scale 0.8
+
+python federated_train.py --gpus 0 --exp_code MLG_08_08 --no_verbose --method_local --proto_adaptation_rate_client 0.8 --method_global --proto_adaptation_rate_server 0.8
+
+python federated_train.py --gpus 2 --num_clients 3 --exp_code art_CFCD --no_verbose --split_dir chimera_3_5_2_0.2_0.7_0.3  --augmentations 0=features_1536_fixed 1=features_1536_fixed 2=Aug0_brightness_460 --debug
+
+python federated_train.py --gpus 2 --num_clients 3 --exp_code MS_2_2_08 --no_verbose --split_dir chimera_3_5_2_0.2_0.5_0.5  --augmentations 0=features_1536_fixed 1=features_1536_fixed 2=features_1536_fixed --debug  --num_sampled 2 --temperature 2 --variance_scale 0.8
+
+python plot/plot_crossfold_group_comparison.py --groups '{"CFCDID ": ["art_CFCDID_sp1_s3", "art_CFCDID_sp2_s3","art_CFCDID_sp3_s3","art_CFCDID_sp4_s3","art_CFCDID_sp5_s3"], "Artificial CFCD ": ["art_CFCD_sp1_s3", "art_CFCD_sp2_s3","art_CFCD_sp3_s3","art_CFCD_sp4_s3","art_CFCD_sp5_s3"], "ML 08": ["ML_08_sp1_s3", "ML_08_sp2_s3","ML_08_sp3_s3","ML_08_sp4_s3","ML_08_sp5_s3"], "MG 08": ["MG_08_sp1_s3", "MG_08_sp2_s3","MG_08_sp3_s3","MG_08_sp4_s3","MG_08_sp5_s3"], "MG 02 02t": ["MG_02_02t_sp1_s3", "MG_02_02t_sp2_s3","MG_02_02t_sp3_s3","MG_02_02t_sp4_s3","MG_02_02t_sp5_s3"]}' --submodel MM --metric_filter all --show_full_training --smooth_window 5 --show_std --name ArtCFCDID2
+
+
+MS: --num_sampled 2 --temperature 2 --variance_scale 0.8
+ML: --method_local --proto_adaptation_rate_client 0.2 --strictness 2.0
+MG: --method_global --proto_adaptation_rate_server 0.2 --temperature 2 
+
+python federated_train.py --gpus 2 --num_clients 3 --exp_code del1 --no_verbose --split_dir chimera_3_5_2_0.2_0.7_0.3  --augmentations 0=features_1536_fixed 1=features_1536_fixed 2=Aug0_brightness_460 --debug

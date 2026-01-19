@@ -1,0 +1,15 @@
+name: chimera
+channels:
+  - defaults
+dependencies:
+  - tqdm
+  - numpy
+  - scikit-learn
+  - pandas
+  - h5py
+  - opencv
+  - tifffile
+  - imagecodecs
+  - pip
+  - future
+prefix: /gris/gris-f/homelv/phempel/anaconda3/envs/chimera
