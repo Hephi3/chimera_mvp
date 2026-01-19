@@ -19,6 +19,15 @@ test_metrics = {
     'Avg_f1/test': 'PCF',
 }
 
+metric_ylimits = {
+    # 'F1 Score': (0.04, 0.75),
+    # 'F1 Score': (0.18, 0.67),
+    'F1 Score': (0.02, 0.68),
+    # 'PCF': (-0.27, 0.02),
+    'PCF': (-0.41, 0.02),
+}
+show_legend_global=False
+
 
 def tensorboard_to_datadict_federated(experiment_name: str, fold_num: int, exp_dir: str = ROOT_RESULTS):
     """Extract server test data from TensorBoard logs for a specific fold"""
@@ -201,12 +210,13 @@ def plot_test_metric(ax, title, server_stats, all_rounds, show_std=True,
                            stage_1_means_arr + stage_1_stds_arr, color=color, alpha=STD_ALPHA)
     
     ax.set_xlabel('Federated Round')
+    ax.set_ylim(metric_ylimits.get(title, (None, None)))
     ax.set_title(title)
     ax.set_ylabel(title)
     ax.grid(True, alpha=0.3)
     ax.xaxis.set_major_locator(plt.MaxNLocator(integer=True))
     
-    if show_legend:
+    if show_legend and show_legend_global:
         handles, labels = ax.get_legend_handles_labels()
         if handles:
             ax.legend(fontsize=8)
@@ -244,12 +254,13 @@ def plot_avg_f1_metric(ax, title, server_stats, all_rounds, show_std=True,
                         server_means_arr + server_stds_arr, color=color, alpha=STD_ALPHA)
 
     ax.set_xlabel('Federated Round')
+    ax.set_ylim(metric_ylimits.get(title, (None, None)))
     ax.set_title(title)
     ax.set_ylabel(title)
     ax.grid(True, alpha=0.3)
     ax.xaxis.set_major_locator(plt.MaxNLocator(integer=True))
     
-    if show_legend:
+    if show_legend and show_legend_global:
         handles, labels = ax.get_legend_handles_labels()
         if handles:
             ax.legend(fontsize=8)
@@ -302,7 +313,7 @@ def plot_test_metrics_comparison(experiment_groups: dict, submodel: str = 'MM',
                                  show_std: bool = True, folds: list = None, name: str = 'test_metrics'):
     """Compare test metrics across groups of cross-fold validation experiments"""
     
-    group_colors = ['blue', 'red', 'green', 'orange', 'purple',  'brown', 'pink', 'gray']
+    group_colors = ['red', 'green', 'orange', 'purple',  'brown', 'pink', 'gray']
     
     # Prepare experiment groups
     all_group_data = {}
@@ -474,9 +485,10 @@ def plot_test_metrics_comparison(experiment_groups: dict, submodel: str = 'MM',
     
     # Create legend below the entire plot as a horizontal line
     singleline_legend = len(legend_handles) < 7
-    fig.legend(handles=legend_handles, labels=legend_labels, loc='lower center', 
-               ncol=len(legend_handles) if singleline_legend else math.ceil(len(legend_handles)/2), bbox_to_anchor=(0.5, -0.05 if singleline_legend else -0.1), 
-               fontsize=10, frameon=True)
+    if show_legend_global:
+        fig.legend(handles=legend_handles, labels=legend_labels, loc='lower center', 
+                ncol=len(legend_handles) if singleline_legend else math.ceil(len(legend_handles)/2), bbox_to_anchor=(0.5, -0.05 if singleline_legend else -0.1), 
+                fontsize=10, frameon=True)
     
     plt.tight_layout()
     
