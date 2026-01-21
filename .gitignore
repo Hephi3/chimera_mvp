@@ -6,3 +6,5 @@ train/command_logs/
 train/examples/
 train/experiment_logs/
 train/visualization_*
+
+test/input/

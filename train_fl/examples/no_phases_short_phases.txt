@@ -1,0 +1,27 @@
+# Simple text file with commands
+# Lines starting with # are comments and will be ignored
+# Empty lines are also ignored
+
+# 3_clients_short_phases_3_1_0_s1 3_clients_short_phases_3_3_1_s1 3_clients_short_phases_3_5_2_s1 3_clients_short_phases_3_7_3_s1 3_clients_short_phases_3_9_4_s1 3_clients_short_phases_3_11_5_s1 3_clients_short_phases_2_3_0_s1 3_clients_short_phases_2_3_1_s1 3_clients_short_phases_2_5_2_s1 3_clients_short_phases_2_7_3_s1 3_clients_short_phases_2_9_4_s1 3_clients_short_phases_2_11_5_s1 3_clients_short_phases_4_3_0_s1 3_clients_short_phases_4_3_1_s1 3_clients_short_phases_4_5_2_s1 3_clients_short_phases_4_7_3_s1 3_clients_short_phases_4_9_4_s1 3_clients_short_phases_4_11_5_s1
+# Different phase lenghts
+# python federated_train.py --gpus 1 --num_clients 3 --exp_code 3_clients_short_phases_3_1_0 --no_verbose --split_dir chimera_3_0.1 --num_rounds 10 --seed 1 --early_stopping --es_patience 3 --es_stop_epoch 1 --phase_length 0 --folds 1
+# python federated_train.py --gpus 1 --num_clients 3 --exp_code 3_clients_short_phases_3_3_1 --no_verbose --split_dir chimera_3_0.1 --num_rounds 10 --seed 1 --early_stopping --es_patience 3 --es_stop_epoch 3 --phase_length 1 --folds 1
+# python federated_train.py --gpus 1 --num_clients 3 --exp_code 3_clients_short_phases_3_5_2 --no_verbose --split_dir chimera_3_0.1 --num_rounds 10 --seed 1 --early_stopping --es_patience 3 --es_stop_epoch 5 --phase_length 2 --folds 1
+# python federated_train.py --gpus 1 --num_clients 3 --exp_code 3_clients_short_phases_3_7_3 --no_verbose --split_dir chimera_3_0.1 --num_rounds 10 --seed 1 --early_stopping --es_patience 3 --es_stop_epoch 7 --phase_length 3 --folds 1
+# python federated_train.py --gpus 1 --num_clients 3 --exp_code 3_clients_short_phases_3_9_4 --no_verbose --split_dir chimera_3_0.1 --num_rounds 10 --seed 1 --early_stopping --es_patience 3 --es_stop_epoch 9 --phase_length 4 --folds 1
+# python federated_train.py --gpus 1 --num_clients 3 --exp_code 3_clients_short_phases_3_11_5 --no_verbose --split_dir chimera_3_0.1 --num_rounds 10 --seed 1 --early_stopping --es_patience 3 --es_stop_epoch 11 --phase_length 5 --folds 1
+
+# Different patiences
+# python federated_train.py --gpus 1 --num_clients 3 --exp_code 3_clients_short_phases_2_3_0 --no_verbose --split_dir chimera_3_0.1 --num_rounds 10 --seed 1 --early_stopping --es_patience 2 --es_stop_epoch 1 --phase_length 0 --folds 1
+# python federated_train.py --gpus 1 --num_clients 3 --exp_code 3_clients_short_phases_2_3_1 --no_verbose --split_dir chimera_3_0.1 --num_rounds 10 --seed 1 --early_stopping --es_patience 2 --es_stop_epoch 3 --phase_length 1 --folds 1
+# python federated_train.py --gpus 1 --num_clients 3 --exp_code 3_clients_short_phases_2_5_2 --no_verbose --split_dir chimera_3_0.1 --num_rounds 10 --seed 1 --early_stopping --es_patience 2 --es_stop_epoch 5 --phase_length 2 --folds 1
+# python federated_train.py --gpus 1 --num_clients 3 --exp_code 3_clients_short_phases_2_7_3 --no_verbose --split_dir chimera_3_0.1 --num_rounds 10 --seed 1 --early_stopping --es_patience 2 --es_stop_epoch 7 --phase_length 3 --folds 1
+# python federated_train.py --gpus 1 --num_clients 3 --exp_code 3_clients_short_phases_2_9_4 --no_verbose --split_dir chimera_3_0.1 --num_rounds 10 --seed 1 --early_stopping --es_patience 2 --es_stop_epoch 9 --phase_length 4 --folds 1
+# python federated_train.py --gpus 1 --num_clients 3 --exp_code 3_clients_short_phases_2_11_5 --no_verbose --split_dir chimera_3_0.1 --num_rounds 10 --seed 1 --early_stopping --es_patience 2 --es_stop_epoch 11 --phase_length 5 --folds 1
+
+python federated_train.py --gpus 1 --num_clients 3 --exp_code 3_clients_short_phases_4_3_0 --no_verbose --split_dir chimera_3_0.1 --num_rounds 10 --seed 1 --early_stopping --es_patience 4 --es_stop_epoch 1 --phase_length 0 --folds 1
+python federated_train.py --gpus 1 --num_clients 3 --exp_code 3_clients_short_phases_4_3_1 --no_verbose --split_dir chimera_3_0.1 --num_rounds 10 --seed 1 --early_stopping --es_patience 4 --es_stop_epoch 3 --phase_length 1 --folds 1
+python federated_train.py --gpus 1 --num_clients 3 --exp_code 3_clients_short_phases_4_5_2 --no_verbose --split_dir chimera_3_0.1 --num_rounds 10 --seed 1 --early_stopping --es_patience 4 --es_stop_epoch 5 --phase_length 2 --folds 1
+python federated_train.py --gpus 1 --num_clients 3 --exp_code 3_clients_short_phases_4_7_3 --no_verbose --split_dir chimera_3_0.1 --num_rounds 10 --seed 1 --early_stopping --es_patience 4 --es_stop_epoch 7 --phase_length 3 --folds 1
+python federated_train.py --gpus 1 --num_clients 3 --exp_code 3_clients_short_phases_4_9_4 --no_verbose --split_dir chimera_3_0.1 --num_rounds 10 --seed 1 --early_stopping --es_patience 4 --es_stop_epoch 9 --phase_length 4 --folds 1
+python federated_train.py --gpus 1 --num_clients 3 --exp_code 3_clients_short_phases_4_11_5 --no_verbose --split_dir chimera_3_0.1 --num_rounds 10 --seed 1 --early_stopping --es_patience 4 --es_stop_epoch 11 --phase_length 5 --folds 1

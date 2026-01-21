@@ -1,0 +1,52 @@
+# Simple text file with commands
+# Lines starting with # are comments and will be ignored
+# Empty lines are also ignored
+
+# 3_clients_no_phases_s1 3_clients_no_phases_max2_s1 3_clients_no_phases_max5_s1 3_clients_no_phases_max20_s1
+# Seed 2
+python federated_train.py --gpus 2 --num_clients 3 --exp_code 3_clients_no_phases --no_verbose --split_dir chimera_3_0.1 --num_rounds 10 --seed 2 --no_phases --early_stopping
+python federated_train.py --gpus 2 --num_clients 3 --exp_code 3_clients_no_phases_max20 --no_verbose --split_dir chimera_3_0.1 --num_rounds 10 --seed 2 --max_epochs 20 --no_phases --early_stopping
+python federated_train.py --gpus 2 --num_clients 3 --exp_code 3_clients_no_phases_max5 --no_verbose --split_dir chimera_3_0.1 --num_rounds 10 --seed 2 --max_epochs 5 --no_phases
+python federated_train.py --gpus 2 --num_clients 3 --exp_code 3_clients_no_phases_max2 --no_verbose --split_dir chimera_3_0.1 --num_rounds 10 --seed 2 --max_epochs 2 --no_phases
+
+# Seed 3
+python federated_train.py --gpus 2 --num_clients 3 --exp_code 3_clients_no_phases --no_verbose --split_dir chimera_3_0.1 --num_rounds 10 --seed 3 --no_phases --early_stopping
+python federated_train.py --gpus 2 --num_clients 3 --exp_code 3_clients_no_phases_max20 --no_verbose --split_dir chimera_3_0.1 --num_rounds 10 --seed 3 --max_epochs 20 --no_phases --early_stopping
+python federated_train.py --gpus 2 --num_clients 3 --exp_code 3_clients_no_phases_max5 --no_verbose --split_dir chimera_3_0.1 --num_rounds 10 --seed 3 --max_epochs 5 --no_phases
+python federated_train.py --gpus 2 --num_clients 3 --exp_code 3_clients_no_phases_max2 --no_verbose --split_dir chimera_3_0.1 --num_rounds 10 --seed 3 --max_epochs 2 --no_phases
+
+# Split 2
+python federated_train.py --gpus 2 --num_clients 3 --exp_code 3_clients_no_phases_sp2 --no_verbose --split_dir chimera_3_0.1_2 --num_rounds 10 --seed 1 --no_phases --early_stopping
+python federated_train.py --gpus 2 --num_clients 3 --exp_code 3_clients_no_phases_max20_sp2 --no_verbose --split_dir chimera_3_0.1_2 --num_rounds 10 --seed 1 --max_epochs 20 --no_phases --early_stopping
+python federated_train.py --gpus 2 --num_clients 3 --exp_code 3_clients_no_phases_max5_sp2 --no_verbose --split_dir chimera_3_0.1_2 --num_rounds 10 --seed 1 --max_epochs 5 --no_phases
+python federated_train.py --gpus 2 --num_clients 3 --exp_code 3_clients_no_phases_max2_sp2 --no_verbose --split_dir chimera_3_0.1_2 --num_rounds 10 --seed 1 --max_epochs 2 --no_phases
+
+# Split 3
+python federated_train.py --gpus 2 --num_clients 3 --exp_code 3_clients_no_phases_sp3 --no_verbose --split_dir chimera_3_0.1_3 --num_rounds 10 --seed 1 --no_phases --early_stopping
+python federated_train.py --gpus 2 --num_clients 3 --exp_code 3_clients_no_phases_max20_sp3 --no_verbose --split_dir chimera_3_0.1_3 --num_rounds 10 --seed 1 --max_epochs 20 --no_phases --early_stopping
+python federated_train.py --gpus 2 --num_clients 3 --exp_code 3_clients_no_phases_max5_sp3 --no_verbose --split_dir chimera_3_0.1_3 --num_rounds 10 --seed 1 --max_epochs 5 --no_phases
+python federated_train.py --gpus 2 --num_clients 3 --exp_code 3_clients_no_phases_max2_sp3 --no_verbose --split_dir chimera_3_0.1_3 --num_rounds 10 --seed 1 --max_epochs 2 --no_phases
+
+# Seed 4
+python federated_train.py --gpus 2 --num_clients 3 --exp_code 3_clients_no_phases --no_verbose --split_dir chimera_3_0.1 --num_rounds 10 --seed 4 --no_phases --early_stopping
+python federated_train.py --gpus 2 --num_clients 3 --exp_code 3_clients_no_phases_max20 --no_verbose --split_dir chimera_3_0.1 --num_rounds 10 --seed 4 --max_epochs 20 --no_phases --early_stopping
+python federated_train.py --gpus 2 --num_clients 3 --exp_code 3_clients_no_phases_max5 --no_verbose --split_dir chimera_3_0.1 --num_rounds 10 --seed 4 --max_epochs 5 --no_phases
+python federated_train.py --gpus 2 --num_clients 3 --exp_code 3_clients_no_phases_max2 --no_verbose --split_dir chimera_3_0.1 --num_rounds 10 --seed 4 --max_epochs 2 --no_phases
+
+# Seed 5
+python federated_train.py --gpus 2 --num_clients 3 --exp_code 3_clients_no_phases --no_verbose --split_dir chimera_3_0.1 --num_rounds 10 --seed 5 --no_phases --early_stopping
+python federated_train.py --gpus 2 --num_clients 3 --exp_code 3_clients_no_phases_max20 --no_verbose --split_dir chimera_3_0.1 --num_rounds 10 --seed 5 --max_epochs 20 --no_phases --early_stopping
+python federated_train.py --gpus 2 --num_clients 3 --exp_code 3_clients_no_phases_max5 --no_verbose --split_dir chimera_3_0.1 --num_rounds 10 --seed 5 --max_epochs 5 --no_phases
+python federated_train.py --gpus 2 --num_clients 3 --exp_code 3_clients_no_phases_max2 --no_verbose --split_dir chimera_3_0.1 --num_rounds 10 --seed 5 --max_epochs 2 --no_phases
+
+# Split 4
+python federated_train.py --gpus 2 --num_clients 3 --exp_code 3_clients_no_phases_sp4 --no_verbose --split_dir chimera_3_0.1_4 --num_rounds 10 --seed 1 --no_phases --early_stopping
+python federated_train.py --gpus 2 --num_clients 3 --exp_code 3_clients_no_phases_max20_sp4 --no_verbose --split_dir chimera_3_0.1_4 --num_rounds 10 --seed 1 --max_epochs 20 --no_phases --early_stopping
+python federated_train.py --gpus 2 --num_clients 3 --exp_code 3_clients_no_phases_max5_sp4 --no_verbose --split_dir chimera_3_0.1_4 --num_rounds 10 --seed 1 --max_epochs 5 --no_phases
+python federated_train.py --gpus 2 --num_clients 3 --exp_code 3_clients_no_phases_max2_sp4 --no_verbose --split_dir chimera_3_0.1_4 --num_rounds 10 --seed 1 --max_epochs 2 --no_phases
+
+# Split 5
+python federated_train.py --gpus 2 --num_clients 3 --exp_code 3_clients_no_phases_sp5 --no_verbose --split_dir chimera_3_0.1_5 --num_rounds 10 --seed 1 --no_phases --early_stopping
+python federated_train.py --gpus 2 --num_clients 3 --exp_code 3_clients_no_phases_max20_sp5 --no_verbose --split_dir chimera_3_0.1_5 --num_rounds 10 --seed 1 --max_epochs 20 --no_phases --early_stopping
+python federated_train.py --gpus 2 --num_clients 3 --exp_code 3_clients_no_phases_max5_sp5 --no_verbose --split_dir chimera_3_0.1_5 --num_rounds 10 --seed 1 --max_epochs 5 --no_phases
+python federated_train.py --gpus 2 --num_clients 3 --exp_code 3_clients_no_phases_max2_sp5 --no_verbose --split_dir chimera_3_0.1_5 --num_rounds 10 --seed 1 --max_epochs 2 --no_phases

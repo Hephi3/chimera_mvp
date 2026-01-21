@@ -1,0 +1,6 @@
+# Quick experiments for testing
+python federated_train.py --gpus 2 --num_clients 2 --num_rounds 5 --seed 1 --no_verbose --max_epochs 100 --split_dir chimera_2_0.1_1 --exp_code 2_clients_split_comparison_split_1 --early_stopping
+python federated_train.py --gpus 2 --num_clients 2 --num_rounds 5 --seed 1 --no_verbose --max_epochs 100 --split_dir chimera_2_0.1_2 --exp_code 2_clients_split_comparison_split_2 --early_stopping
+python federated_train.py --gpus 2 --num_clients 2 --num_rounds 5 --seed 1 --no_verbose --max_epochs 100 --split_dir chimera_2_0.1_3 --exp_code 2_clients_split_comparison_split_3 --early_stopping
+python federated_train.py --gpus 2 --num_clients 2 --num_rounds 5 --seed 1 --no_verbose --max_epochs 100 --split_dir chimera_2_0.1_4 --exp_code 2_clients_split_comparison_split_4 --early_stopping
+python federated_train.py --gpus 2 --num_clients 2 --num_rounds 5 --seed 1 --no_verbose --max_epochs 100 --split_dir chimera_2_0.1_5 --exp_code 2_clients_split_comparison_split_5 --early_stopping

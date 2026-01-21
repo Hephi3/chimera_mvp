@@ -1,0 +1,34 @@
+'{       
+  "Split 1": ["folds_sp1_4115_s1", "folds_sp1_4115_s2", "folds_sp1_4115_s3"], 
+  "Split 2": ["folds_sp2_4115_s1", "folds_sp2_4115_s2", "folds_sp2_4115_s3"],
+  "Split 3": ["folds_sp3_4115_s1", "folds_sp3_4115_s2", "folds_sp3_4115_s3"],
+  "Split 4": ["folds_sp4_4115_s1", "folds_sp4_4115_s2", "folds_sp4_4115_s3"], 
+  "Split 5": ["folds_sp5_4115_s1", "folds_sp5_4115_s2", "folds_sp5_4115_s3"], 
+}'
+
+python federated_train.py --gpus 0 --num_clients 3 --exp_code folds_sp2_4115 --no_verbose --split_dir chimera_3_5_0.1_2 --folds 5 --num_rounds 10 --seed 1 --early_stopping --es_patience 4 --es_stop_epoch 11 --no_phases --phase_length 5
+python federated_train.py --gpus 0 --num_clients 3 --exp_code folds_sp3_4115 --no_verbose --split_dir chimera_3_5_0.1_3 --folds 5 --num_rounds 10 --seed 1 --early_stopping --es_patience 4 --es_stop_epoch 11 --no_phases --phase_length 5
+python federated_train.py --gpus 0 --num_clients 3 --exp_code folds_sp4_4115 --no_verbose --split_dir chimera_3_5_0.1_4 --folds 5 --num_rounds 10 --seed 1 --early_stopping --es_patience 4 --es_stop_epoch 11 --no_phases --phase_length 5
+python federated_train.py --gpus 0 --num_clients 3 --exp_code folds_sp5_4115 --no_verbose --split_dir chimera_3_5_0.1_5 --folds 5 --num_rounds 10 --seed 1 --early_stopping --es_patience 4 --es_stop_epoch 11 --no_phases --phase_length 5
+
+python federated_train.py --gpus 0 --num_clients 3 --exp_code folds_sp2_4115 --no_verbose --split_dir chimera_3_5_0.1_2 --folds 5 --num_rounds 10 --seed 2 --early_stopping --es_patience 4 --es_stop_epoch 11 --no_phases --phase_length 5
+python federated_train.py --gpus 0 --num_clients 3 --exp_code folds_sp3_4115 --no_verbose --split_dir chimera_3_5_0.1_3 --folds 5 --num_rounds 10 --seed 2 --early_stopping --es_patience 4 --es_stop_epoch 11 --no_phases --phase_length 5
+python federated_train.py --gpus 0 --num_clients 3 --exp_code folds_sp4_4115 --no_verbose --split_dir chimera_3_5_0.1_4 --folds 5 --num_rounds 10 --seed 2 --early_stopping --es_patience 4 --es_stop_epoch 11 --no_phases --phase_length 5
+python federated_train.py --gpus 0 --num_clients 3 --exp_code folds_sp5_4115 --no_verbose --split_dir chimera_3_5_0.1_5 --folds 5 --num_rounds 10 --seed 2 --early_stopping --es_patience 4 --es_stop_epoch 11 --no_phases --phase_length 5
+
+python federated_train.py --gpus 0 --num_clients 3 --exp_code folds_sp2_4115 --no_verbose --split_dir chimera_3_5_0.1_2 --folds 5 --num_rounds 10 --seed 3 --early_stopping --es_patience 4 --es_stop_epoch 11 --no_phases --phase_length 5
+python federated_train.py --gpus 0 --num_clients 3 --exp_code folds_sp3_4115 --no_verbose --split_dir chimera_3_5_0.1_3 --folds 5 --num_rounds 10 --seed 3 --early_stopping --es_patience 4 --es_stop_epoch 11 --no_phases --phase_length 5
+python federated_train.py --gpus 0 --num_clients 3 --exp_code folds_sp4_4115 --no_verbose --split_dir chimera_3_5_0.1_4 --folds 5 --num_rounds 10 --seed 3 --early_stopping --es_patience 4 --es_stop_epoch 11 --no_phases --phase_length 5
+python federated_train.py --gpus 0 --num_clients 3 --exp_code folds_sp5_4115 --no_verbose --split_dir chimera_3_5_0.1_5 --folds 5 --num_rounds 10 --seed 3 --early_stopping --es_patience 4 --es_stop_epoch 11 --no_phases --phase_length 5
+
+python federated_train.py --gpus 0 --num_clients 3 --exp_code folds_sp2_4115 --no_verbose --split_dir chimera_3_5_0.1_2 --folds 5 --num_rounds 10 --seed 4 --early_stopping --es_patience 4 --es_stop_epoch 11 --no_phases --phase_length 5
+python federated_train.py --gpus 0 --num_clients 3 --exp_code folds_sp3_4115 --no_verbose --split_dir chimera_3_5_0.1_3 --folds 5 --num_rounds 10 --seed 4 --early_stopping --es_patience 4 --es_stop_epoch 11 --no_phases --phase_length 5
+python federated_train.py --gpus 0 --num_clients 3 --exp_code folds_sp4_4115 --no_verbose --split_dir chimera_3_5_0.1_4 --folds 5 --num_rounds 10 --seed 4 --early_stopping --es_patience 4 --es_stop_epoch 11 --no_phases --phase_length 5
+python federated_train.py --gpus 0 --num_clients 3 --exp_code folds_sp5_4115 --no_verbose --split_dir chimera_3_5_0.1_5 --folds 5 --num_rounds 10 --seed 4 --early_stopping --es_patience 4 --es_stop_epoch 11 --no_phases --phase_length 5
+
+
+python federated_train.py --gpus 0 --num_clients 3 --exp_code folds_sp2_4115 --no_verbose --split_dir chimera_3_5_0.1_2 --folds 5 --num_rounds 10 --seed 5 --early_stopping --es_patience 4 --es_stop_epoch 11 --no_phases --phase_length 5
+python federated_train.py --gpus 0 --num_clients 3 --exp_code folds_sp3_4115 --no_verbose --split_dir chimera_3_5_0.1_3 --folds 5 --num_rounds 10 --seed 5 --early_stopping --es_patience 4 --es_stop_epoch 11 --no_phases --phase_length 5
+python federated_train.py --gpus 0 --num_clients 3 --exp_code folds_sp4_4115 --no_verbose --split_dir chimera_3_5_0.1_4 --folds 5 --num_rounds 10 --seed 5 --early_stopping --es_patience 4 --es_stop_epoch 11 --no_phases --phase_length 5
+python federated_train.py --gpus 0 --num_clients 3 --exp_code folds_sp5_4115 --no_verbose --split_dir chimera_3_5_0.1_5 --folds 5 --num_rounds 10 --seed 5 --early_stopping --es_patience 4 --es_stop_epoch 11 --no_phases --phase_length 5
+

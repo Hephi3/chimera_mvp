@@ -1,0 +1,5 @@
+
+
+python federated_train.py --gpus 0 --num_clients 3 --exp_code aug_no_phases --no_verbose --split_dir chimera_3_5_0.1_1 --folds 5 --num_rounds 10 --seed 1 --no_phases --max_epochs 3 --data_root_dir "/local/scratch/phempel/chimera/features_1536_fixed" --augmentations 1=features_1536_fixed_aug2_2_420 2=features_1536_fixed_aug3_3_430
+python federated_train.py --gpus 0 --num_clients 3 --exp_code aug_no_phases --no_verbose --split_dir chimera_3_5_0.1_1 --folds 5 --num_rounds 10 --seed 2 --no_phases --max_epochs 3 --data_root_dir "/local/scratch/phempel/chimera/features_1536_fixed" --augmentations 1=features_1536_fixed_aug2_2_420 2=features_1536_fixed_aug3_3_430
+python federated_train.py --gpus 0 --num_clients 3 --exp_code aug_no_phases --no_verbose --split_dir chimera_3_5_0.1_1 --folds 5 --num_rounds 10 --seed 3 --no_phases --max_epochs 3 --data_root_dir "/local/scratch/phempel/chimera/features_1536_fixed" --augmentations 1=features_1536_fixed_aug2_2_420 2=features_1536_fixed_aug3_3_430

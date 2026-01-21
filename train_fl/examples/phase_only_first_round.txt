@@ -1,0 +1,12 @@
+#Seeds
+python federated_train.py --gpus 3 --num_clients 3 --exp_code 3_clients_1st_round_phases_10_rounds --no_verbose --split_dir chimera_3_0.1 --num_rounds 10 --seed 1 --early_stopping --es_patience 5 --es_stop_epoch 40 --phase_length 15
+python federated_train.py --gpus 3 --num_clients 3 --exp_code 3_clients_1st_round_phases_10_rounds --no_verbose --split_dir chimera_3_0.1 --num_rounds 10 --seed 2 --early_stopping --es_patience 5 --es_stop_epoch 40 --phase_length 15
+python federated_train.py --gpus 3 --num_clients 3 --exp_code 3_clients_1st_round_phases_10_rounds --no_verbose --split_dir chimera_3_0.1 --num_rounds 10 --seed 3 --early_stopping --es_patience 5 --es_stop_epoch 40 --phase_length 15
+python federated_train.py --gpus 3 --num_clients 3 --exp_code 3_clients_1st_round_phases_10_rounds --no_verbose --split_dir chimera_3_0.1 --num_rounds 10 --seed 4 --early_stopping --es_patience 5 --es_stop_epoch 40 --phase_length 15
+python federated_train.py --gpus 3 --num_clients 3 --exp_code 3_clients_1st_round_phases_10_rounds --no_verbose --split_dir chimera_3_0.1 --num_rounds 10 --seed 5 --early_stopping --es_patience 5 --es_stop_epoch 40 --phase_length 15
+
+#Splits
+python federated_train.py --gpus 3 --num_clients 3 --exp_code 3_clients_1st_round_phases_10_rounds_sp2 --no_verbose --split_dir chimera_3_0.1_2 --num_rounds 10 --seed 1 --early_stopping --es_patience 5 --es_stop_epoch 40 --phase_length 15
+python federated_train.py --gpus 3 --num_clients 3 --exp_code 3_clients_1st_round_phases_10_rounds_sp3 --no_verbose --split_dir chimera_3_0.1_3 --num_rounds 10 --seed 1 --early_stopping --es_patience 5 --es_stop_epoch 40 --phase_length 15
+python federated_train.py --gpus 3 --num_clients 3 --exp_code 3_clients_1st_round_phases_10_rounds_sp4 --no_verbose --split_dir chimera_3_0.1_4 --num_rounds 10 --seed 1 --early_stopping --es_patience 5 --es_stop_epoch 40 --phase_length 15
+python federated_train.py --gpus 3 --num_clients 3 --exp_code 3_clients_1st_round_phases_10_rounds_sp5 --no_verbose --split_dir chimera_3_0.1_5 --num_rounds 10 --seed 1 --early_stopping --es_patience 5 --es_stop_epoch 40 --phase_length 15

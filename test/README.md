@@ -1,0 +1,1 @@
+This folder allows to test the multimodal inference model.

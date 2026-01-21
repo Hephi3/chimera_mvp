@@ -1,0 +1,7 @@
+# Simple text file with commands
+# Lines starting with # are comments and will be ignored
+# Empty lines are also ignored
+
+python federated_train.py --gpus 1 --num_rounds 5 --split_dir chimera_3_0.1 --seed 1 --no_verbose --num_clients 3 --max_epochs 100 --exp_code epochs_sweep_100 --early_stopping
+python federated_train.py --gpus 1 --num_rounds 5 --split_dir chimera_3_0.1 --seed 1 --no_verbose --num_clients 3 --max_epochs 70 --exp_code epochs_sweep_70 --early_stopping
+python federated_train.py --gpus 1 --num_rounds 5 --split_dir chimera_3_0.1 --seed 1 --no_verbose --num_clients 3 --max_epochs 50 --exp_code epochs_sweep_50 --early_stopping

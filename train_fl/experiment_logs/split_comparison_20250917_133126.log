@@ -1,0 +1,49 @@
+[2025-09-17 13:31:26] Starting experiment run from config: experiments/split_comparison.yaml
+[2025-09-17 13:31:26] Logging to: experiment_logs/split_comparison_20250917_133126.log
+[2025-09-17 13:31:26] Generated 5 experiment combinations
+[2025-09-17 13:31:26] Experiment 1: split_comparison_num_clients_3_num_rounds_5_seed_1_split_dir_chimera_3_0.1
+[2025-09-17 13:31:26]   Command: python federated_train.py --gpus 2 --num_clients 3 --num_rounds 5 --seed 1 --no_verbose --max_epochs 100 --split_dir chimera_3_0.1 --exp_code split_comparison_num_clients_3_num_rounds_5_seed_1_split_dir_chimera_3_0.1
+[2025-09-17 13:31:26] Experiment 2: split_comparison_num_clients_3_num_rounds_5_seed_1_split_dir_chimera_3_0.1_2
+[2025-09-17 13:31:26]   Command: python federated_train.py --gpus 2 --num_clients 3 --num_rounds 5 --seed 1 --no_verbose --max_epochs 100 --split_dir chimera_3_0.1_2 --exp_code split_comparison_num_clients_3_num_rounds_5_seed_1_split_dir_chimera_3_0.1_2
+[2025-09-17 13:31:26] Experiment 3: split_comparison_num_clients_3_num_rounds_5_seed_1_split_dir_chimera_3_0.1_3
+[2025-09-17 13:31:26]   Command: python federated_train.py --gpus 2 --num_clients 3 --num_rounds 5 --seed 1 --no_verbose --max_epochs 100 --split_dir chimera_3_0.1_3 --exp_code split_comparison_num_clients_3_num_rounds_5_seed_1_split_dir_chimera_3_0.1_3
+[2025-09-17 13:31:26] Experiment 4: split_comparison_num_clients_3_num_rounds_5_seed_1_split_dir_chimera_3_0.1_4
+[2025-09-17 13:31:26]   Command: python federated_train.py --gpus 2 --num_clients 3 --num_rounds 5 --seed 1 --no_verbose --max_epochs 100 --split_dir chimera_3_0.1_4 --exp_code split_comparison_num_clients_3_num_rounds_5_seed_1_split_dir_chimera_3_0.1_4
+[2025-09-17 13:31:26] Experiment 5: split_comparison_num_clients_3_num_rounds_5_seed_1_split_dir_chimera_3_0.1_5
+[2025-09-17 13:31:26]   Command: python federated_train.py --gpus 2 --num_clients 3 --num_rounds 5 --seed 1 --no_verbose --max_epochs 100 --split_dir chimera_3_0.1_5 --exp_code split_comparison_num_clients_3_num_rounds_5_seed_1_split_dir_chimera_3_0.1_5
+[2025-09-17 13:31:26] 
+============================================================
+[2025-09-17 13:31:26] Running experiment 1/5
+[2025-09-17 13:31:26] Starting experiment: split_comparison_num_clients_3_num_rounds_5_seed_1_split_dir_chimera_3_0.1
+[2025-09-17 13:31:26] Command: python federated_train.py --gpus 2 --num_clients 3 --num_rounds 5 --seed 1 --no_verbose --max_epochs 100 --split_dir chimera_3_0.1 --exp_code split_comparison_num_clients_3_num_rounds_5_seed_1_split_dir_chimera_3_0.1
+[2025-09-17 13:45:55] ✓ Experiment completed successfully in 868.37s: split_comparison_num_clients_3_num_rounds_5_seed_1_split_dir_chimera_3_0.1
+[2025-09-17 13:45:55] 
+============================================================
+[2025-09-17 13:45:55] Running experiment 2/5
+[2025-09-17 13:45:55] Starting experiment: split_comparison_num_clients_3_num_rounds_5_seed_1_split_dir_chimera_3_0.1_2
+[2025-09-17 13:45:55] Command: python federated_train.py --gpus 2 --num_clients 3 --num_rounds 5 --seed 1 --no_verbose --max_epochs 100 --split_dir chimera_3_0.1_2 --exp_code split_comparison_num_clients_3_num_rounds_5_seed_1_split_dir_chimera_3_0.1_2
+[2025-09-17 13:58:26] ✓ Experiment completed successfully in 751.14s: split_comparison_num_clients_3_num_rounds_5_seed_1_split_dir_chimera_3_0.1_2
+[2025-09-17 13:58:26] 
+============================================================
+[2025-09-17 13:58:26] Running experiment 3/5
+[2025-09-17 13:58:26] Starting experiment: split_comparison_num_clients_3_num_rounds_5_seed_1_split_dir_chimera_3_0.1_3
+[2025-09-17 13:58:26] Command: python federated_train.py --gpus 2 --num_clients 3 --num_rounds 5 --seed 1 --no_verbose --max_epochs 100 --split_dir chimera_3_0.1_3 --exp_code split_comparison_num_clients_3_num_rounds_5_seed_1_split_dir_chimera_3_0.1_3
+[2025-09-17 14:11:00] ✓ Experiment completed successfully in 753.87s: split_comparison_num_clients_3_num_rounds_5_seed_1_split_dir_chimera_3_0.1_3
+[2025-09-17 14:11:00] 
+============================================================
+[2025-09-17 14:11:00] Running experiment 4/5
+[2025-09-17 14:11:00] Starting experiment: split_comparison_num_clients_3_num_rounds_5_seed_1_split_dir_chimera_3_0.1_4
+[2025-09-17 14:11:00] Command: python federated_train.py --gpus 2 --num_clients 3 --num_rounds 5 --seed 1 --no_verbose --max_epochs 100 --split_dir chimera_3_0.1_4 --exp_code split_comparison_num_clients_3_num_rounds_5_seed_1_split_dir_chimera_3_0.1_4
+[2025-09-17 14:23:34] ✓ Experiment completed successfully in 754.10s: split_comparison_num_clients_3_num_rounds_5_seed_1_split_dir_chimera_3_0.1_4
+[2025-09-17 14:23:34] 
+============================================================
+[2025-09-17 14:23:34] Running experiment 5/5
+[2025-09-17 14:23:34] Starting experiment: split_comparison_num_clients_3_num_rounds_5_seed_1_split_dir_chimera_3_0.1_5
+[2025-09-17 14:23:34] Command: python federated_train.py --gpus 2 --num_clients 3 --num_rounds 5 --seed 1 --no_verbose --max_epochs 100 --split_dir chimera_3_0.1_5 --exp_code split_comparison_num_clients_3_num_rounds_5_seed_1_split_dir_chimera_3_0.1_5
+[2025-09-17 14:36:14] ✓ Experiment completed successfully in 760.44s: split_comparison_num_clients_3_num_rounds_5_seed_1_split_dir_chimera_3_0.1_5
+[2025-09-17 14:36:14] 
+============================================================
+[2025-09-17 14:36:14] Experiment sweep completed in 3887.94s
+[2025-09-17 14:36:14] Successful: 5
+[2025-09-17 14:36:14] Failed: 0
+[2025-09-17 14:36:14] Total: 5

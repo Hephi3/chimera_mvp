@@ -1,0 +1,56 @@
+# python federated_train.py --gpus 2 --num_clients 1 --exp_code nda_no_phases_centralized --no_verbose --split_dir chimera_3_5_0.1_1_merged --folds 5 --num_rounds 3 --seed 1 --data_root_dir "/local/scratch/phempel/chimera/features_1536_fixed" --max_epochs 150 --phase_length 15 --early_stopping --es_patience 5 --es_stop_epoch 40
+python federated_train.py --gpus 2 --num_clients 1 --exp_code nda_no_phases_centralized --no_verbose --split_dir chimera_3_5_0.1_1_merged --folds 5 --num_rounds 3 --seed 2 --data_root_dir "/local/scratch/phempel/chimera/features_1536_fixed" --max_epochs 150 --phase_length 15 --early_stopping --es_patience 5 --es_stop_epoch 40
+python federated_train.py --gpus 2 --num_clients 1 --exp_code nda_no_phases_centralized --no_verbose --split_dir chimera_3_5_0.1_1_merged --folds 5 --num_rounds 3 --seed 3 --data_root_dir "/local/scratch/phempel/chimera/features_1536_fixed" --max_epochs 150 --phase_length 15 --early_stopping --es_patience 5 --es_stop_epoch 40
+
+python federated_train.py --gpus 2 --num_clients 1 --exp_code nda_no_phases_centralized_sp2 --no_verbose --split_dir chimera_3_5_0.1_2_merged --folds 5 --num_rounds 3 --seed 1 --data_root_dir "/local/scratch/phempel/chimera/features_1536_fixed" --max_epochs 150 --phase_length 15 --early_stopping --es_patience 5 --es_stop_epoch 40
+python federated_train.py --gpus 2 --num_clients 1 --exp_code nda_no_phases_centralized_sp2 --no_verbose --split_dir chimera_3_5_0.1_2_merged --folds 5 --num_rounds 3 --seed 2 --data_root_dir "/local/scratch/phempel/chimera/features_1536_fixed" --max_epochs 150 --phase_length 15 --early_stopping --es_patience 5 --es_stop_epoch 40
+python federated_train.py --gpus 2 --num_clients 1 --exp_code nda_no_phases_centralized_sp2 --no_verbose --split_dir chimera_3_5_0.1_2_merged --folds 5 --num_rounds 3 --seed 3 --data_root_dir "/local/scratch/phempel/chimera/features_1536_fixed" --max_epochs 150 --phase_length 15 --early_stopping --es_patience 5 --es_stop_epoch 40
+
+python federated_train.py --gpus 2 --num_clients 1 --exp_code nda_no_phases_centralized_sp3 --no_verbose --split_dir chimera_3_5_0.1_3_merged --folds 5 --num_rounds 3 --seed 1 --data_root_dir "/local/scratch/phempel/chimera/features_1536_fixed" --max_epochs 150 --phase_length 15 --early_stopping --es_patience 5 --es_stop_epoch 40
+python federated_train.py --gpus 2 --num_clients 1 --exp_code nda_no_phases_centralized_sp3 --no_verbose --split_dir chimera_3_5_0.1_3_merged --folds 5 --num_rounds 3 --seed 2 --data_root_dir "/local/scratch/phempel/chimera/features_1536_fixed" --max_epochs 150 --phase_length 15 --early_stopping --es_patience 5 --es_stop_epoch 40
+python federated_train.py --gpus 2 --num_clients 1 --exp_code nda_no_phases_centralized_sp3 --no_verbose --split_dir chimera_3_5_0.1_3_merged --folds 5 --num_rounds 3 --seed 3 --data_root_dir "/local/scratch/phempel/chimera/features_1536_fixed" --max_epochs 150 --phase_length 15 --early_stopping --es_patience 5 --es_stop_epoch 40
+
+python federated_train.py --gpus 2 --num_clients 1 --exp_code nda_no_phases_centralized_sp4 --no_verbose --split_dir chimera_3_5_0.1_4_merged --folds 5 --num_rounds 3 --seed 1 --data_root_dir "/local/scratch/phempel/chimera/features_1536_fixed" --max_epochs 150 --phase_length 15 --early_stopping --es_patience 5 --es_stop_epoch 40
+python federated_train.py --gpus 2 --num_clients 1 --exp_code nda_no_phases_centralized_sp4 --no_verbose --split_dir chimera_3_5_0.1_4_merged --folds 5 --num_rounds 3 --seed 2 --data_root_dir "/local/scratch/phempel/chimera/features_1536_fixed" --max_epochs 150 --phase_length 15 --early_stopping --es_patience 5 --es_stop_epoch 40
+python federated_train.py --gpus 2 --num_clients 1 --exp_code nda_no_phases_centralized_sp4 --no_verbose --split_dir chimera_3_5_0.1_4_merged --folds 5 --num_rounds 3 --seed 3 --data_root_dir "/local/scratch/phempel/chimera/features_1536_fixed" --max_epochs 150 --phase_length 15 --early_stopping --es_patience 5 --es_stop_epoch 40
+
+python federated_train.py --gpus 2 --num_clients 1 --exp_code nda_no_phases_centralized_sp5 --no_verbose --split_dir chimera_3_5_0.1_5_merged --folds 5 --num_rounds 3 --seed 1 --data_root_dir "/local/scratch/phempel/chimera/features_1536_fixed" --max_epochs 150 --phase_length 15 --early_stopping --es_patience 5 --es_stop_epoch 40
+python federated_train.py --gpus 2 --num_clients 1 --exp_code nda_no_phases_centralized_sp5 --no_verbose --split_dir chimera_3_5_0.1_5_merged --folds 5 --num_rounds 3 --seed 2 --data_root_dir "/local/scratch/phempel/chimera/features_1536_fixed" --max_epochs 150 --phase_length 15 --early_stopping --es_patience 5 --es_stop_epoch 40
+python federated_train.py --gpus 2 --num_clients 1 --exp_code nda_no_phases_centralized_sp5 --no_verbose --split_dir chimera_3_5_0.1_5_merged --folds 5 --num_rounds 3 --seed 3 --data_root_dir "/local/scratch/phempel/chimera/features_1536_fixed" --max_epochs 150 --phase_length 15 --early_stopping --es_patience 5 --es_stop_epoch 40
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# python federated_train.py --gpus 2 --num_clients 3 --exp_code nda_no_phases_1ep --no_verbose --split_dir chimera_3_5_0.1_1 --folds 5 --num_rounds 40 --seed 1 --no_phases --max_epochs 1 --data_root_dir "/local/scratch/phempel/chimera/features_1536_fixed"
+# python federated_train.py --gpus 2 --num_clients 3 --exp_code nda_no_phases_1ep --no_verbose --split_dir chimera_3_5_0.1_1 --folds 5 --num_rounds 40 --seed 2 --no_phases --max_epochs 1 --data_root_dir "/local/scratch/phempel/chimera/features_1536_fixed"
+# python federated_train.py --gpus 2 --num_clients 3 --exp_code nda_no_phases_1ep --no_verbose --split_dir chimera_3_5_0.1_1 --folds 5 --num_rounds 40 --seed 3 --no_phases --max_epochs 1 --data_root_dir "/local/scratch/phempel/chimera/features_1536_fixed"
+
+
+# python federated_train.py --gpus 2 --num_clients 3 --exp_code nda_no_phases_3ep --no_verbose --split_dir chimera_3_5_0.1_1 --folds 5 --num_rounds 20 --seed 1 --no_phases --max_epochs 3 --data_root_dir "/local/scratch/phempel/chimera/features_1536_fixed"
+# python federated_train.py --gpus 2 --num_clients 3 --exp_code nda_no_phases_3ep --no_verbose --split_dir chimera_3_5_0.1_1 --folds 5 --num_rounds 20 --seed 2 --no_phases --max_epochs 3 --data_root_dir "/local/scratch/phempel/chimera/features_1536_fixed"
+# python federated_train.py --gpus 2 --num_clients 3 --exp_code nda_no_phases_3ep --no_verbose --split_dir chimera_3_5_0.1_1 --folds 5 --num_rounds 20 --seed 3 --no_phases --max_epochs 3 --data_root_dir "/local/scratch/phempel/chimera/features_1536_fixed"
+
+# python federated_train.py --gpus 2 --num_clients 3 --exp_code nda_no_phases_2ep --no_verbose --split_dir chimera_3_5_0.1_1 --folds 5 --num_rounds 15 --seed 1 --no_phases --max_epochs 2 --data_root_dir "/local/scratch/phempel/chimera/features_1536_fixed"
+# python federated_train.py --gpus 2 --num_clients 3 --exp_code nda_no_phases_2ep --no_verbose --split_dir chimera_3_5_0.1_1 --folds 5 --num_rounds 15 --seed 2 --no_phases --max_epochs 2 --data_root_dir "/local/scratch/phempel/chimera/features_1536_fixed"
+# python federated_train.py --gpus 2 --num_clients 3 --exp_code nda_no_phases_2ep --no_verbose --split_dir chimera_3_5_0.1_1 --folds 5 --num_rounds 15 --seed 3 --no_phases --max_epochs 2 --data_root_dir "/local/scratch/phempel/chimera/features_1536_fixed"
+
+# python federated_train.py --gpus 2 --num_clients 3 --exp_code nda_no_phases_epsteps2:10_5:3_2 --no_verbose --split_dir chimera_3_5_0.1_1 --folds 5 --num_rounds 15 --seed 1 --no_phases --max_epochs_steps "2:10,5:3,2" --data_root_dir "/local/scratch/phempel/chimera/features_1536_fixed"
+# python federated_train.py --gpus 2 --num_clients 3 --exp_code nda_no_phases_epsteps2:10_5:3_2 --no_verbose --split_dir chimera_3_5_0.1_1 --folds 5 --num_rounds 15 --seed 2 --no_phases --max_epochs_steps "2:10,5:3,2" --data_root_dir "/local/scratch/phempel/chimera/features_1536_fixed"
+# python federated_train.py --gpus 2 --num_clients 3 --exp_code nda_no_phases_epsteps2:10_5:3_2 --no_verbose --split_dir chimera_3_5_0.1_1 --folds 5 --num_rounds 15 --seed 3 --no_phases --max_epochs_steps "2:10,5:3,2" --data_root_dir "/local/scratch/phempel/chimera/features_1536_fixed"
+
+# python federated_train.py --gpus 2 --num_clients 3 --exp_code nda_no_phases_epsteps1:10_2:5_3 --no_verbose --split_dir chimera_3_5_0.1_1 --folds 5 --num_rounds 15 --seed 1 --no_phases --max_epochs_steps "1:10,2:5,3" --data_root_dir "/local/scratch/phempel/chimera/features_1536_fixed"
+# python federated_train.py --gpus 2 --num_clients 3 --exp_code nda_no_phases_epsteps1:10_2:5_3 --no_verbose --split_dir chimera_3_5_0.1_1 --folds 5 --num_rounds 15 --seed 2 --no_phases --max_epochs_steps "1:10,2:5,3" --data_root_dir "/local/scratch/phempel/chimera/features_1536_fixed"
+# python federated_train.py --gpus 2 --num_clients 3 --exp_code nda_no_phases_epsteps1:10_2:5_3 --no_verbose --split_dir chimera_3_5_0.1_1 --folds 5 --num_rounds 15 --seed 3 --no_phases --max_epochs_steps "1:10,2:5,3" --data_root_dir "/local/scratch/phempel/chimera/features_1536_fixed"
+

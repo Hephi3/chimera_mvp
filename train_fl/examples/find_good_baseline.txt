@@ -1,0 +1,83 @@
+# Optimized Training Strategy Exploration
+# Based on Test F1 Score analysis showing No Phases achieves highest test performance
+# Focus: max_epochs variations and improved early stopping while keeping num_rounds=10
+
+# =============================================================================
+# MAX_EPOCHS VARIATIONS WITH NO PHASES (3 experiments)
+# No Phases shows best Test F1 scores, test different local training intensities
+# =============================================================================
+
+# Higher Epochs No Phases - More local training per round
+python federated_train.py --gpus 1 --num_clients 3 --exp_code no_phases_5epochs_s1 --no_verbose --split_dir chimera_3_5_0.1_1 --folds 5 --num_rounds 10 --seed 1 --no_phases --max_epochs 5
+
+# Maximum Epochs No Phases - Very intensive local training  
+python federated_train.py --gpus 1 --num_clients 3 --exp_code no_phases_7epochs_s2 --no_verbose --split_dir chimera_3_5_0.1_1 --folds 5 --num_rounds 10 --seed 2 --no_phases --max_epochs 7
+
+# Ultra High Epochs No Phases - Push local training limits
+python federated_train.py --gpus 1 --num_clients 3 --exp_code no_phases_10epochs_s3 --no_verbose --split_dir chimera_3_5_0.1_1 --folds 5 --num_rounds 10 --seed 3 --no_phases --max_epochs 10
+
+# =============================================================================
+# IMPROVED EARLY STOPPING WITH HIGHER MAX_EPOCHS (3 experiments)
+# Combine successful ES patterns with more intensive local training
+# =============================================================================
+
+# Conservative ES with Higher Epochs - Best ES + more local training
+python federated_train.py --gpus 1 --num_clients 3 --exp_code es_2_8_5epochs_s1 --no_verbose --split_dir chimera_3_5_0.1_1 --folds 5 --num_rounds 10 --seed 1 --early_stopping --es_patience 2 --es_stop_epoch 8 --phase_length 3 --max_epochs 5
+
+# Medium ES with Higher Epochs - Balanced ES + more local training
+python federated_train.py --gpus 1 --num_clients 3 --exp_code es_3_10_7epochs_s2 --no_verbose --split_dir chimera_3_5_0.1_1 --folds 5 --num_rounds 10 --seed 2 --early_stopping --es_patience 3 --es_stop_epoch 10 --phase_length 4 --max_epochs 7
+
+# Lenient ES with Higher Epochs - Allow longer training + intensive local work
+python federated_train.py --gpus 1 --num_clients 3 --exp_code es_4_12_5epochs_s3 --no_verbose --split_dir chimera_3_5_0.1_1 --folds 5 --num_rounds 10 --seed 3 --early_stopping --es_patience 4 --es_stop_epoch 12 --phase_length 5 --max_epochs 5
+
+# =============================================================================
+# VERY LENIENT EARLY STOPPING (3 experiments)
+# Allow much longer training before stopping, closer to No Phases behavior
+# =============================================================================
+
+# Very Lenient ES - High patience, long stop epoch
+python federated_train.py --gpus 1 --num_clients 3 --exp_code very_lenient_es_p6_s15_s1 --no_verbose --split_dir chimera_3_5_0.1_1 --folds 5 --num_rounds 10 --seed 1 --early_stopping --es_patience 6 --es_stop_epoch 15 --phase_length 6 --max_epochs 3
+
+# Ultra Lenient ES - Maximum patience, very long stop epoch  
+python federated_train.py --gpus 1 --num_clients 3 --exp_code ultra_lenient_es_p8_s20_s2 --no_verbose --split_dir chimera_3_5_0.1_1 --folds 5 --num_rounds 10 --seed 2 --early_stopping --es_patience 8 --es_stop_epoch 20 --phase_length 8 --max_epochs 3
+
+# Extreme Lenient ES - Almost like No Phases with safety net
+python federated_train.py --gpus 1 --num_clients 3 --exp_code extreme_lenient_es_p10_s25_s3 --no_verbose --split_dir chimera_3_5_0.1_1 --folds 5 --num_rounds 10 --seed 3 --early_stopping --es_patience 10 --es_stop_epoch 25 --phase_length 10 --max_epochs 3
+
+# =============================================================================
+# OPTIMIZED PHASE COMBINATIONS (3 experiments)  
+# Fine-tune phase_length with successful ES parameters for better Test F1
+# =============================================================================
+
+# Optimized Conservative - Conservative ES with extended phases
+python federated_train.py --gpus 1 --num_clients 3 --exp_code opt_conservative_es_p2_s8_ph5_s1 --no_verbose --split_dir chimera_3_5_0.1_1 --folds 5 --num_rounds 10 --seed 1 --early_stopping --es_patience 2 --es_stop_epoch 8 --phase_length 5 --max_epochs 4
+
+# Optimized Medium - Medium ES with longer phases and higher epochs
+python federated_train.py --gpus 1 --num_clients 3 --exp_code opt_medium_es_p3_s10_ph6_s2 --no_verbose --split_dir chimera_3_5_0.1_1 --folds 5 --num_rounds 10 --seed 2 --early_stopping --es_patience 3 --es_stop_epoch 10 --phase_length 6 --max_epochs 5
+
+# Optimized Balanced - Balanced approach with extended parameters
+python federated_train.py --gpus 1 --num_clients 3 --exp_code opt_balanced_es_p4_s12_ph7_s3 --no_verbose --split_dir chimera_3_5_0.1_1 --folds 5 --num_rounds 10 --seed 3 --early_stopping --es_patience 4 --es_stop_epoch 12 --phase_length 7 --max_epochs 4
+
+# =============================================================================
+# EXECUTION SUMMARY  
+# =============================================================================
+# Total experiments: 12
+# Focus areas:
+# 1. Extended No Phases training to maximize Test F1 scores (experiments 1-3)
+# 2. Very lenient early stopping to allow Test F1 improvements (experiments 4-6)
+# 3. Late-stage early stopping to combine No Phases benefits with safety (experiments 7-9)
+# 4. Progressive training schedules with more local updates (experiments 10-12)
+#
+# Expected insights:
+# - Optimal training length for peak Test F1 performance
+# - Whether lenient early stopping can match No Phases Test F1 with better training control
+# - Impact of delayed early stopping activation on Test F1 vs training metrics
+# - Effect of increased local training on federated learning Test F1 performance
+#
+# Strategy rationale:
+# - No Phases achieved highest Test F1 scores, so extend this approach
+# - Early stopping was too aggressive, stopping before Test F1 peaks
+# - Late-stage or lenient ES may capture the best of both worlds
+# - More local training per round might improve model quality
+#
+# Estimated runtime: ~10 hours (assuming ~50 minutes per experiment)

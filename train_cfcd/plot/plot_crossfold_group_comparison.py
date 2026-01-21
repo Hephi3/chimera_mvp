@@ -1781,6 +1781,23 @@ if __name__ == "__main__":
 
 #  python plot/plot_only_test.py --groups '{"CF CD Baseline": ["art_CFCD_no_weighted_training_7_3"], "Combined Method": ["73_MS204_ML02s2_MG02t05"], "FedProx µ=0.001": ["FedProx001"],"FedProx µ=0.005": ["FedProx005"],"FedProx µ=0.01": ["FedProx01"],"FedProx µ=1": ["fedprox"],"FedProx µ=10": ["FedProx10"]}' --name FedProxAll --gen_all_seeds
 
+
+#  python plot/plot_only_test.py --groups '{"CF CD Baseline": ["art_CFCD_no_weighted_training_7_3"], "Combined Method": ["73_MS204_ML02s2_MG02t05"], "FedProx": ["FedProx01"], "FedAvgM lr=0.001 β=0.5": ["FedAvgM00105"], "FedAvgM lr=0.5 β=0.9": ["FedAvgM"], "FedAvgM lr=0.05 β=0.6": ["FedAvgM00506"]}' --name FedProxMFedAvg --gen_all_seeds
+
+
 # python plot/plot_only_test.py --groups '{"CF CD Baseline": ["art_CFCD_no_weighted_training_7_3"], "Combined Method": ["73_MS204_ML02s2_MG02t05"], "FedAvgM lr=0.001 β=0.5": ["FedAvgM00105"], "FedAvgM lr=0.1 β=0.5": ["FedAvgM0105"], "FedAvgM lr=0.5 β=0.9": ["FedAvgM"], "FedAvgM lr=0.05 β=0.6": ["FedAvgM00506"]}' --name FedAvgMAll --gen_all_seeds
+
+
+# With Hyperparams: # python plot/plot_only_test.py --groups '{"CF CD Baseline": ["art_CFCD_no_weighted_training_7_3"], "Local s=1 Adapt=0.2": ["73_ML_02_str1"], "Global T=0.5 Adapt=0.3": ["73_MG_03_05t"],"Generative Replay 2 Samples, γ=0.4": ["73_MS_2_2_04"], "Combined Method": ["73_MS204_ML02s2_MG02t05"]}' --name AllSingles --gen_all_seeds
+
+# python plot/plot_only_test.py --groups '{"CF CD Baseline": ["art_CFCD_no_weighted_training_7_3"], "Local Prototype-based Training": ["73_ML_02_str1"], "Global Prototype-based Aggregation": ["73_MG_03_05t"],"Generative Replay": ["73_MS_2_2_04"], "Combined Method": ["73_MS204_ML02s2_MG02t05"]}' --name AllSingles --gen_all_seeds --no_std
+
+
+# python plot/plot_only_test.py --groups '{"CF CD Baseline": ["art_CFCD_no_weighted_training_7_3"]}' --name AllSingles1 --gen_all_seeds --no_std
+# python plot/plot_only_test.py --groups '{"CF CD Baseline": ["art_CFCD_no_weighted_training_7_3"], "Local Prototype-based Training": ["73_ML_02_str1"]}' --name AllSingles2 --gen_all_seeds --no_std
+# python plot/plot_only_test.py --groups '{"CF CD Baseline": ["art_CFCD_no_weighted_training_7_3"], "Local Prototype-based Training": ["73_ML_02_str1"], "Global Prototype-based Aggregation": ["73_MG_03_05t"]}' --name AllSingles3 --gen_all_seeds --no_std
+# python plot/plot_only_test.py --groups '{"CF CD Baseline": ["art_CFCD_no_weighted_training_7_3"], "Local Prototype-based Training": ["73_ML_02_str1"], "Global Prototype-based Aggregation": ["73_MG_03_05t"],"Generative Replay": ["73_MS_2_2_04"]}' --name AllSingles4 --gen_all_seeds --no_std
+# python plot/plot_only_test.py --groups '{"CF CD Baseline": ["art_CFCD_no_weighted_training_7_3"], "Local Prototype-based Training": ["73_ML_02_str1"], "Global Prototype-based Aggregation": ["73_MG_03_05t"],"Generative Replay": ["73_MS_2_2_04"], "Combined Method": ["73_MS204_ML02s2_MG02t05"]}' --name AllSingles5 --gen_all_seeds --no_std
+
 
 # python plot/plot_clean_comparison.py --groups '{"Federated Learning": ["1_stage_FL_sp1_s1", "1_stage_FL_sp2_s1","1_stage_FL_sp3_s1","1_stage_FL_sp4_s1","1_stage_FL_sp5_s1","1_stage_FL_sp1_s2", "1_stage_FL_sp2_s2","1_stage_FL_sp3_s2","1_stage_FL_sp4_s2","1_stage_FL_sp5_s2","1_stage_FL_sp1_s3", "1_stage_FL_sp2_s3","1_stage_FL_sp3_s3","1_stage_FL_sp4_s3","1_stage_FL_sp5_s3"], "Centralised": ["1_stage_Centralized_sp1_s1", "1_stage_Centralized_sp2_s1","1_stage_Centralized_sp3_s1","1_stage_Centralized_sp4_s1","1_stage_Centralized_sp5_s1","1_stage_Centralized_sp1_s2", "1_stage_Centralized_sp2_s2","1_stage_Centralized_sp3_s2","1_stage_Centralized_sp4_s2","1_stage_Centralized_sp5_s2","1_stage_Centralized_sp1_s3", "1_stage_Centralized_sp2_s3","1_stage_Centralized_sp3_s3","1_stage_Centralized_sp4_s3","1_stage_Centralized_sp5_s3"]}' --name FLvsCentralized_clean_3
